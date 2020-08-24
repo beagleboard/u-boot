@@ -201,6 +201,7 @@ int env_import_redund(const char *buf1, int buf1_read_fail,
 /* Export the environment and generate CRC for it. */
 int env_export(env_t *env_out)
 {
+#if !defined(CONFIG_SPL_BUILD)
 	char *res;
 	ssize_t	len;
 
@@ -215,6 +216,7 @@ int env_export(env_t *env_out)
 
 #ifdef CONFIG_SYS_REDUNDAND_ENVIRONMENT
 	env_out->flags = ++env_flags; /* increase the serial */
+#endif
 #endif
 
 	return 0;
