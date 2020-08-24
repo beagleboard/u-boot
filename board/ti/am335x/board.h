@@ -10,6 +10,22 @@
 #ifndef _BOARD_H_
 #define _BOARD_H_
 
+struct am335x_cape_eeprom_id {
+	unsigned int header;
+	char eeprom_rev[2];
+	char board_name[32];
+	char version[4];
+	char manufacture[16];
+	char part_number[16];
+	char number_of_pins[2];
+	char serial_number[12];
+	char pin_usage[140];
+	char vdd_3v3exp[ 2];
+	char vdd_5v[ 2];
+	char sys_5v[2];
+	char dc_supplied[2];
+};
+
 /**
  * AM335X (EMIF_4D) EMIF REG_COS_COUNT_1, REG_COS_COUNT_2, and
  * REG_PR_OLD_COUNT values to avoid LCDC DMA FIFO underflows and Frame
