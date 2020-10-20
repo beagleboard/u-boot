@@ -259,6 +259,7 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 void board_fit_image_post_process(const void *fit, int node, void **p_image,
 				  size_t *p_size)
 {
+#ifdef CONFIG_SYS_K3_SPL_ATF
 	int len;
 	int i;
 	const char *os;
@@ -278,6 +279,7 @@ void board_fit_image_post_process(const void *fit, int node, void **p_image,
 			break;
 		}
 	}
+#endif
 
 #ifdef CONFIG_TI_SECURE_DEVICE
 	ti_secure_image_post_process(p_image, p_size);
