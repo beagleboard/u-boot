@@ -29,6 +29,9 @@ void ti_secure_image_post_process(void **p_image, size_t *p_size)
 	image_addr = (uintptr_t)*p_image;
 	image_size = *p_size;
 
+	if (!image_size)
+		return;
+
 	debug("Authenticating image at address 0x%016llx\n", image_addr);
 	debug("Authenticating image of size %d bytes\n", image_size);
 
