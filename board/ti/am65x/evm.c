@@ -25,6 +25,7 @@
 #include "../common/board_detect.h"
 
 #define board_is_am65x_base_board()	board_ti_is("AM6-COMPROCEVM")
+#define MAX_DAUGHTER_CARDS	8
 
 /* Daughter card presence detection signals */
 enum {
@@ -128,6 +129,8 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 }
 #endif
 
+const char *k3_dtbo_list[MAX_DAUGHTER_CARDS] = {NULL};
+
 int do_board_detect(void)
 {
 	int ret;
@@ -196,7 +199,7 @@ static int probe_daughtercards(void)
 	char mac_addr[DAUGHTER_CARD_NO_OF_MAC_ADDR][TI_EEPROM_HDR_ETH_ALEN];
 	u8 mac_addr_cnt;
 	char name_overlays[1024] = { 0 };
-	int i, j;
+	int i, j, nb_dtbos = 0;
 	int ret;
 
 	/*
@@ -263,6 +266,7 @@ static int probe_daughtercards(void)
 			return ret;
 	}
 
+	memset(k3_dtbo_list, 0, sizeof(k3_dtbo_list));
 	for (i = 0; i < ARRAY_SIZE(cards); i++) {
 		/* Obtain card-specific slot index and associated I2C address */
 		u8 slot_index = cards[i].slot_index;
@@ -331,6 +335,8 @@ static int probe_daughtercards(void)
 		/* Skip if no overlays are to be added */
 		if (!strlen(cards[i].dtbo_name))
 			continue;
+
+		k3_dtbo_list[nb_dtbos++] = cards[i].dtbo_name;
 
 		/*
 		 * Make sure we are not running out of buffer space by checking
