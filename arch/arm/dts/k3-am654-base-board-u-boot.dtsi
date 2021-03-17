@@ -191,6 +191,9 @@
 
 &wkup_i2c0 {
 	u-boot,dm-spl;
+	gpio@38 {
+		u-boot,dm-spl;
+	};
 };
 
 &usb1 {
