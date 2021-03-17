@@ -30,4 +30,6 @@ config SYSINFO_SMBIOS
 	  one which provides a way to specify this SMBIOS information in the
 	  devicetree, without needing any board-specific functionality.
 
+source "drivers/sysinfo/ti/Kconfig"
+
 endif
