@@ -11,6 +11,11 @@
 		stdout-path = "serial2:115200n8";
 	};
 
+	board {
+		compatible = "ti,am654-evm";
+		u-boot,dm-spl;
+	};
+
 	aliases {
 		serial2 = &main_uart0;
 		ethernet0 = &cpsw_port1;
