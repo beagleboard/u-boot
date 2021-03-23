@@ -48,5 +48,6 @@ obj-$(CONFIG_SANDBOX) += clk_sandbox_test.o
 obj-$(CONFIG_SANDBOX_CLK_CCF) += clk_sandbox_ccf.o
 obj-$(CONFIG_STM32H7) += clk_stm32h7.o
 obj-$(CONFIG_CLK_TI_SCI) += clk-ti-sci.o
+obj-$(CONFIG_$(SPL_TPL_)CLK_K3_PLL) += clk-k3-pll.o
 obj-$(CONFIG_CLK_VERSAL) += clk_versal.o
 obj-$(CONFIG_CLK_CDCE9XX) += clk-cdce9xx.o
