@@ -115,7 +115,18 @@ config CLK_K3
 config SPL_CLK_K3
 	bool "Clock support for K3 SoC family of devices"
 	depends on CLK && SPL
+	help
 	  Enables the clock translation layer from DT to device clocks.
+
+config CLK_K3
+	bool "Clock support for K3 SoC family of devices"
+	depends on CLK
+	help
+	  Enables the clock translation layer from DT to device clocks.
+
+config SPL_CLK_K3
+	bool "Clock support for K3 SoC family of devices"
+	depends on CLK && SPL
 
 config CLK_K3_PLL
 	bool "PLL clock support for K3 SoC family of devices"
