@@ -134,7 +134,7 @@ static void ti_pd_transition(struct ti_pd *pd)
 	psc_write(BIT(pd->id), pd->psc, PSC_PTCMD);
 }
 
-static u8 ti_pd_state(struct ti_pd *pd)
+u8 ti_pd_state(struct ti_pd *pd)
 {
 	u32 pdctl;
 
@@ -233,7 +233,7 @@ static int ti_lpsc_wait(struct ti_lpsc *lpsc)
 	return -ETIMEDOUT;
 }
 
-static u8 lpsc_get_state(struct ti_lpsc *lpsc)
+u8 lpsc_get_state(struct ti_lpsc *lpsc)
 {
 	u32 mdctl;
 
@@ -241,7 +241,7 @@ static u8 lpsc_get_state(struct ti_lpsc *lpsc)
 	return mdctl & MDSTAT_STATE_MASK;
 }
 
-static int ti_lpsc_transition(struct ti_lpsc *lpsc, u8 state)
+int ti_lpsc_transition(struct ti_lpsc *lpsc, u8 state)
 {
 	struct ti_pd *psc_pd;
 	int ret;
