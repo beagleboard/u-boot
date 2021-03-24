@@ -50,10 +50,10 @@
 };
 
 &sdhci0 {
-	no-1-8-v;
 	u-boot,dm-spl;
 };
 
 &sdhci1 {
+	no-1-8-v;
 	u-boot,dm-spl;
 };
