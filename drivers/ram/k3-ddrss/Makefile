@@ -7,6 +7,7 @@ obj-$(CONFIG_K3_DDRSS) += k3-ddrss.o
 obj-$(CONFIG_K3_DDRSS) += lpddr4_obj_if.o
 obj-$(CONFIG_K3_DDRSS) += lpddr4.o
 obj-$(CONFIG_K3_DDRSS) += cps_bm.o
+ccflags-$(CONFIG_K3_DDRSS) += -Idrivers/ram/k3-ddrss/
 
 obj-$(CONFIG_K3_AM64_DDRSS) += lpddr4_16bit.o
 obj-$(CONFIG_K3_AM64_DDRSS) += lpddr4_16bit_ctl_regs_rw_masks.o
