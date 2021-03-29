@@ -45,7 +45,7 @@ int dram_init_banksize(void)
 int board_fit_config_name_match(const char *name)
 {
 #if defined(CONFIG_TARGET_AM642_A53_EVM)
-	if (!strcmp(name, "k3-am642-evm"))
+	if (!strcmp(name, CONFIG_DEFAULT_DEVICE_TREE))
 		return 0;
 #endif
 
