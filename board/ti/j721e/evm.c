@@ -117,7 +117,7 @@ static void __maybe_unused detect_enable_hyperflash(void *blob)
 }
 #endif
 
-#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_TARGET_J7200_A72_EVM)
+#if defined(CONFIG_SPL_BUILD) && (defined(CONFIG_TARGET_J7200_A72_EVM) || defined(CONFIG_TARGET_J7200_R5_EVM))
 void spl_perform_fixups(struct spl_image_info *spl_image)
 {
 	detect_enable_hyperflash(spl_image->fdt_addr);
@@ -396,6 +396,40 @@ int board_late_init(void)
 	return 0;
 }
 
+static int __maybe_unused detect_SW3_1_state(void)
+{
+	if (IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM)) {
+		struct gpio_desc desc = {0};
+		int ret;
+
+		ret = dm_gpio_lookup_name("6", &desc);
+		if (ret) {
+			printf("error getting GPIO lookup name: %d\n", ret);
+			return ret;
+		}
+
+		ret = dm_gpio_request(&desc, "6");
+		if (ret) {
+			printf("error requesting GPIO: %d\n", ret);
+			goto err_free_gpio;
+		}
+
+		ret = dm_gpio_set_dir_flags(&desc, GPIOD_IS_IN);
+		if (ret) {
+			printf("error setting direction flag of GPIO: %d\n", ret);
+			goto err_free_gpio;
+		}
+
+		ret = dm_gpio_get_value(&desc);
+		if (ret < 0)
+			printf("error getting value of GPIO: %d\n", ret);
+
+err_free_gpio:
+		dm_gpio_free(desc.dev, &desc);
+		return ret;
+	}
+}
+
 void spl_board_init(void)
 {
 #if defined(CONFIG_ESM_K3) || defined(CONFIG_ESM_PMIC)
@@ -426,4 +460,19 @@ void spl_board_init(void)
 			printf("ESM PMIC init failed: %d\n", ret);
 	}
 #endif
+
+	if (IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM) &&
+	    IS_ENABLED(CONFIG_HBMC_AM654)) {
+		struct udevice *dev;
+		int ret;
+
+		ret = detect_SW3_1_state();
+		if (ret == 1) {
+			ret = uclass_get_device_by_driver(UCLASS_MTD,
+							  DM_GET_DRIVER(hbmc_am654),
+							  &dev);
+			if (ret)
+				debug("Failed to probe hyperflash\n");
+		}
+	}
 }
