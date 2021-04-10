@@ -10,8 +10,6 @@
 #ifndef LPDDR4_32BIT_H
 #define LPDDR4_32BIT_H
 
-#define REG_WRITE_VERIF 1
-
 #define DSLICE_NUM (4U)
 #define ASLICE_NUM (1U)
 
