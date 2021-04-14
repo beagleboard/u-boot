@@ -223,6 +223,12 @@
 
 	 flash@0{
 		u-boot,dm-spl;
+
+		partition@3fe0000 {
+			label = "ospi.phypattern";
+			reg = <0x3fe0000 0x20000>;
+			u-boot,dm-spl;
+		};
 	};
 };
 
