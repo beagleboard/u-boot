@@ -60,12 +60,14 @@
 #define	CQSPI_REG_CONFIG_ENABLE			BIT(0)
 #define	CQSPI_REG_CONFIG_CLK_POL		BIT(1)
 #define	CQSPI_REG_CONFIG_CLK_PHA		BIT(2)
+#define CQSPI_REG_CONFIG_PHY_EN			BIT(3)
 #define	CQSPI_REG_CONFIG_DIRECT			BIT(7)
 #define	CQSPI_REG_CONFIG_DECODE			BIT(9)
 #define	CQSPI_REG_CONFIG_XIP_IMM		BIT(18)
 #define	CQSPI_REG_CONFIG_CHIPSELECT_LSB		10
 #define	CQSPI_REG_CONFIG_BAUD_LSB		19
 #define CQSPI_REG_CONFIG_DTR_PROTO		BIT(24)
+#define CQSPI_REG_CONFIG_PHY_PIPELINE		BIT(25)
 #define CQSPI_REG_CONFIG_DUAL_OPCODE		BIT(30)
 #define	CQSPI_REG_CONFIG_IDLE_LSB		31
 #define	CQSPI_REG_CONFIG_CHIPSELECT_MASK	0xF
@@ -102,6 +104,7 @@
 #define	CQSPI_REG_RD_DATA_CAPTURE_BYPASS	BIT(0)
 #define	CQSPI_REG_RD_DATA_CAPTURE_DELAY_LSB	1
 #define	CQSPI_REG_RD_DATA_CAPTURE_SMPL_EDGE	BIT(5)
+#define CQSPI_REG_RD_DATA_CAPTURE_DQS		BIT(8)
 #define	CQSPI_REG_RD_DATA_CAPTURE_DELAY_MASK	0xF
 
 #define	CQSPI_REG_SIZE				0x14
@@ -173,6 +176,13 @@
 #define	CQSPI_REG_CMDWRITEDATALOWER		0xA8
 #define	CQSPI_REG_CMDWRITEDATAUPPER		0xAC
 
+#define CQSPI_REG_PHY_CONFIG			0xB4
+#define CQSPI_REG_PHY_CONFIG_RX_DEL_LSB		0
+#define CQSPI_REG_PHY_CONFIG_RX_DEL_MASK	0x7F
+#define CQSPI_REG_PHY_CONFIG_TX_DEL_LSB		16
+#define CQSPI_REG_PHY_CONFIG_TX_DEL_MASK	0x7F
+#define CQSPI_REG_PHY_CONFIG_RESYNC		BIT(31)
+
 #define CQSPI_REG_OP_EXT_LOWER			0xE0
 #define CQSPI_REG_OP_EXT_READ_LSB		24
 #define CQSPI_REG_OP_EXT_WRITE_LSB		16
@@ -225,6 +235,34 @@ static unsigned int cadence_qspi_calc_dummy(const struct spi_mem_op *op,
 		dummy_clk /= 2;
 
 	return dummy_clk;
+}
+
+/*
+ * Check if we can use PHY on the given op. This is assuming it will be a DAC
+ * mode read, since PHY won't work on any other type of operation anyway.
+ */
+static bool cadence_qspi_apb_use_phy(struct cadence_spi_platdata *plat,
+				     const struct spi_mem_op *op)
+{
+	if (!plat->use_phy)
+		return false;
+
+	if (op->data.nbytes < 16)
+		return false;
+
+	/* PHY is only tuned for 8D-8D-8D. */
+	if (!plat->dtr)
+		return false;
+	if (op->cmd.buswidth != 8)
+		return false;
+	if (op->addr.nbytes && op->addr.buswidth != 8)
+		return false;
+	if (op->dummy.nbytes && op->dummy.buswidth != 8)
+		return false;
+	if (op->data.nbytes && op->data.buswidth != 8)
+		return false;
+
+	return true;
 }
 
 static u32 cadence_qspi_calc_rdreg(struct cadence_spi_platdata *plat)
@@ -333,9 +371,63 @@ void cadence_qspi_apb_readdata_capture(void *reg_base,
 	reg |= (delay & CQSPI_REG_RD_DATA_CAPTURE_DELAY_MASK)
 		<< CQSPI_REG_RD_DATA_CAPTURE_DELAY_LSB;
 
+	reg |= CQSPI_REG_RD_DATA_CAPTURE_DQS;
+
 	writel(reg, reg_base + CQSPI_REG_RD_DATA_CAPTURE);
 
 	cadence_qspi_apb_controller_enable(reg_base);
+}
+
+static void cadence_qspi_apb_phy_enable(struct cadence_spi_platdata *plat,
+					bool enable)
+{
+	void *reg_base = plat->regbase;
+	unsigned int reg;
+	u8 dummy;
+
+	if (enable) {
+		cadence_qspi_apb_readdata_capture(plat->regbase, 1,
+						  plat->phy_read_delay);
+
+		reg = readl(reg_base + CQSPI_REG_CONFIG);
+		reg |= CQSPI_REG_CONFIG_PHY_EN |
+		       CQSPI_REG_CONFIG_PHY_PIPELINE;
+		writel(reg, reg_base + CQSPI_REG_CONFIG);
+
+		/* Reduce dummy cycle by 1. */
+		reg = readl(reg_base + CQSPI_REG_RD_INSTR);
+		dummy = (reg >> CQSPI_REG_RD_INSTR_DUMMY_LSB) &
+			CQSPI_REG_RD_INSTR_DUMMY_MASK;
+		dummy--;
+		reg &= ~(CQSPI_REG_RD_INSTR_DUMMY_MASK <<
+			 CQSPI_REG_RD_INSTR_DUMMY_LSB);
+
+		reg |= (dummy & CQSPI_REG_RD_INSTR_DUMMY_MASK)
+		       << CQSPI_REG_RD_INSTR_DUMMY_LSB;
+		writel(reg, reg_base + CQSPI_REG_RD_INSTR);
+	} else {
+		cadence_qspi_apb_readdata_capture(plat->regbase, 1,
+						  plat->read_delay);
+
+		reg = readl(reg_base + CQSPI_REG_CONFIG);
+		reg &= ~(CQSPI_REG_CONFIG_PHY_EN |
+			 CQSPI_REG_CONFIG_PHY_PIPELINE);
+		writel(reg, reg_base + CQSPI_REG_CONFIG);
+
+		/* Increment dummy cycle by 1. */
+		reg = readl(reg_base + CQSPI_REG_RD_INSTR);
+		dummy = (reg >> CQSPI_REG_RD_INSTR_DUMMY_LSB) &
+			CQSPI_REG_RD_INSTR_DUMMY_MASK;
+		dummy++;
+		reg &= ~(CQSPI_REG_RD_INSTR_DUMMY_MASK <<
+			 CQSPI_REG_RD_INSTR_DUMMY_LSB);
+
+		reg |= (dummy & CQSPI_REG_RD_INSTR_DUMMY_MASK)
+		       << CQSPI_REG_RD_INSTR_DUMMY_LSB;
+		writel(reg, reg_base + CQSPI_REG_RD_INSTR);
+	}
+
+	cadence_qspi_wait_idle(reg_base);
 }
 
 void cadence_qspi_apb_config_baudrate_div(void *reg_base,
@@ -868,6 +960,65 @@ failrd:
 	return ret;
 }
 
+static int
+cadence_qspi_apb_direct_read_execute(struct cadence_spi_platdata *plat,
+				     const struct spi_mem_op *op)
+{
+	loff_t from = op->addr.val;
+	loff_t from_aligned, to_aligned;
+	size_t len = op->data.nbytes;
+	size_t len_aligned;
+	u_char *buf = op->data.buf.in;
+	int ret;
+
+	if (len < 16 || !cadence_qspi_apb_use_phy(plat, op)) {
+		if (dma_memcpy(buf, plat->ahbbase + from, len) < 0)
+			memcpy_fromio(buf, plat->ahbbase + from, len);
+
+		if (!cadence_qspi_wait_idle(plat->regbase))
+			return -EIO;
+		return 0;
+	}
+
+	/*
+	 * PHY reads must be 16-byte aligned, and they must be a multiple of 16
+	 * bytes.
+	 */
+	from_aligned = (from + 0xF) & ~0xF;
+	to_aligned = (from + len) & ~0xF;
+	len_aligned = to_aligned - from_aligned;
+
+	/* Read the unaligned part at the start. */
+	if (from != from_aligned) {
+		ret = dma_memcpy(buf, plat->ahbbase + from,
+				 from_aligned - from);
+		if (ret)
+			return ret;
+		buf += from_aligned - from;
+	}
+
+	if (len_aligned) {
+		cadence_qspi_apb_phy_enable(plat, true);
+		ret = dma_memcpy(buf, plat->ahbbase + from_aligned,
+				 len_aligned);
+		cadence_qspi_apb_phy_enable(plat, false);
+		if (ret)
+			return ret;
+		buf += len_aligned;
+	}
+
+	/* Now read the remaining part, if any. */
+	if (to_aligned != (from + len)) {
+		ret = dma_memcpy(buf, plat->ahbbase + to_aligned,
+				 (from + len) - to_aligned);
+		if (ret)
+			return ret;
+		buf += (from + len) - to_aligned;
+	}
+
+	return 0;
+}
+
 int cadence_qspi_apb_read_execute(struct cadence_spi_platdata *plat,
 				  const struct spi_mem_op *op)
 {
@@ -875,15 +1026,8 @@ int cadence_qspi_apb_read_execute(struct cadence_spi_platdata *plat,
 	void *buf = op->data.buf.in;
 	size_t len = op->data.nbytes;
 
-	if (plat->use_dac_mode && (from + len < plat->ahbsize)) {
-		if (len < 256 ||
-		    dma_memcpy(buf, plat->ahbbase + from, len) < 0) {
-			memcpy_fromio(buf, plat->ahbbase + from, len);
-		}
-		if (!cadence_qspi_wait_idle(plat->regbase))
-			return -EIO;
-		return 0;
-	}
+	if (plat->use_dac_mode && (from + len < plat->ahbsize))
+		return cadence_qspi_apb_direct_read_execute(plat, op);
 
 	return cadence_qspi_apb_indirect_read_execute(plat, len, buf);
 }

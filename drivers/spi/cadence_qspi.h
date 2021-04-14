@@ -30,6 +30,8 @@ struct cadence_spi_platdata {
 	int		read_delay;
 	bool		has_phy;
 	u32		wr_delay;
+	int		phy_read_delay;
+	bool		use_phy;
 	u32		phy_pattern_start;
 
 	/* Flash parameters */
