@@ -183,6 +183,12 @@ static inline void *spi_mem_get_drvdata(struct spi_mem *mem)
  *		    limitations)
  * @supports_op: check if an operation is supported by the controller
  * @exec_op: execute a SPI memory operation
+ * @do_calibration: perform calibration needed for high SPI clock speed
+ *		    operation. Should be called after the SPI memory device has
+ *		    been completely initialized. The op passed should contain
+ *		    a template for the read operation used for the device so
+ *		    the controller can decide what type of calibration is
+ *		    required for this type of read.
  *
  * This interface should be implemented by SPI controllers providing an
  * high-level interface to execute SPI memory operation, which is usually the
@@ -194,6 +200,7 @@ struct spi_controller_mem_ops {
 			    const struct spi_mem_op *op);
 	int (*exec_op)(struct spi_slave *slave,
 		       const struct spi_mem_op *op);
+	void (*do_calibration)(struct spi_slave *slave, struct spi_mem_op *op);
 };
 
 #ifndef __UBOOT__
@@ -256,6 +263,8 @@ bool spi_mem_default_supports_op(struct spi_slave *slave,
 				 const struct spi_mem_op *op);
 
 int spi_mem_exec_op(struct spi_slave *slave, const struct spi_mem_op *op);
+
+int spi_mem_do_calibration(struct spi_slave *slave, struct spi_mem_op *op);
 
 #ifndef __UBOOT__
 int spi_mem_driver_register_with_owner(struct spi_mem_driver *drv,
