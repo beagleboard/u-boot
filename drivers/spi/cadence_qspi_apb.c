@@ -101,6 +101,7 @@
 #define	CQSPI_REG_RD_DATA_CAPTURE		0x10
 #define	CQSPI_REG_RD_DATA_CAPTURE_BYPASS	BIT(0)
 #define	CQSPI_REG_RD_DATA_CAPTURE_DELAY_LSB	1
+#define	CQSPI_REG_RD_DATA_CAPTURE_SMPL_EDGE	BIT(5)
 #define	CQSPI_REG_RD_DATA_CAPTURE_DELAY_MASK	0xF
 
 #define	CQSPI_REG_SIZE				0x14
@@ -317,6 +318,9 @@ void cadence_qspi_apb_readdata_capture(void *reg_base,
 	cadence_qspi_apb_controller_disable(reg_base);
 
 	reg = readl(reg_base + CQSPI_REG_RD_DATA_CAPTURE);
+
+	/* Disable Rising edge sampling */
+	reg &= ~CQSPI_REG_RD_DATA_CAPTURE_SMPL_EDGE;
 
 	if (bypass)
 		reg |= CQSPI_REG_RD_DATA_CAPTURE_BYPASS;
