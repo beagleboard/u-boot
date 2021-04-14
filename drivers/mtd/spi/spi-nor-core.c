@@ -2598,7 +2598,11 @@ int spi_nor_scan(struct spi_nor *nor)
 		/* already configured from SFDP */
 	} else if (info->addr_width) {
 		nor->addr_width = info->addr_width;
-	} else if (mtd->size > SZ_16M) {
+	} else {
+		nor->addr_width = 3;
+	}
+
+	if (nor->addr_width == 3 && mtd->size > SZ_16M) {
 #ifndef CONFIG_SPI_FLASH_BAR
 		/* enable 4-byte addressing if the device exceeds 16MiB */
 		nor->addr_width = 4;
@@ -2612,8 +2616,6 @@ int spi_nor_scan(struct spi_nor *nor)
 	if (ret < 0)
 		return ret;
 #endif
-	} else {
-		nor->addr_width = 3;
 	}
 
 	if (nor->addr_width > SPI_NOR_MAX_ADDR_WIDTH) {
