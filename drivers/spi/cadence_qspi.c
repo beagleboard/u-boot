@@ -182,6 +182,8 @@ static int cadence_spi_probe(struct udevice *bus)
 	struct clk clk;
 	int ret;
 
+	plat->dev = bus;
+
 	priv->regbase = plat->regbase;
 	priv->ahbbase = plat->ahbbase;
 
