@@ -997,7 +997,14 @@ cadence_qspi_apb_direct_read_execute(struct cadence_spi_platdata *plat,
 	u_char *buf = op->data.buf.in;
 	int ret;
 
-	if (len < 16 || !cadence_qspi_apb_use_phy(plat, op)) {
+	if (len < 16) {
+		memcpy_fromio(buf, plat->ahbbase + from, len);
+		if (!cadence_qspi_wait_idle(plat->regbase))
+			return -EIO;
+		return 0;
+	}
+
+	if (!cadence_qspi_apb_use_phy(plat, op)) {
 		if (!op->data.dtr || dma_memcpy(buf, plat->ahbbase + from, len) < 0)
 			memcpy_fromio(buf, plat->ahbbase + from, len);
 
