@@ -26,6 +26,8 @@ struct cadence_spi_platdata {
 	u32		trigger_address;
 	fdt_addr_t	ahbsize;
 	bool		use_dac_mode;
+	int		read_delay;
+	bool		has_phy;
 
 	/* Flash parameters */
 	u32		page_size;
