@@ -24,7 +24,7 @@ Example:
 --------
 	dm_tifs: dm-tifs {
 		compatible = "ti,j721e-dm-sci";
-		ti,host-id = <250>;
+		ti,host-id = <3>;
 		ti,secure-host;
 		mbox-names = "rx", "tx";
 		mboxes= <&mcu_secproxy 21>,
