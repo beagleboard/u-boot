@@ -326,6 +326,8 @@ static int cadence_spi_ofdata_to_platdata(struct udevice *bus)
 {
 	struct cadence_spi_platdata *plat = bus->platdata;
 	ofnode subnode;
+	const char *label;
+	u32 start;
 
 	plat->regbase = (void *)devfdt_get_addr_index(bus, 0);
 	plat->ahbbase = (void *)devfdt_get_addr_size_index(bus, 1,
@@ -369,6 +371,18 @@ static int cadence_spi_ofdata_to_platdata(struct udevice *bus)
 	plat->read_delay = ofnode_read_s32_default(subnode, "cdns,read-delay",
 						   0);
 	plat->has_phy = ofnode_read_bool(subnode, "cdns,phy-mode");
+
+	/* Find the PHY tuning pattern partition. */
+	subnode = ofnode_first_subnode(subnode);
+	while (ofnode_valid(subnode)) {
+		label = ofnode_read_string(subnode, "label");
+		if (label && strcmp(label, "ospi.phypattern") == 0) {
+			if (!ofnode_read_u32_array(subnode, "reg", &start, 1))
+				plat->phy_pattern_start = start;
+			break;
+		}
+		subnode = ofnode_next_subnode(subnode);
+	}
 
 	debug("%s: regbase=%p ahbbase=%p max-frequency=%d page-size=%d\n",
 	      __func__, plat->regbase, plat->ahbbase, plat->max_hz,
