@@ -101,6 +101,13 @@ static const struct reg_field p_standard_mode[WIZ_MAX_LANES] = {
 	REG_FIELD(WIZ_LANECTL(3), 24, 25),
 };
 
+static const struct reg_field p0_fullrt_div[WIZ_MAX_LANES] = {
+	REG_FIELD(WIZ_LANECTL(0), 22, 23),
+	REG_FIELD(WIZ_LANECTL(1), 22, 23),
+	REG_FIELD(WIZ_LANECTL(2), 22, 23),
+	REG_FIELD(WIZ_LANECTL(3), 22, 23),
+};
+
 static const struct reg_field p_mac_div_sel0[WIZ_MAX_LANES] = {
 	REG_FIELD(WIZ_LANEDIV(0), 16, 22),
 	REG_FIELD(WIZ_LANEDIV(1), 16, 22),
@@ -202,6 +209,7 @@ struct wiz {
 	struct regmap_field	*p_standard_mode[WIZ_MAX_LANES];
 	struct regmap_field	*p_mac_div_sel0[WIZ_MAX_LANES];
 	struct regmap_field	*p_mac_div_sel1[WIZ_MAX_LANES];
+	struct regmap_field	*p0_fullrt_div[WIZ_MAX_LANES];
 	struct regmap_field	*pma_cmn_refclk_int_mode;
 	struct regmap_field	*pma_cmn_refclk_mode;
 	struct regmap_field	*pma_cmn_refclk_dig_div;
@@ -386,12 +394,27 @@ static int wiz_reset_assert(struct reset_ctl *reset_ctl)
 	return ret;
 }
 
+static int wiz_phy_fullrt_div(struct wiz *wiz, int lane)
+{
+	if (wiz->type != AM64_WIZ_10G)
+		return 0;
+
+	if (wiz->lane_phy_type[lane] == PHY_TYPE_PCIE)
+		return regmap_field_write(wiz->p0_fullrt_div[lane], 0x1);
+
+	return 0;
+}
+
 static int wiz_reset_deassert(struct reset_ctl *reset_ctl)
 {
 	struct wiz_reset *priv = dev_get_priv(reset_ctl->dev);
 	struct wiz *wiz = priv->wiz;
 	int ret;
 	int id = reset_ctl->id;
+
+	ret = wiz_phy_fullrt_div(wiz, id - 1);
+	if (ret)
+		return ret;
 
 	/* if typec-dir gpio was specified, set LN10 SWAP bit based on that */
 	if (id == 0 && wiz->gpio_typec_dir) {
@@ -654,6 +677,12 @@ static int wiz_regfield_init(struct wiz *wiz)
 			dev_err(dev, "P%d_STANDARD_MODE reg field init fail\n",
 				i);
 			return PTR_ERR(wiz->p_standard_mode[i]);
+		}
+
+		wiz->p0_fullrt_div[i] = devm_regmap_field_alloc(dev, regmap, p0_fullrt_div[i]);
+		if (IS_ERR(wiz->p0_fullrt_div[i])) {
+			dev_err(dev, "P%d_FULLRT_DIV reg field init failed\n", i);
+			return PTR_ERR(wiz->p0_fullrt_div[i]);
 		}
 
 		wiz->p_mac_div_sel0[i] =
