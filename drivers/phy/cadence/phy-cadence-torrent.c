@@ -560,6 +560,7 @@ static int cdns_torrent_phy_probe(struct udevice *dev)
 	struct cdns_torrent_phy *cdns_phy = dev_get_priv(dev);
 	struct cdns_torrent_data *data;
 	int ret, subnodes = 0, node = 0, i;
+	struct clk *clk;
 	ofnode child;
 	u32 total_num_lanes = 0;
 	u32 phy_type;
@@ -580,6 +581,18 @@ static int cdns_torrent_phy_probe(struct udevice *dev)
 	if (IS_ERR(cdns_phy->apb_rst)) {
 		dev_err(dev, "failed to get apb reset\n");
 		return PTR_ERR(cdns_phy->apb_rst);
+	}
+
+	clk = devm_clk_get(dev, "refclk");
+	if (IS_ERR(clk)) {
+		dev_err(dev, "phy ref clock not found\n");
+		return PTR_ERR(clk);
+	}
+
+	ret = clk_prepare_enable(clk);
+	if (ret) {
+		dev_err(cdns_phy->dev, "Failed to prepare ref clock\n");
+		return ret;
 	}
 
 	cdns_phy->sd_base = devfdt_remap_addr_index(dev, 0);
