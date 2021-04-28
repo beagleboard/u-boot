@@ -123,3 +123,31 @@
 	dr_mode = "host";
 	u-boot,dm-spl;
 };
+
+&main_bcdma {
+	u-boot,dm-spl;
+};
+
+&main_pktdma {
+	u-boot,dm-spl;
+};
+
+&ospi0_pins_default {
+	u-boot,dm-spl;
+};
+
+&fss {
+	u-boot,dm-spl;
+};
+
+&ospi0 {
+	u-boot,dm-spl;
+
+	flash@0 {
+		u-boot,dm-spl;
+
+		partition@3fc0000 {
+			u-boot,dm-spl;
+		};
+	};
+};
