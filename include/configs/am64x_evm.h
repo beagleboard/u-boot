@@ -91,12 +91,22 @@
 		"${bootdir}/${name_fit}\0"				\
 	"partitions=" PARTS_DEFAULT
 
+#ifdef CONFIG_TARGET_AM642_A53_EVM
+#define EXTRA_ENV_AM642_BOARD_SETTINGS_MTD				\
+	"mtdids=" CONFIG_MTDIDS_DEFAULT "\0"				\
+	"mtdparts=" CONFIG_MTDPARTS_DEFAULT "\0"
+#else
+#define EXTRA_ENV_AM642_BOARD_SETTINGS_MTD
+#endif
+
+
 /* Incorporate settings into the U-Boot environment */
 #define CONFIG_EXTRA_ENV_SETTINGS					\
 	DEFAULT_LINUX_BOOT_ENV						\
 	DEFAULT_MMC_TI_ARGS						\
 	EXTRA_ENV_AM642_BOARD_SETTINGS					\
-	EXTRA_ENV_AM642_BOARD_SETTINGS_MMC
+	EXTRA_ENV_AM642_BOARD_SETTINGS_MMC				\
+	EXTRA_ENV_AM642_BOARD_SETTINGS_MTD
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
