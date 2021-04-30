@@ -20,6 +20,7 @@
 #include <asm/omap_common.h>
 #include <env.h>
 #include <spl.h>
+#include <soc.h>
 #include <sysinfo.h>
 #include <asm/arch/sys_proto.h>
 
@@ -202,6 +203,9 @@ static int probe_daughtercards(void)
 	char name_overlays[1024] = { 0 };
 	int i, nb_dtbos = 0;
 	int ret;
+	struct udevice *soc;
+	char str[SOC_MAX_STR_SIZE];
+	const char *am65x_sr1_dtboname = "k3-am654-base-board-sr1.dtbo";
 
 	/*
 	 * Daughter card presence detection signal name to GPIO (via I2C I/O
@@ -255,6 +259,25 @@ static int probe_daughtercards(void)
 			0,
 		},
 	};
+
+	ret = soc_get(&soc);
+	if (ret) {
+		pr_err("soc_get failed %d\n", ret);
+		return ret;
+	}
+
+	ret = soc_get_revision(soc, str, sizeof(str));
+	if (ret) {
+		pr_err("Unable to get silicon revision %d\n", ret);
+		return ret;
+	}
+
+	/* Apply overlay for boards using SR1.0 */
+	printf("Detected: Silicon %s\n", str);
+	if (!strncmp(str, "SR1.0", 5)) {
+		strcat(name_overlays, am65x_sr1_dtboname);
+		strcat(name_overlays, " ");
+	}
 
 	/*
 	 * Initialize GPIO used for daughtercard slot presence detection and
