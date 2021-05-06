@@ -100,11 +100,6 @@ static uint32_t k3_lpddr4_read_ddr_type(void)
 	return dram_class;
 }
 
-static void k3_ddr4_freq_update(void)
-{
-	clk_set_rate(&ddrss->ddr_clk, ddrss->ddr_freq1);
-}
-
 static void k3_lpddr4_freq_update(void)
 {
 	unsigned int req_type, counter;
@@ -158,7 +153,6 @@ static void k3_lpddr4_ack_freq_upd_req(void)
 
 	switch(dram_class) {
 	case DENALI_CTL_0_DRAM_CLASS_DDR4:
-		k3_ddr4_freq_update();
 		break;
 	case DENALI_CTL_0_DRAM_CLASS_LPDDR4:
 		k3_lpddr4_freq_update();
@@ -166,6 +160,35 @@ static void k3_lpddr4_ack_freq_upd_req(void)
 	default:
 		printf("Unrecognized dram_class cannot update frequency!\n");
 	}
+}
+
+static int k3_ddrss_init_freq(struct k3_ddrss_desc *ddrss)
+{
+	u32 dram_class;
+	int ret;
+
+	dram_class = k3_lpddr4_read_ddr_type();
+
+	switch (dram_class) {
+	case DENALI_CTL_0_DRAM_CLASS_DDR4:
+		/* Set to ddr_freq1 from DT for DDR4 */
+		ret = clk_set_rate(&ddrss->ddr_clk, ddrss->ddr_freq1);
+		break;
+	case DENALI_CTL_0_DRAM_CLASS_LPDDR4:
+		/* Set to bypass frequency for LPDDR4*/
+		ret = clk_set_rate(&ddrss->ddr_clk, clk_get_rate(&ddrss->osc_clk));
+		break;
+	default:
+		ret = -EINVAL;
+		printf("Unrecognized dram_class cannot init frequency!\n");
+	}
+
+	if (ret < 0)
+		dev_err(ddrss->dev, "ddr clk init failed: %d\n", ret);
+	else
+		ret = 0;
+
+	return ret;
 }
 
 static void k3_lpddr4_info_handler(const lpddr4_privatedata * pd,
@@ -262,13 +285,6 @@ static int k3_ddrss_ofdata_to_priv(struct udevice *dev)
 	ret = dev_read_u32(dev, "ti,ddr-fhs-cnt", &ddrss->ddr_fhs_cnt);
 	if (ret)
 		dev_err(dev, "ddr fhs cnt not populated %d\n", ret);
-
-	/* Put DDR pll in bypass mode */
-	ret = clk_set_rate(&ddrss->ddr_clk, clk_get_rate(&ddrss->osc_clk));
-	if (ret < 0)
-		dev_err(dev, "ddr clk bypass failed: %d\n", ret);
-	else
-		ret = 0;
 
 	return ret;
 }
@@ -428,6 +444,11 @@ static int k3_ddrss_probe(struct udevice *dev)
 	k3_lpddr4_probe();
 	k3_lpddr4_init();
 	k3_lpddr4_hardware_reg_init();
+
+	ret = k3_ddrss_init_freq(ddrss);
+	if (ret)
+		return ret;
+
 	k3_lpddr4_start();
 
 	return ret;
