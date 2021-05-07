@@ -77,6 +77,7 @@ int checkboard(void)
 	return 0;
 }
 
+#ifdef CONFIG_BOARD_LATE_INIT
 static void setup_board_eeprom_env(void)
 {
 	char *name = "am64x_gpevm";
@@ -115,6 +116,7 @@ static void setup_serial(void)
 	snprintf(serial_string, sizeof(serial_string), "%016lx", board_serial);
 	env_set("serial#", serial_string);
 }
+#endif
 #endif
 
 #ifdef CONFIG_BOARD_LATE_INIT
