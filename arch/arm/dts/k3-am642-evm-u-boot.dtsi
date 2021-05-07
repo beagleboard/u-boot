@@ -73,6 +73,10 @@
 
 &dmsc {
 	u-boot,dm-spl;
+	k3_sysreset: sysreset-controller {
+		compatible = "ti,sci-sysreset";
+		u-boot,dm-spl;
+	};
 };
 
 &k3_pds {
