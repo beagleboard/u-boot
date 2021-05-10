@@ -8,7 +8,7 @@
 #include <dt-bindings/mux/ti-serdes.h>
 #include <dt-bindings/phy/phy.h>
 #include "k3-am642.dtsi"
-#include "k3-am64-evm-lp4-1600MTs.dtsi"
+#include "k3-am64-sk-lp4-1333MTs.dtsi"
 #include "k3-am64-ddr.dtsi"
 
 / {
