@@ -203,6 +203,10 @@
 	u-boot,dm-spl;
 };
 
+&wkup_gpio0 {
+	u-boot,dm-spl;
+};
+
 &ospi0 {
 	u-boot,dm-spl;
 	status = "okay";

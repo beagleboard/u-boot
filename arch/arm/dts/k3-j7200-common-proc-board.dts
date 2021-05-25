@@ -304,3 +304,8 @@
 		resets = <&serdes_wiz0 3>;
 	};
 };
+
+&wkup_gpio0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_gpio_pins_default>;
+};

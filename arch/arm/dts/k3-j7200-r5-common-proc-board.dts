@@ -271,6 +271,11 @@
 	maximum-speed = "high-speed";
 };
 
+&wkup_gpio0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_gpio_pins_default>;
+};
+
 &hbmc {
 	status = "okay";
 	pinctrl-names = "default";
