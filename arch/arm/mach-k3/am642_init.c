@@ -97,7 +97,7 @@ static int fixup_usb_boot(const void *fdt_blob)
 		 */
 		ret = fdt_find_and_setprop((void *)fdt_blob,
 					   "/bus@f4000/cdns-usb@f900000/usb@f400000",
-					   "dr_mode", "host", 4, 0);
+					   "dr_mode", "host", 5, 0);
 		if (ret)
 			printf("%s: fdt_find_and_setprop() failed:%d\n",
 			       __func__, ret);
