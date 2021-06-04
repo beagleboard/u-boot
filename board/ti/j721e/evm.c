@@ -29,6 +29,9 @@
 #define board_is_j721e_som()	(board_ti_k3_is("J721EX-PM1-SOM") || \
 				 board_ti_k3_is("J721EX-PM2-SOM"))
 
+#define board_is_j721e_pm1_som() board_ti_k3_is("J721EX-PM1-SOM")
+#define board_is_j721e_pm2_som() board_ti_k3_is("J721EX-PM2-SOM")
+
 #define board_is_j7200_som()	(board_ti_k3_is("J7200X-PM1-SOM") || \
 				 board_ti_k3_is("J7200X-PM2-SOM"))
 
@@ -84,8 +87,15 @@ int dram_init_banksize(void)
 #ifdef CONFIG_SPL_LOAD_FIT
 int board_fit_config_name_match(const char *name)
 {
-	if (!strcmp(name, "k3-j721e-common-proc-board"))
-		return 0;
+	if (board_is_j721e_pm1_som()) {
+		/* Loading for pm1 board a72 spl/u-boot */
+		if (!strcmp(name, "k3-j721e-tps65917-proc-board"))
+			return 0;
+	} else if (board_is_j721e_pm2_som()) {
+		/* Loading for pm2 board a72 spl/u-boot */
+		if (!strcmp(name, "k3-j721e-common-proc-board"))
+			return 0;
+	}
 
 	return -1;
 }
