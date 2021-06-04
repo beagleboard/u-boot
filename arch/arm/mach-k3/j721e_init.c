@@ -19,8 +19,10 @@
 #include <dm.h>
 #include <dm/uclass-internal.h>
 #include <dm/pinctrl.h>
+#include <fdt_support.h>
 #include <mmc.h>
 #include <remoteproc.h>
+#include "../../../board/ti/common/board_detect.h"
 
 #ifdef CONFIG_SPL_BUILD
 #ifdef CONFIG_K3_LOAD_SYSFW
@@ -137,6 +139,10 @@ static void store_boot_info_from_rom(void)
 
 void board_init_f(ulong dummy)
 {
+#if defined(CONFIG_CPU_V7R) && defined(CONFIG_K3_AVS0)
+	int offset;
+	u32 val, dflt = 0;
+#endif
 #if defined(CONFIG_K3_J721E_DDRSS) || defined(CONFIG_K3_LOAD_SYSFW)
 	struct udevice *dev;
 	int ret;
@@ -218,6 +224,15 @@ void board_init_f(ulong dummy)
 		do_board_detect();
 
 #if defined(CONFIG_CPU_V7R) && defined(CONFIG_K3_AVS0)
+	if (board_ti_k3_is("J721EX-PM1-SOM")) {
+		offset = fdt_node_offset_by_compatible(gd->fdt_blob, -1,
+						       "ti,am654-vtm");
+		val = fdt_getprop_u32_default_node(gd->fdt_blob, offset, 0,
+						   "som1-supply-2", dflt);
+		do_fixup_by_compat_u32((void *)gd->fdt_blob, "ti,am654-vtm",
+				       "vdd-supply-2", val, 0);
+	}
+
 	ret = uclass_get_device_by_driver(UCLASS_MISC, DM_GET_DRIVER(k3_avs),
 					  &dev);
 	if (ret)
