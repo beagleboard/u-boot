@@ -444,7 +444,8 @@ int board_late_init(void)
 		setup_serial();
 
 		/* Check for and probe any plugged-in daughtercards */
-		probe_daughtercards();
+		if (!board_is_j721e_eaik())
+			probe_daughtercards();
 	}
 
 	if (board_is_j7200_som())
@@ -497,8 +498,11 @@ void spl_board_init(void)
 
 	if ((IS_ENABLED(CONFIG_TARGET_J721E_A72_EVM) ||
 	     IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM)) &&
-	    IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT))
-		probe_daughtercards();
+	    IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
+		if (!board_is_j721e_eaik())
+			probe_daughtercards();
+	}
+
 
 #ifdef CONFIG_ESM_K3
 	if (board_ti_k3_is("J721EX-PM2-SOM")) {
