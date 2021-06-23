@@ -590,7 +590,8 @@ static int eth_pre_remove(struct udevice *dev)
 {
 	struct eth_pdata *pdata = dev->platdata;
 
-	eth_get_ops(dev)->stop(dev);
+	if (eth_is_active(dev))
+		eth_get_ops(dev)->stop(dev);
 
 	/* clear the MAC address */
 	memset(pdata->enetaddr, 0, ARP_HLEN);
