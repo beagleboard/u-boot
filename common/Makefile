@@ -20,7 +20,6 @@ endif
 # # boards
 obj-y += board_f.o
 obj-y += board_r.o
-obj-$(CONFIG_DISPLAY_BOARDINFO) += board_info.o
 obj-$(CONFIG_DISPLAY_BOARDINFO_LATE) += board_info.o
 
 obj-$(CONFIG_CMD_BOOTM) += bootm.o bootm_os.o
@@ -61,6 +60,8 @@ endif # !CONFIG_SPL_BUILD
 
 obj-$(CONFIG_$(SPL_TPL_)BOOTSTAGE) += bootstage.o
 obj-$(CONFIG_$(SPL_TPL_)BLOBLIST) += bloblist.o
+
+obj-$(CONFIG_DISPLAY_BOARDINFO) += board_info.o
 
 ifdef CONFIG_SPL_BUILD
 ifdef CONFIG_SPL_DFU
