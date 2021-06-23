@@ -471,3 +471,8 @@
 &mcu_udmap {
 	ti,sci = <&dm_tifs>;
 };
+
+/* EEPROM might be read before SYSFW is available */
+&wkup_i2c0 {
+	/delete-property/ power-domains;
+};
