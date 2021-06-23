@@ -29,6 +29,8 @@
 #define board_is_j721e_som()	(board_ti_k3_is("J721EX-PM1-SOM") || \
 				 board_ti_k3_is("J721EX-PM2-SOM"))
 
+#define board_is_j721e_eaik()	 board_ti_k3_is("J721EX-EAIK")
+
 #define board_is_j721e_pm1_som() board_ti_k3_is("J721EX-PM1-SOM")
 #define board_is_j721e_pm2_som() board_ti_k3_is("J721EX-PM2-SOM")
 
@@ -199,6 +201,8 @@ static void setup_board_eeprom_env(void)
 		name = "J721EX-PM1-SOM";
 	else if (board_ti_k3_is("J721EX-PM2-SOM"))
 		name = "J721EX-PM2-SOM";
+	else if (board_is_j721e_eaik())
+		name = "j721e-eaik";
 	else if (board_is_j7200_som())
 		name = "j7200";
 	else
