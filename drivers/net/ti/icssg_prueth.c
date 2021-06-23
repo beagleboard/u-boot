@@ -58,6 +58,13 @@
 /* CTRLMMR_ICSSG_RGMII_CTRL register bits */
 #define ICSSG_CTRL_RGMII_ID_MODE		BIT(24)
 
+/* Management packet type */
+#define PRUETH_PKT_TYPE_CMD		0x10
+
+/* Management frames are sent/received one at a time */
+#define MGMT_PKT_SIZE			128
+static uchar mgm_pkt_rx[MGMT_PKT_SIZE];
+
 static int icssg_phy_init(struct udevice *dev)
 {
 	struct prueth *priv = dev_get_priv(dev);
@@ -111,6 +118,81 @@ static int icssg_mdio_init(struct udevice *dev)
 	return 0;
 }
 
+static int icssg_execute_firmware_command(struct prueth *priv, u32 cmd)
+{
+	struct ti_udma_drv_packet_data packet_data = { 0 };
+	struct udevice *dev = priv->dev;
+	int i = 10, ret = 0;
+	uchar *rx_pkt;
+	u32 rsp;
+
+	ret = dma_prepare_rcv_buf(&priv->dma_rx_mgm,
+				  &mgm_pkt_rx, MGMT_PKT_SIZE);
+	if (ret)
+		dev_err(dev, "Mgm RX dma add buf failed %d\n", ret);
+
+	packet_data.pkt_type = PRUETH_PKT_TYPE_CMD;
+	ret = dma_send(&priv->dma_tx, &cmd, sizeof(cmd), &packet_data);
+	if (ret < 0) {
+		dev_err(dev, "Error sending command to firmware %d\n", ret);
+		return ret;
+	}
+
+	while (i--) {
+		ret =  dma_receive(&priv->dma_rx_mgm, (void **)&rx_pkt, NULL);
+		if (ret < 0 || ret > 0)
+			break;
+		/* wait for 10 * 10 = 100 msec. */
+		mdelay(10);
+	}
+	if (ret <= 0) {
+		/* Either error or no response from firmware */
+		dev_err(dev, "Error or no response from firmware %d\n", ret);
+		return -EINVAL;
+	}
+
+	rsp = le32_to_cpu(*(u32 *)rx_pkt);
+	if ((rsp & 0xffff0000) == (cmd & 0xffff0000))
+		return 0;
+
+	dev_err(dev, "Invalid response from firmware %x\n", rsp);
+	return -EINVAL;
+}
+
+static void icssg_change_port_speed_duplex(struct prueth *priv,
+					   bool full_duplex, int speed)
+{
+	u32 cmd = ICSSG_PSTATE_SPEED_DUPLEX_CMD;
+
+	if (!priv->is_sr1)
+		return;
+
+	/* Set bit 3 of cmd for full duplex */
+	if (full_duplex)
+		cmd |= ICSSG_PSTATE_FULL_DUPLEX;
+
+	/* Set bit 1 & 2 of cmd based on speed */
+	switch (speed) {
+	case SPEED_10:
+		/* default value in CMD is already for 10M - bit 1
+		 * & 2 reset to 0,
+		 */
+		break;
+	case SPEED_100:
+		cmd |= ICSSG_PSTATE_SPEED_100;
+		break;
+	case SPEED_1000:
+		cmd |= ICSSG_PSTATE_SPEED_1000;
+		break;
+	default:
+		/* nothing to do */
+		return;
+	}
+
+	if (icssg_execute_firmware_command(priv, cmd))
+		dev_err(priv->dev, "Error sending port speed/duplex cmd\n");
+}
+
 static int icssg_update_link(struct prueth *priv)
 {
 	struct phy_device *phy = priv->phydev;
@@ -126,6 +208,9 @@ static int icssg_update_link(struct prueth *priv)
 				       priv->slice);
 		/* update the Tx IPG based on 100M/1G speed */
 		icssg_config_ipg(priv, phy->speed, priv->slice);
+
+		/* send command to firmware to update speed/duplex setting */
+		icssg_change_port_speed_duplex(priv, full_duplex, phy->speed);
 
 		printf("link up on port %d, speed %d, %s duplex\n",
 		       priv->port_id, phy->speed,
@@ -148,7 +233,10 @@ static int prueth_start(struct udevice *dev)
 	icssg_class_set_mac_addr(priv->miig_rt, priv->slice,
 				 (u8 *)pdata->enetaddr);
 
-	icssg_class_default(priv->miig_rt, priv->slice, 1);
+	if (!priv->is_sr1)
+		icssg_ft1_set_mac_addr(priv->miig_rt, priv->slice, (u8 *)pdata->enetaddr);
+
+	icssg_class_default(priv->miig_rt, priv->slice, 1, priv->is_sr1);
 
 	/* To differentiate channels for SLICE0 vs SLICE1 */
 	snprintf(chn_name, sizeof(chn_name), "tx%d-0", priv->slice);
@@ -181,6 +269,18 @@ static int prueth_start(struct udevice *dev)
 			dev_err(dev, "RX dma add buf failed %d\n", ret);
 	}
 
+	if (priv->is_sr1) {
+		snprintf(chn_name, sizeof(chn_name), "rxmgm%d", priv->slice);
+		ret = dma_get_by_name(dev, chn_name, &priv->dma_rx_mgm);
+		if (ret)
+			dev_err(dev, "RX dma get failed %d\n", ret);
+
+		dma_get_cfg(&priv->dma_rx_mgm, 0, (void **)&dma_rx_cfg_data);
+		if (dma_rx_cfg_data->flow_id_base != ICSSG_RX_MGM_CHAN_FLOW_ID)
+			dev_err(dev, "RX mgm dma flow id bad, expected %d, actual %ld\n",
+				ICSSG_RX_MGM_CHAN_FLOW_ID, priv->dma_rx_mgm.id);
+	}
+
 	ret = dma_enable(&priv->dma_tx);
 	if (ret) {
 		dev_err(dev, "TX dma_enable failed %d\n", ret);
@@ -191,6 +291,14 @@ static int prueth_start(struct udevice *dev)
 	if (ret) {
 		dev_err(dev, "RX dma_enable failed %d\n", ret);
 		goto rx_fail;
+	}
+
+	if (priv->is_sr1) {
+		ret = dma_enable(&priv->dma_rx_mgm);
+		if (ret) {
+			dev_err(dev, "Mgm RX dma_enable failed %d\n", ret);
+			goto mgm_rx_fail;
+		}
 	}
 
 	ret = phy_startup(priv->phydev);
@@ -210,6 +318,11 @@ static int prueth_start(struct udevice *dev)
 phy_shut:
 	phy_shutdown(priv->phydev);
 phy_fail:
+	if (priv->is_sr1) {
+		dma_disable(&priv->dma_rx_mgm);
+		dma_free(&priv->dma_rx_mgm);
+	}
+mgm_rx_fail:
 	dma_disable(&priv->dma_rx);
 	dma_free(&priv->dma_rx);
 rx_fail:
@@ -217,7 +330,7 @@ rx_fail:
 	dma_free(&priv->dma_tx);
 
 tx_fail:
-	icssg_class_disable(priv->miig_rt, priv->slice);
+	icssg_class_disable(priv->miig_rt, priv->slice, priv->is_sr1);
 
 	return ret;
 }
@@ -272,7 +385,13 @@ static void prueth_stop(struct udevice *dev)
 {
 	struct prueth *priv = dev_get_priv(dev);
 
-	icssg_class_disable(priv->miig_rt, priv->slice);
+	icssg_class_disable(priv->miig_rt, priv->slice, priv->is_sr1);
+
+	/* Execute shutdown command at firmware */
+	if (priv->is_sr1) {
+		if (icssg_execute_firmware_command(priv, ICSSG_SHUTDOWN_CMD))
+			dev_err(dev, "Error executing firmware shutdown cmd\n");
+	}
 
 	phy_shutdown(priv->phydev);
 
@@ -281,6 +400,11 @@ static void prueth_stop(struct udevice *dev)
 
 	dma_disable(&priv->dma_rx);
 	dma_free(&priv->dma_rx);
+
+	if (priv->is_sr1) {
+		dma_disable(&priv->dma_rx_mgm);
+		dma_free(&priv->dma_rx_mgm);
+	}
 
 	/* Workaround for shutdown command */
 	writel(0x0, priv->tmaddr + priv->slice * 0x200);
@@ -378,6 +502,9 @@ static int prueth_probe(struct udevice *dev)
 	node = ofnode_get_by_phandle(phandle);
 	if (!ofnode_valid(node))
 		return -EINVAL;
+
+	if (device_is_compatible(dev, "ti,am654-icssg-prueth-sr1"))
+		prueth->is_sr1 = 1;
 
 	pruss_node = ofnode_get_parent(node);
 	err = misc_init_by_ofnode(pruss_node);
@@ -507,7 +634,10 @@ static int prueth_probe(struct udevice *dev)
 	}
 
 	/* Set Load time configuration */
-	icssg_config(prueth);
+	if (prueth->is_sr1)
+		icssg_config_sr1(prueth);
+	else
+		icssg_config(prueth);
 
 	return 0;
 out:
@@ -519,6 +649,7 @@ out:
 
 static const struct udevice_id prueth_ids[] = {
 	{ .compatible = "ti,am654-icssg-prueth" },
+	{ .compatible = "ti,am654-icssg-prueth-sr1" },
 	{ }
 };
 

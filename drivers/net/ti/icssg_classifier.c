@@ -302,7 +302,7 @@ void icssg_class_disable_n(struct regmap *miig_rt, int slice, int n)
 }
 
 /* disable all RX traffic */
-void icssg_class_disable(struct regmap *miig_rt, int slice)
+void icssg_class_disable(struct regmap *miig_rt, int slice, bool is_sr1)
 {
 	int n;
 
@@ -312,6 +312,10 @@ void icssg_class_disable(struct regmap *miig_rt, int slice)
 
 	for (n = 0; n < ICSSG_NUM_CLASSIFIERS; n++)
 		icssg_class_disable_n(miig_rt, slice, n);
+
+	/* Exclusively disable classifier 4 for SR1.0 */
+	if (is_sr1)
+		icssg_class_disable_n(miig_rt, slice, 4);
 
 	/* FT1 Disabled */
 	for (n = 0; n < ICSSG_NUM_FT1_SLOTS; n++) {
@@ -327,13 +331,13 @@ void icssg_class_disable(struct regmap *miig_rt, int slice)
 	regmap_write(miig_rt, offs[slice].rx_class_cfg2, 0);
 }
 
-void icssg_class_default(struct regmap *miig_rt, int slice, bool allmulti)
+void icssg_class_default(struct regmap *miig_rt, int slice, bool allmulti, bool is_sr1)
 {
 	u32 data;
 	int n;
 
 	/* defaults */
-	icssg_class_disable(miig_rt, slice);
+	icssg_class_disable(miig_rt, slice, is_sr1);
 
 	/* Setup Classifier */
 	for (n = 0; n < ICSSG_NUM_CLASSIFIERS_IN_USE; n++) {
@@ -348,6 +352,22 @@ void icssg_class_default(struct regmap *miig_rt, int slice, bool allmulti)
 
 		/* set CFG1 for OR_OR_AND for classifier */
 		rx_class_sel_set_type(miig_rt, slice, n,
+				      RX_CLASS_SEL_TYPE_OR_OR_AND);
+	}
+
+	/* SR1.0 requires classifier 4 as global traffic enable */
+	if (is_sr1) {
+		/* match on Broadcast or MAC_PRU address */
+		data = RX_CLASS_FT_BC | RX_CLASS_FT_DA_P;
+
+		/* multicast? */
+		if (allmulti)
+			data |= RX_CLASS_FT_MC;
+
+		rx_class_set_or(miig_rt, slice, 4, data);
+
+		/* set CFG1 for OR_OR_AND for classifier */
+		rx_class_sel_set_type(miig_rt, slice, 4,
 				      RX_CLASS_SEL_TYPE_OR_OR_AND);
 	}
 

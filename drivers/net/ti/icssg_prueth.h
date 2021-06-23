@@ -20,8 +20,9 @@
 #include "icssg_config.h"
 
 void icssg_class_set_mac_addr(struct regmap *miig_rt, int slice, u8 *mac);
-void icssg_class_disable(struct regmap *miig_rt, int slice);
-void icssg_class_default(struct regmap *miig_rt, int slice, bool allmulti);
+void icssg_class_disable(struct regmap *miig_rt, int slice, bool is_sr1);
+void icssg_class_default(struct regmap *miig_rt, int slice, bool allmulti,
+			 bool is_sr1);
 void icssg_ft1_set_mac_addr(struct regmap *miig_rt, int slice, u8 *mac_addr);
 
 enum prueth_mac {
@@ -53,18 +54,22 @@ struct prueth {
 	ofnode			phy_node;
 	u32			phy_addr;
 	ofnode			eth_node[PRUETH_NUM_MACS];
+	struct icssg_config_sr1	config[PRUSS_NUM_PRUS];
 	u32			mdio_freq;
 	int			phy_interface;
 	struct			clk mdiofck;
 	struct dma		dma_tx;
 	struct dma		dma_rx;
+	struct dma		dma_rx_mgm;
 	u32			rx_next;
 	u32			rx_pend;
 	int			slice;
+	bool			is_sr1;
 };
 
 /* config helpers */
 void icssg_config_ipg(struct prueth *prueth, int speed, int mii);
 int icssg_config(struct prueth *prueth);
+void icssg_config_sr1(struct prueth *prueth);
 
 #endif /* __NET_TI_ICSSG_PRUETH_H */
