@@ -292,6 +292,8 @@ static int probe_daughtercards(void)
 	}
 
 	memset(k3_dtbo_list, 0, sizeof(k3_dtbo_list));
+	if (!strncmp(str, "SR1.0", 5))
+		k3_dtbo_list[nb_dtbos++] = am65x_sr1_dtboname;
 	for (i = 0; i < ARRAY_SIZE(cards); i++) {
 		/* Obtain card-specific slot index and associated I2C address */
 		u8 slot_index = cards[i].slot_index;
