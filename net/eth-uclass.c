@@ -78,9 +78,14 @@ struct udevice *eth_get_dev(void)
 	if (!uc_priv)
 		return NULL;
 
-	if (!uc_priv->current)
-		eth_errno = uclass_first_device(UCLASS_ETH,
-				    &uc_priv->current);
+	if (!uc_priv->current) {
+		eth_errno = uclass_get_device_by_seq(UCLASS_ETH, 0,
+						     &uc_priv->current);
+		if (eth_errno || !uc_priv->current)
+			 eth_errno = uclass_first_device(UCLASS_ETH,
+							 &uc_priv->current);
+	}
+
 	return uc_priv->current;
 }
 
