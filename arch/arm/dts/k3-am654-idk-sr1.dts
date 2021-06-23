@@ -5,4 +5,4 @@
  * Copyright (C) 2020-2021 Texas Instruments Incorporated - https://www.ti.com/
  */
 
-#include "k3-am654-idk.dts"
+#include "k3-am654-sr1.dts"
