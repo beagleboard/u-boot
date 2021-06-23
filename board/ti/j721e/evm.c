@@ -181,6 +181,7 @@ int checkboard(void)
 	return 0;
 }
 
+#ifdef CONFIG_BOARD_LATE_INIT
 static void setup_board_eeprom_env(void)
 {
 	char *name = "J721EX-PM2-SOM";
@@ -221,6 +222,7 @@ static void setup_serial(void)
 	snprintf(serial_string, sizeof(serial_string), "%016lx", board_serial);
 	env_set("serial#", serial_string);
 }
+#endif
 
 /*
  * Declaration of daughtercards to probe. Note that when adding more
@@ -424,6 +426,7 @@ void configure_serdes_torrent(void)
 		printf("phy_power_on failed !!\n");
 }
 
+#ifdef CONFIG_BOARD_LATE_INIT
 int board_late_init(void)
 {
 	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
@@ -439,6 +442,7 @@ int board_late_init(void)
 
 	return 0;
 }
+#endif
 
 static int __maybe_unused detect_SW3_1_state(void)
 {
