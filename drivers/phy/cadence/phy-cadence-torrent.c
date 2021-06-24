@@ -290,9 +290,16 @@ struct cdns_torrent_data {
 static inline struct cdns_torrent_inst *phy_get_drvdata(struct phy *phy)
 {
 	struct cdns_torrent_phy *sp = dev_get_priv(phy->dev);
+	int index;
 
-	if (phy->id < sp->nsubnodes)
-		return &sp->phys[phy->id];
+	if (phy->id >= MAX_NUM_LANES)
+		return NULL;
+
+	for (index = 0; index < sp->nsubnodes; index++) {
+		if (phy->id == sp->phys[index].mlane)
+			return &sp->phys[index];
+	}
+
 	return NULL;
 }
 

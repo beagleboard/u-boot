@@ -232,11 +232,17 @@ static inline int cdns_reset_deassert(struct reset_control *rst)
 static inline struct cdns_sierra_inst *phy_get_drvdata(struct phy *phy)
 {
 	struct cdns_sierra_phy *sp = dev_get_priv(phy->dev);
+	int index;
 
-	if (phy->id < sp->nsubnodes)
-		return &sp->phys[phy->id];
-	else
+	if (phy->id >= SIERRA_MAX_LANES)
 		return NULL;
+
+	for (index = 0; index < sp->nsubnodes; index++) {
+		if (phy->id == sp->phys[index].mlane)
+			return &sp->phys[index];
+	}
+
+	return NULL;
 }
 
 static int cdns_sierra_phy_init(struct phy *gphy)
