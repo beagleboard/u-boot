@@ -41,6 +41,7 @@
 #include <mmc.h>
 #include <dm/uclass.h>
 #include <hang.h>
+#include <i2c.h>
 
 #include "../common/board_detect.h"
 #include "mux_data.h"
@@ -528,8 +529,10 @@ void do_board_detect(void)
 
 	rc = ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
 				  CONFIG_EEPROM_CHIP_ADDRESS);
-	if (rc)
+	if (rc) {
 		printf("ti_i2c_eeprom_init failed %d\n", rc);
+		ti_i2c_eeprom_am_set("BBONE-AI", "A");
+	};
 
 #ifdef CONFIG_SUPPORT_EMMC_BOOT
 	rc = board_bootmode_has_emmc();
@@ -577,6 +580,164 @@ void do_board_detect(void)
 	if (bname)
 		snprintf(sysinfo.board_string, SYSINFO_BOARD_NAME_MAX_LEN,
 			 "Board: %s REV %s\n", bname, board_ti_get_rev());
+}
+
+struct am335x_cape_eeprom_id {
+	unsigned int header;
+	char eeprom_rev[2];
+	char board_name[32];
+	char version[4];
+	char manufacture[16];
+	char part_number[16];
+	char number_of_pins[2];
+	char serial_number[12];
+	char pin_usage[140];
+	char vdd_3v3exp[ 2];
+	char vdd_5v[ 2];
+	char sys_5v[2];
+	char dc_supplied[2];
+};
+
+#define CAPE_EEPROM_BUS_NUM 3
+#define CAPE_EEPROM_ADDR0	0x54
+#define CAPE_EEPROM_ADDR1	0x55
+#define CAPE_EEPROM_ADDR2	0x56
+#define CAPE_EEPROM_ADDR3	0x57
+
+#define CAPE_EEPROM_ADDR_LEN 0x10
+
+static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
+{
+	int ret;
+	struct udevice *dev;
+	unsigned char addr;
+	/* /lib/firmware/BB-CAPE-DISP-CT4-00A0.dtbo */
+	/* 14 + 16 + 1 + 4 + 5 = 40 */
+	char hash_cape_overlay[40];
+	char cape_overlay[26];
+	char process_cape_part_number[16];
+	char process_cape_version[4];
+	char end_part_number;
+	char cape_overlay_pass_to_kernel[18];
+
+	strlcpy(cape_overlay_pass_to_kernel, "", 1);
+
+	for ( addr = CAPE_EEPROM_ADDR0; addr <= CAPE_EEPROM_ADDR3; addr++ ) {
+		ret = i2c_get_chip_for_busnum(CAPE_EEPROM_BUS_NUM, addr, 1, &dev);
+		if (ret) {
+			printf("BeagleBone Cape EEPROM: no EEPROM at address: 0x%x\n", addr);
+		} else {
+			printf("BeagleBone Cape EEPROM: found EEPROM at address: 0x%x\n", addr);
+
+			ret = i2c_set_chip_offset_len(dev, 2);
+			if (ret) {
+				printf("BeagleBone Cape EEPROM: i2c_set_chip_offset_len failure\n");
+			}
+
+			ret = dm_i2c_read(dev, 0, (uchar *)cape_header, sizeof(struct am335x_cape_eeprom_id));
+			if (ret) {
+				printf("BeagleBone Cape EEPROM: Cannot read eeprom params\n");
+			}
+
+			if (cape_header->header == 0xEE3355AA) {
+				strlcpy(hash_cape_overlay, "/lib/firmware/", 14 + 1);
+				strlcpy(cape_overlay, "", 2);
+				strlcpy(cape_overlay_pass_to_kernel, "", 2);
+				strlcpy(process_cape_part_number, "...............", 16 + 1);
+				strlcpy(process_cape_version, "...", 4 + 1);
+
+				strlcpy(process_cape_part_number, cape_header->part_number, 16 + 1);
+				printf("BeagleBone Cape EEPROM: debug part_number field:[%s]\n", process_cape_part_number);
+
+				//FIXME: some capes end with '.'
+				if ( process_cape_part_number[15] == 0x2E ) {
+					puts("debug: fixup, extra . in eeprom field\n");
+					process_cape_part_number[15] = 0x00;
+					if ( process_cape_part_number[14] == 0x2E ) {
+						process_cape_part_number[14] = 0x00;
+					}
+				}
+
+				//Find ending 0x00 or 0xFF
+				puts("BeagleBone Cape EEPROM: debug part_number field HEX:[");
+				end_part_number=16;
+				for ( int i=0; i <= 16; i++ ) {
+					if (( process_cape_part_number[i] == 0x00 ) || ( process_cape_part_number[i] == 0xFF )) {
+						end_part_number=i;
+						i=17;
+					} else {
+						printf("%x", process_cape_part_number[i]);
+					}
+				}
+				puts("]\n");
+
+				strncat(cape_overlay_pass_to_kernel, process_cape_part_number, end_part_number);
+				strncat(cape_overlay_pass_to_kernel, ",", 1);
+				//printf("debug: %s\n", cape_overlay_pass_to_kernel);
+
+				strncat(hash_cape_overlay, process_cape_part_number, end_part_number);
+				strncat(cape_overlay, process_cape_part_number, end_part_number);
+				//printf("debug: %s %s\n", hash_cape_overlay, cape_overlay);
+
+				strncat(hash_cape_overlay, "-", 1);
+				strncat(cape_overlay, "-", 1);
+				//printf("debug: %s %s\n", hash_cape_overlay, cape_overlay);
+
+				strlcpy(process_cape_version, cape_header->version, 4 + 1);
+				//printf("debug: version field:[%s]\n", process_cape_version);
+
+				//Find invalid 0xFF -> 0x30 BBAI FAN Cape...
+				puts("BeagleBone Cape EEPROM: debug version field HEX:[");
+				for ( int i=0; i <= 3; i++ ) {
+					printf("%x", process_cape_version[i]);
+					if ( process_cape_version[i] == 0xFF ) {
+						process_cape_version[i] = 0x30;
+					}
+				}
+				puts("]\n");
+
+				strncat(hash_cape_overlay, process_cape_version, 4);
+				strncat(cape_overlay, process_cape_version, 4);
+				//printf("debug: %s %s\n", hash_cape_overlay, cape_overlay);
+
+				strncat(hash_cape_overlay, ".dtbo", 5);
+				strncat(cape_overlay, ".dtbo", 5);
+				//printf("debug: %s %s\n", hash_cape_overlay, cape_overlay);
+
+				printf("BeagleBone Cape EEPROM: 0x%x %s\n", addr, cape_overlay);
+
+				switch(addr) {
+					case CAPE_EEPROM_ADDR0:
+						env_set("uboot_overlay_addr0", cape_overlay);
+						env_set("uboot_detected_capes_addr0", cape_overlay_pass_to_kernel);
+						break;
+					case CAPE_EEPROM_ADDR1:
+						env_set("uboot_overlay_addr1", cape_overlay);
+						env_set("uboot_detected_capes_addr1", cape_overlay_pass_to_kernel);
+						break;
+					case CAPE_EEPROM_ADDR2:
+						env_set("uboot_overlay_addr2", cape_overlay);
+						env_set("uboot_detected_capes_addr2", cape_overlay_pass_to_kernel);
+						break;
+					case CAPE_EEPROM_ADDR3:
+						env_set("uboot_overlay_addr3", cape_overlay);
+						env_set("uboot_detected_capes_addr3", cape_overlay_pass_to_kernel);
+						break;
+				}
+				env_set("uboot_detected_capes", "1");
+			} else {
+				printf("BeagleBone Cape EEPROM: EEPROM contents not valid (or blank) on address: 0x%x\n", addr);
+			}
+		}
+	}
+	return 0;
+}
+
+void do_cape_detect(void)
+{
+	struct am335x_cape_eeprom_id cape_header;
+
+	probe_cape_eeprom(&cape_header);
 }
 
 static void setup_board_eeprom_env(void)
@@ -782,8 +943,10 @@ int board_late_init(void)
 	/* Just probe the potentially supported cdce913 device */
 	uclass_get_device(UCLASS_CLK, 0, &dev);
 
-	if (board_is_bbai())
+	if (board_is_bbai()) {
 		env_set("console", "ttyS0,115200n8");
+		do_cape_detect();
+	}
 
 #if !defined(CONFIG_SPL_BUILD)
 	board_ti_set_ethaddr(2);

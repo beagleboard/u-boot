@@ -132,6 +132,7 @@
 	"bootpart=0:2\0" \
 	"bootdir=/boot\0" \
 	"bootfile=zImage\0" \
+	"board_eeprom_header=undefined\0" \
 	"usbtty=cdc_acm\0" \
 	"vram=16M\0" \
 	AVB_VERIFY_CMD \
@@ -183,7 +184,14 @@
 		"else " \
 			"echo $apart partition not found; " \
 			"exit; " \
-		"fi;\0"
+		"fi;\0 " \
+	"read_board_eeprom=" \
+		"if test $board_eeprom_header = beagle_x15_revb1_blank; then " \
+			"run eeprom_dump; run eeprom_x15_b1; reset; fi; " \
+		"if test $board_eeprom_header = beagle_x15_revc_blank; then " \
+			"run eeprom_dump; run eeprom_x15_c; reset; fi; " \
+		"if test $board_eeprom_header = bbai_a2_blank; then " \
+			"run eeprom_dump; run eeprom_bbai_a2; reset; fi;  \0 "
 
 #ifdef CONFIG_OMAP54XX
 
@@ -223,19 +231,17 @@
 			"echo WARNING: Could not determine device tree to use; fi; \0"
 
 #define CONFIG_BOOTCOMMAND \
-	"if test ${dofastboot} -eq 1; then " \
-		"echo Boot fastboot requested, resetting dofastboot ...;" \
-		"setenv dofastboot 0; saveenv;" \
-		FASTBOOT_CMD \
-	"fi;" \
-	"if test ${boot_fit} -eq 1; then "	\
-		"run update_to_fit;"	\
-	"fi;"	\
+	"run read_board_eeprom; " \
 	"run findfdt; " \
-	"run envboot; " \
-	"run mmcboot;" \
-	"run emmc_linux_boot; " \
-	"run emmc_android_boot; " \
+	"setenv mmcdev 0; " \
+	"setenv devtype usb; " \
+	"echo usb_boot is currently disabled;" \
+	"setenv devtype scsi; " \
+	"echo scsi_boot is currently disabled;" \
+	"setenv devtype mmc; " \
+	"run mmc_boot;" \
+	"setenv mmcdev 1; " \
+	"run mmc_boot;" \
 	""
 
 #endif /* CONFIG_OMAP54XX */
