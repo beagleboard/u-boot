@@ -276,8 +276,8 @@ static int k3_ddrss_ofdata_to_priv(struct udevice *dev)
 	if (ret) {
 		ddrss->ddr_freq0 = clk_get_rate(&ddrss->osc_clk);
 		dev_dbg(dev,
-			"ddr freq0 not populated, using bypass frequency.\n",
-			ret);
+			"ddr freq0 not populated, using bypass frequency %u\n",
+			ddrss->ddr_freq0);
 	}
 
 	ret = dev_read_u32(dev, "ti,ddr-freq1", &ddrss->ddr_freq1);
