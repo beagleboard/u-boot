@@ -552,6 +552,7 @@ U_BOOT_DRIVER(wiz_reset) = {
 	.id = UCLASS_RESET,
 	.probe = wiz_reset_probe,
 	.ops = &wiz_reset_ops,
+	.flags = DM_FLAG_REMOVE_WITH_PD_ON,
 };
 
 static int wiz_reset(struct wiz *wiz)
@@ -1151,4 +1152,5 @@ U_BOOT_DRIVER(phy_j721e_wiz) = {
 	.probe		= j721e_wiz_probe,
 	.remove		= j721e_wiz_remove,
 	.priv_auto_alloc_size = sizeof(struct wiz),
+	.flags = DM_FLAG_REMOVE_WITH_PD_ON,
 };
