@@ -249,13 +249,20 @@
 
 &wkup_i2c0 {
 	u-boot,dm-spl;
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_i2c0_pins_default>;
+	clock-frequency = <400000>;
+
+	tps659413: tps659413@48 {
+		compatible = "ti,tps659413";
+		reg = <0x48>;
+		u-boot,dm-spl;
+	};
+
 	lp876441: lp876441@4c {
 		compatible = "ti,lp876441";
 		reg = <0x4c>;
 		u-boot,dm-spl;
-		pinctrl-names = "default";
-		pinctrl-0 = <&wkup_i2c0_pins_default>;
-		clock-frequency = <400000>;
 
 		regulators: regulators {
 			u-boot,dm-spl;
