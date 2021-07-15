@@ -221,3 +221,7 @@
 		};
 	};
 };
+
+&main_esm {
+	u-boot,dm-spl;
+};
