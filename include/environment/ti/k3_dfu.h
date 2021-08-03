@@ -29,6 +29,15 @@
 	"u-env.raw raw 0x3400 0x100 mmcpart 1;" \
 	"sysfw.itb.raw raw 0x3600 0x800 mmcpart 1\0"
 
+#define DFU_ALT_INFO_EMMC_COMBINED \
+	"dfu_alt_info_emmc=" \
+	"rawemmc raw 0 0x800000 mmcpart 1;" \
+	"rootfs part 0 1 mmcpart 0;" \
+	"tiboot3.bin.raw raw 0x0 0x800 mmcpart 1;" \
+	"tispl.bin.raw raw 0x800 0x1000 mmcpart 1;" \
+	"u-boot.img.raw raw 0x1800 0x2000 mmcpart 1;" \
+	"u-env.raw raw 0x3800 0x100 mmcpart 1;\0"
+
 #define DFU_ALT_INFO_OSPI \
 	"dfu_alt_info_ospi=" \
 	"tiboot3.bin raw 0x0 0x080000;" \
@@ -36,6 +45,14 @@
 	"u-boot.img raw 0x280000 0x400000;" \
 	"u-boot-env raw 0x680000 0x020000;" \
 	"sysfw.itb raw 0x6c0000 0x100000;" \
+	"rootfs raw 0x800000 0x3800000\0"
+
+#define DFU_ALT_INFO_OSPI_COMBINED \
+	"dfu_alt_info_ospi=" \
+	"tiboot3.bin raw 0x0 0x100000;" \
+	"tispl.bin raw 0x100000 0x200000;" \
+	"u-boot.img raw 0x300000 0x400000;" \
+	"u-boot-env raw 0x700000 0x020000;" \
 	"rootfs raw 0x800000 0x3800000\0"
 
 #define DFU_ALT_INFO_RAM \
