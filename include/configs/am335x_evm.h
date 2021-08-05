@@ -112,7 +112,7 @@
 	"bootfile=zImage\0" \
 	"board_eeprom_header=undefined\0" \
 	"fdtfile=undefined\0" \
-	"console=ttyO0,115200n8\0" \
+	"console=ttyS0,115200n8\0" \
 	"partitions=" \
 		"uuid_disk=${uuid_gpt_disk};" \
 		"name=bootloader,start=384K,size=1792K," \
@@ -232,11 +232,11 @@
 		"fi; \0" \
 	"init_console=" \
 		"if test $board_name = A335_ICE; then "\
-			"setenv console ttyO3,115200n8;" \
+			"setenv console ttyS3,115200n8;" \
 		"elif test $board_name = A335BLGC; then " \
-			"setenv console ttyO4,115200n8;" \
+			"setenv console ttyS4,115200n8;" \
 		"else " \
-			"setenv console ttyO0,115200n8;" \
+			"setenv console ttyS0,115200n8;" \
 		"fi;\0" \
 	EEWIKI_NFS \
 	EEWIKI_BOOT \
