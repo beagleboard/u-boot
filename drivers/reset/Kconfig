@@ -188,4 +188,11 @@ config RESET_SCMI
 	  Enable this option if you want to support reset controller
 	  devices exposed by a SCMI agent based on SCMI reset domain
 	  protocol communication with a SCMI server.
+
+config RESET_DRA7
+	bool "Support for TI's DRA7 Reset driver"
+	depends on DM_RESET
+	help
+	  Support for TI DRA7-RESET subsystem. Basic Assert/Deassert
+	  is supported.
 endmenu
