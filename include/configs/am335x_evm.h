@@ -238,7 +238,6 @@
 		"else " \
 			"setenv console ttyS0,115200n8;" \
 		"fi;\0" \
-	EEWIKI_NFS \
 	EEWIKI_BOOT \
 	EEWIKI_UNAME_BOOT \
 	EEPROM_PROGRAMMING \
