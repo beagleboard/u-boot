@@ -113,7 +113,6 @@
 	"board_eeprom_header=undefined\0" \
 	"fdtfile=undefined\0" \
 	"console=ttyS0,115200n8\0" \
-	"console_gadget=\0" \
 	"partitions=" \
 		"uuid_disk=${uuid_gpt_disk};" \
 		"name=bootloader,start=384K,size=1792K," \

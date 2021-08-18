@@ -13,14 +13,12 @@
 	"mmcrootfstype=ext4 rootwait\0" \
 	"finduuid=part uuid ${devtype} ${bootpart} uuid\0" \
 	"args_mmc=run finduuid;setenv bootargs console=${console} " \
-		"${console_gadget} " \
 		"${cape_uboot} " \
 		"root=PARTUUID=${uuid} ro " \
 		"rootfstype=${mmcrootfstype} " \
 		"${uboot_detected_capes} " \
 		"${cmdline}\0" \
 	"args_mmc_old=setenv bootargs console=${console} " \
-		"${console_gadget} " \
 		"${optargs} " \
 		"${cape_uboot} " \
 		"root=${oldroot} ro " \
@@ -28,7 +26,6 @@
 		"${uboot_detected_capes} " \
 		"${cmdline}\0" \
 	"args_mmc_uuid=setenv bootargs console=${console} " \
-		"${console_gadget} " \
 		"${optargs} " \
 		"${cape_uboot} " \
 		"root=UUID=${uuid} ro " \
@@ -36,7 +33,6 @@
 		"${uboot_detected_capes} " \
 		"${cmdline}\0" \
 	"args_uenv_root=setenv bootargs console=${console} " \
-		"${console_gadget} " \
 		"${optargs} " \
 		"${cape_uboot} " \
 		"root=${uenv_root} ro " \
