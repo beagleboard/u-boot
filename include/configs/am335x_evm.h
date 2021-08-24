@@ -219,6 +219,8 @@
 			"setenv fdtfile am335x-sancloud-bbe-lite.dtb; fi; " \
 		"if test $board_name = OS00; then " \
 			"setenv fdtfile am335x-osd3358-sm-red.dtb; fi; " \
+		"if test $board_name = OS01; then " \
+			"setenv fdtfile am335x-osd3358-sm-red-01.dtb; fi; " \
 		"if test $board_name = A33515BB; then " \
 			"setenv fdtfile am335x-evm.dtb; fi; " \
 		"if test $board_name = A335X_SK; then " \
