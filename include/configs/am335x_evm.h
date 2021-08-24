@@ -197,6 +197,8 @@
 				"setenv fdtfile am335x-bonegreen.dtb; " \
 			"elif test $board_rev = OS00; then " \
 				"setenv fdtfile am335x-osd3358-sm-red.dtb; " \
+			"elif test $board_rev = OS01; then " \
+				"setenv fdtfile am335x-osd3358-sm-red-01.dtb; " \
 			"else " \
 				"setenv fdtfile am335x-boneblack.dtb; " \
 			"fi; " \
@@ -219,6 +221,8 @@
 			"setenv fdtfile am335x-sancloud-bbe-lite.dtb; fi; " \
 		"if test $board_name = OS00; then " \
 			"setenv fdtfile am335x-osd3358-sm-red.dtb; fi; " \
+		"if test $board_name = OS01; then " \
+			"setenv fdtfile am335x-osd3358-sm-red-01.dtb; fi; " \
 		"if test $board_name = A33515BB; then " \
 			"setenv fdtfile am335x-evm.dtb; fi; " \
 		"if test $board_name = A335X_SK; then " \
