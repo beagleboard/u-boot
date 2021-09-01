@@ -488,6 +488,7 @@ F:	arch/arm/mach-keystone/
 F:	arch/arm/mach-omap2/
 F:	arch/arm/include/asm/arch-omap*/
 F:	arch/arm/include/asm/ti-common/
+F:	arch/arm/dts/dra7*
 F:	board/ti/
 F:	drivers/dma/ti*
 F:	drivers/firmware/ti_sci.*
