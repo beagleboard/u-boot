@@ -272,6 +272,28 @@ config TARGET_AM43XX_EVM
 	  to write software and develop hardware around
 	  an AM43xx processor subsystem.
 
+config TARGET_AM43XX_EVM_MINI
+	bool "Support am43xx_evm_mini"
+	select BOARD_LATE_INIT
+	imply DM_I2C
+	imply SPL_ENV_SUPPORT
+	imply SPL_FS_EXT4
+	imply SPL_FS_FAT
+	imply SPL_GPIO_SUPPORT
+	imply SPL_I2C_SUPPORT
+	imply SPL_LIBCOMMON_SUPPORT
+	imply SPL_LIBDISK_SUPPORT
+	imply SPL_LIBGENERIC_SUPPORT
+	imply SPL_MMC_SUPPORT
+	imply SPL_POWER_SUPPORT
+	imply SPL_SERIAL_SUPPORT
+	imply SPL_YMODEM_SUPPORT
+	help
+	  This option specifies support for the AM43xx
+	  GP and HS EVM development platforms using a minimal
+	  system configuration, only supporting a small subset
+	  of boot media and other features.
+
 config TARGET_CM_T43
 	bool "Support cm_t43"
 
