@@ -155,7 +155,7 @@ void init_env(void)
 #endif
 }
 
-#ifdef CONFIG_FS_LOADER
+#if CONFIG_IS_ENABLED(FS_LOADER)
 int load_firmware(char *name_fw, char *name_loadaddr, u32 *loadaddr)
 {
 	struct udevice *fsdev;
