@@ -337,6 +337,7 @@ dtb-$(CONFIG_AM33XX) += \
 	am335x-brsmarc1.dtb \
 	am335x-draco.dtb \
 	am335x-evm.dtb \
+	am335x-evm-mini.dtb \
 	am335x-evmsk.dtb \
 	am335x-bonegreen.dtb \
 	am335x-icev2.dtb \

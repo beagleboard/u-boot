@@ -62,6 +62,36 @@ config TARGET_AM335X_EVM
 	  to write software and develop hardware around
 	  an AM335x processor subsystem.
 
+config TARGET_AM335X_EVM_MINI
+	bool "Support am335x_evm_mini"
+	select BOARD_LATE_INIT
+	select DM
+	select DM_GPIO
+	select DM_SERIAL
+	imply CMD_DM
+	imply SPL_DM
+	imply SPL_DM_SEQ_ALIAS
+	imply SPL_ENV_SUPPORT
+	imply SPL_FS_EXT4
+	imply SPL_FS_FAT
+	imply SPL_GPIO_SUPPORT
+	imply SPL_I2C_SUPPORT
+	imply SPL_LIBCOMMON_SUPPORT
+	imply SPL_LIBDISK_SUPPORT
+	imply SPL_LIBGENERIC_SUPPORT
+	imply SPL_MMC_SUPPORT
+	imply SPL_OF_LIBFDT
+	imply SPL_POWER_SUPPORT
+	imply SPL_SEPARATE_BSS
+	imply SPL_SERIAL_SUPPORT
+	imply SPL_SYS_MALLOC_SIMPLE
+	imply SPL_YMODEM_SUPPORT
+	help
+	  This option specifies support for the AM335x
+	  GP and HS EVM development platforms using a minimal
+	  system configuration, only supporting a small subset
+	  of boot media and other features.
+
 config TARGET_AM335X_BALTOS
 	bool "Support am335x_baltos"
 	select BOARD_LATE_INIT
