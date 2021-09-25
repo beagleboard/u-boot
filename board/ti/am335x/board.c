@@ -209,6 +209,8 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 			if (subtype_id == 'L') {
 				name = "BBELITE";
 				base_dtb=BBEL_BASE_DTB;
+				virtual_video=NOT_POP;
+				virtual_audio=NOT_POP;
 			} else {
 				name = "BBEN";
 				base_dtb=BBE_BASE_DTB;
