@@ -29,7 +29,8 @@
 #define board_is_j721e_som()	(board_ti_k3_is("J721EX-PM1-SOM") || \
 				 board_ti_k3_is("J721EX-PM2-SOM"))
 
-#define board_is_j721e_eaik()	 board_ti_k3_is("J721EX-EAIK")
+#define board_is_j721e_sk()	 (board_ti_k3_is("J721EX-EAIK") || \
+				  board_ti_k3_is("J721EX-SK"))
 
 #define board_is_j721e_pm1_som() board_ti_k3_is("J721EX-PM1-SOM")
 #define board_is_j721e_pm2_som() board_ti_k3_is("J721EX-PM2-SOM")
@@ -100,9 +101,9 @@ int board_fit_config_name_match(const char *name)
 		if (!strcmp(name, "k3-j721e-common-proc-board") ||
 		    !strcmp(name, "k3-j721e-r5-common-proc-board"))
 			return 0;
-	} else if (board_is_j721e_eaik()) {
-		if (!strcmp(name, "k3-j721e-eaik") ||
-		    !strcmp(name, "k3-j721e-r5-eaik"))
+	} else if (board_is_j721e_sk()) {
+		if (!strcmp(name, "k3-j721e-sk") ||
+		    !strcmp(name, "k3-j721e-r5-sk"))
 			return 0;
 	}
 
@@ -211,8 +212,8 @@ static void setup_board_eeprom_env(void)
 		name = "J721EX-PM1-SOM";
 	else if (board_ti_k3_is("J721EX-PM2-SOM"))
 		name = "J721EX-PM2-SOM";
-	else if (board_is_j721e_eaik())
-		name = "j721e-eaik";
+	else if (board_is_j721e_sk())
+		name = "j721e-sk";
 	else if (board_is_j7200_som())
 		name = "j7200";
 	else
@@ -454,7 +455,7 @@ int board_late_init(void)
 		setup_serial();
 
 		/* Check for and probe any plugged-in daughtercards */
-		if (!board_is_j721e_eaik())
+		if (!board_is_j721e_sk())
 			probe_daughtercards();
 	}
 
@@ -509,7 +510,7 @@ void spl_board_init(void)
 	if ((IS_ENABLED(CONFIG_TARGET_J721E_A72_EVM) ||
 	     IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM)) &&
 	    IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
-		if (!board_is_j721e_eaik())
+		if (!board_is_j721e_sk())
 			probe_daughtercards();
 	}
 
