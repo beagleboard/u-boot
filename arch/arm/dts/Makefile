@@ -980,8 +980,8 @@ dtb-$(CONFIG_SOC_K3_J721E) += k3-j721e-common-proc-board.dtb \
 			      k3-j721e-tps65917-proc-board.dtb \
 			      k3-j7200-common-proc-board.dtb \
 			      k3-j7200-r5-common-proc-board.dtb \
-			      k3-j721e-eaik.dtb \
-			      k3-j721e-r5-eaik.dtb
+			      k3-j721e-sk.dtb \
+			      k3-j721e-r5-sk.dtb
 dtb-$(CONFIG_SOC_K3_AM642) += k3-am642-evm.dtb \
 			      k3-am642-r5-evm.dtb \
 			      k3-am642-sk.dtb \

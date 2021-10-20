@@ -81,8 +81,8 @@
 			"setenv name_fdt k3-j721e-proc-board-tps65917.dtb; fi;" \
 		"if test $board_name = j721e; then "			\
 			"setenv name_fdt k3-j721e-common-proc-board.dtb; fi;" \
-		"if test $board_name = j721e-eaik; then "		\
-			"setenv name_fdt k3-j721e-eaik.dtb; fi;"	\
+		"if test $board_name = j721e-eaik || test $board_name = j721e-sk; then " \
+			"setenv name_fdt k3-j721e-sk.dtb; fi;"	\
 		"setenv fdtfile ${name_fdt}\0"				\
 	"name_kern=Image\0"						\
 	"console=ttyS2,115200n8\0"					\

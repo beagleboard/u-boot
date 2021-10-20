@@ -3,7 +3,7 @@
  * Copyright (C) 2021 Texas Instruments Incorporated - https://www.ti.com/
  */
 
-#include "k3-j721e-eaik-u-boot.dtsi"
+#include "k3-j721e-sk-u-boot.dtsi"
 
 / {
 	chosen {
