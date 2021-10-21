@@ -269,6 +269,40 @@
 			"echo loading ${bootdir}/${bootfile} ...; "\
 			"run loadimage;" \
 			"setenv fdtdir /boot/dtbs/${uname_r}; " \
+			"echo debug: [enable_uboot_overlays=${enable_uboot_overlays}] ... ;" \
+			"if test -n ${enable_uboot_overlays}; then " \
+				"echo debug: [enable_uboot_cape_universal=${enable_uboot_cape_universal}] ... ;" \
+				"if test -n ${enable_uboot_cape_universal}; then " \
+					"echo debug: [uboot_base_dtb_univ=${uboot_base_dtb_univ}] ... ;" \
+					"if test -n ${uboot_base_dtb_univ}; then " \
+						"echo uboot_overlays: [uboot_base_dtb=${uboot_base_dtb_univ}] ... ;" \
+						"if test -e ${devtype} ${bootpart} ${fdtdir}/${uboot_base_dtb_univ}; then " \
+							"setenv fdtfile ${uboot_base_dtb_univ};" \
+							"echo uboot_overlays: Switching too: dtb=${fdtfile} ...;" \
+							"setenv cape_uboot bone_capemgr.uboot_capemgr_enabled=1; " \
+						"else " \
+							"echo debug: unable to find [${uboot_base_dtb_univ}] using [${uboot_base_dtb}] instead ... ;" \
+							"echo debug: [uboot_base_dtb_univ=${uboot_base_dtb}] ... ;" \
+							"if test -n ${uboot_base_dtb}; then " \
+								"echo uboot_overlays: [uboot_base_dtb=${uboot_base_dtb}] ... ;" \
+								"if test -e ${devtype} ${bootpart} ${fdtdir}/${uboot_base_dtb}; then " \
+									"setenv fdtfile ${uboot_base_dtb};" \
+									"echo uboot_overlays: Switching too: dtb=${fdtfile} ...;" \
+								"fi;" \
+							"fi;" \
+						"fi;" \
+					"fi;" \
+				"else " \
+					"echo debug: [uboot_base_dtb_univ=${uboot_base_dtb}] ... ;" \
+					"if test -n ${uboot_base_dtb}; then " \
+						"echo uboot_overlays: [uboot_base_dtb=${uboot_base_dtb}] ... ;" \
+						"if test -e ${devtype} ${bootpart} ${fdtdir}/${uboot_base_dtb}; then " \
+							"setenv fdtfile ${uboot_base_dtb};" \
+							"echo uboot_overlays: Switching too: dtb=${fdtfile} ...;" \
+						"fi;" \
+					"fi;" \
+				"fi;" \
+			"fi;" \
 			"if test -e ${devtype} ${bootpart} ${fdtdir}/${fdtfile}; then " \
 				"run loadfdt;" \
 			"else " \
@@ -309,6 +343,125 @@
 					"fi;" \
 				"fi;" \
 			"fi; " \
+			"if test -n ${enable_uboot_overlays}; then " \
+				"extension scan;" \
+				"setenv fdt_buffer 0x60000;" \
+				"if test -n ${uboot_fdt_buffer}; then " \
+					"setenv fdt_buffer ${uboot_fdt_buffer};" \
+				"fi;" \
+				"echo uboot_overlays: [fdt_buffer=${fdt_buffer}] ... ;" \
+				"if test -n ${uboot_silicon}; then " \
+					"setenv uboot_overlay ${uboot_silicon}; " \
+					"run virtualloadoverlay;" \
+				"fi;" \
+				"if test -n ${uboot_model}; then " \
+					"setenv uboot_overlay ${uboot_model}; " \
+					"run virtualloadoverlay;" \
+				"fi;" \
+				"if test -n ${disable_uboot_overlay_adc}; then " \
+					"echo uboot_overlays: uboot loading of [BB-ADC-00A0.dtbo] disabled by /boot/uEnv.txt [disable_uboot_overlay_adc=1]...;" \
+				"else " \
+					"setenv uboot_overlay BB-ADC-00A0.dtbo; " \
+					"run virtualloadoverlay;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_addr0}; then " \
+					"if test -n ${disable_uboot_overlay_addr0}; then " \
+						"echo uboot_overlays: uboot loading of [${uboot_overlay_addr0}] disabled by /boot/uEnv.txt [disable_uboot_overlay_addr0=1]...;" \
+					"else " \
+						"setenv uboot_overlay ${uboot_overlay_addr0}; " \
+						"run virtualloadoverlay;" \
+					"fi;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_addr1}; then " \
+					"if test -n ${disable_uboot_overlay_addr1}; then " \
+						"echo uboot_overlays: uboot loading of [${uboot_overlay_addr1}] disabled by /boot/uEnv.txt [disable_uboot_overlay_addr1=1]...;" \
+					"else " \
+						"setenv uboot_overlay ${uboot_overlay_addr1}; " \
+						"run virtualloadoverlay;" \
+					"fi;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_addr2}; then " \
+					"if test -n ${disable_uboot_overlay_addr2}; then " \
+						"echo uboot_overlays: uboot loading of [${uboot_overlay_addr2}] disabled by /boot/uEnv.txt [disable_uboot_overlay_addr2=1]...;" \
+					"else " \
+						"setenv uboot_overlay ${uboot_overlay_addr2}; " \
+						"run virtualloadoverlay;" \
+					"fi;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_addr3}; then " \
+					"if test -n ${disable_uboot_overlay_addr3}; then " \
+						"echo uboot_overlays: uboot loading of [${uboot_overlay_addr3}] disabled by /boot/uEnv.txt [disable_uboot_overlay_addr3=1]...;" \
+					"else " \
+						"setenv uboot_overlay ${uboot_overlay_addr3}; " \
+						"run virtualloadoverlay;" \
+					"fi;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_addr4}; then " \
+					"setenv uboot_overlay ${uboot_overlay_addr4}; " \
+					"run virtualloadoverlay;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_addr5}; then " \
+					"setenv uboot_overlay ${uboot_overlay_addr5}; " \
+					"run virtualloadoverlay;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_addr6}; then " \
+					"setenv uboot_overlay ${uboot_overlay_addr6}; " \
+					"run virtualloadoverlay;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_addr7}; then " \
+					"setenv uboot_overlay ${uboot_overlay_addr7}; " \
+					"run virtualloadoverlay;" \
+				"fi;" \
+				"if test -n ${uboot_emmc}; then " \
+					"if test -n ${disable_uboot_overlay_emmc}; then " \
+						"echo uboot_overlays: uboot loading of [${uboot_emmc}] disabled by /boot/uEnv.txt [disable_uboot_overlay_emmc=1]...;" \
+					"else " \
+						"setenv uboot_overlay ${uboot_emmc}; " \
+						"run virtualloadoverlay;" \
+					"fi;" \
+				"fi;" \
+				"if test -n ${uboot_video}; then " \
+					"if test -n ${disable_uboot_overlay_video}; then " \
+						"echo uboot_overlays: uboot loading of [${uboot_video}] disabled by /boot/uEnv.txt [disable_uboot_overlay_video=1]...;" \
+					"else " \
+						"if test -n ${disable_uboot_overlay_audio}; then " \
+							"echo uboot_overlays: uboot loading of [${uboot_video}] disabled by /boot/uEnv.txt [disable_uboot_overlay_audio=1]...;" \
+							"setenv uboot_overlay ${uboot_video_naudio}; " \
+							"run virtualloadoverlay;" \
+						"else " \
+							"setenv uboot_overlay ${uboot_video}; " \
+							"run virtualloadoverlay;" \
+						"fi;" \
+					"fi;" \
+				"fi;" \
+				"if test -n ${uboot_wireless}; then " \
+					"if test -n ${disable_uboot_overlay_wireless}; then " \
+						"echo uboot_overlays: uboot loading of [${uboot_wireless}] disabled by /boot/uEnv.txt [disable_uboot_overlay_wireless=1]...;" \
+					"else " \
+						"setenv uboot_overlay ${uboot_wireless}; " \
+						"run virtualloadoverlay;" \
+					"fi;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_pru}; then " \
+					"setenv uboot_overlay ${uboot_overlay_pru}; " \
+					"run virtualloadoverlay;" \
+				"fi;" \
+				"if test -n ${uboot_overlay_pru_add}; then " \
+					"setenv uboot_overlay ${uboot_overlay_pru_add}; " \
+					"run virtualloadoverlay;" \
+				"fi;" \
+				"if test -n ${dtb_overlay}; then " \
+					"setenv uboot_overlay ${dtb_overlay}; " \
+					"echo uboot_overlays: [dtb_overlay=${uboot_overlay}] ... ;" \
+					"run virtualloadoverlay;" \
+				"fi;" \
+			"else " \
+				"echo uboot_overlays: add [enable_uboot_overlays=1] to /boot/uEnv.txt to enable...;" \
+			"fi;" \
+			"if test -n ${uboot_detected_capes}; then " \
+				"echo uboot_overlays: [uboot_detected_capes=${uboot_detected_capes_addr0}${uboot_detected_capes_addr1}${uboot_detected_capes_addr2}${uboot_detected_capes_addr3}] ... ;" \
+				"setenv uboot_detected_capes uboot_detected_capes=${uboot_detected_capes_addr0}${uboot_detected_capes_addr1}${uboot_detected_capes_addr2}${uboot_detected_capes_addr3}; " \
+			"fi;" \
 			"setenv rdfile initrd.img-${uname_r}; " \
 			"if test -e ${devtype} ${bootpart} ${bootdir}/${rdfile}; then " \
 				"echo loading ${bootdir}/${rdfile} ...; "\
