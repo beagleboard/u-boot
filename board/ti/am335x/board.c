@@ -34,6 +34,7 @@
 #include <asm/omap_common.h>
 #include <asm/omap_sec_common.h>
 #include <asm/omap_mmc.h>
+#include <asm/davinci_rtc.h>
 #include <i2c.h>
 #include <miiphy.h>
 #include <cpsw.h>
@@ -94,6 +95,8 @@ struct serial_device *default_serial_console(void)
 {
 	if (board_is_icev2())
 		return &eserial4_device;
+	else if (board_is_beaglelogic())
+		return &eserial5_device;
 	else
 		return &eserial1_device;
 }
@@ -276,7 +279,7 @@ const struct dpll_params *get_dpll_ddr_params(void)
 
 	if (board_is_evm_sk())
 		return &dpll_ddr3_303MHz[ind];
-	else if (board_is_pb() || board_is_bone_lt() || board_is_icev2())
+	else if (board_is_pb() || board_is_bone_lt() || board_is_icev2() || board_is_beaglelogic())
 		return &dpll_ddr3_400MHz[ind];
 	else if (board_is_evm_15_or_later())
 		return &dpll_ddr3_303MHz[ind];
@@ -307,7 +310,7 @@ const struct dpll_params *get_dpll_mpu_params(void)
 	if (bone_not_connected_to_ac_power())
 		freq = MPUPLL_M_600;
 
-	if (board_is_pb() || board_is_bone_lt())
+	if (board_is_pb() || board_is_bone_lt() || board_is_beaglelogic())
 		freq = MPUPLL_M_1000;
 
 	switch (freq) {
@@ -359,7 +362,7 @@ static void scale_vcores_bone(int freq)
 	 * Override what we have detected since we know if we have
 	 * a Beaglebone Black it supports 1GHz.
 	 */
-	if (board_is_pb() || board_is_bone_lt())
+	if (board_is_pb() || board_is_bone_lt() || board_is_beaglelogic())
 		freq = MPUPLL_M_1000;
 
 	switch (freq) {
@@ -496,7 +499,11 @@ void scale_vcores(void)
 void set_uart_mux_conf(void)
 {
 #if CONFIG_CONS_INDEX == 1
-	enable_uart0_pin_mux();
+	if (board_is_beaglelogic())
+		enable_uart4_pin_mux();
+	else
+		enable_uart0_pin_mux();
+
 #elif CONFIG_CONS_INDEX == 2
 	enable_uart1_pin_mux();
 #elif CONFIG_CONS_INDEX == 3
@@ -566,7 +573,7 @@ void sdram_init(void)
 	if (board_is_evm_sk())
 		config_ddr(303, &ioregs_evmsk, &ddr3_data,
 			   &ddr3_cmd_ctrl_data, &ddr3_emif_reg_data, 0);
-	else if (board_is_pb() || board_is_bone_lt())
+	else if (board_is_pb() || board_is_bone_lt() || board_is_beaglelogic())
 		config_ddr(400, &ioregs_bonelt,
 			   &ddr3_beagleblack_data,
 			   &ddr3_beagleblack_cmd_ctrl_data,
@@ -709,11 +716,60 @@ done:
 }
 #endif
 
+#if defined(CONFIG_SPL_AM33XX_ENABLE_RTC32K_OSC)
+void rtc32k_enable(void)
+{
+	struct davinci_rtc *rtc = (struct davinci_rtc *)RTC_BASE;
+
+	/*
+	 * Unlock the RTC's registers.  For more details please see the
+	 * RTC_SS section of the TRM.  In order to unlock we need to
+	 * write these specific values (keys) in this order.
+	 */
+	writel(RTC_KICK0R_WE, &rtc->kick0r);
+	writel(RTC_KICK1R_WE, &rtc->kick1r);
+
+	if (board_is_pb() || board_is_blue()) {
+		/* 6: EN_32KCLK */
+		/* 3: SEL_32KCLK_SRC 0: internal, 1: external */
+		writel((0 << 3) | (1 << 6), &rtc->osc);
+	} else {
+		/* Enable the RTC 32K OSC by setting bits 3 and 6. */
+		writel((1 << 3) | (1 << 6), &rtc->osc);
+	}
+}
+#endif
+
 /*
  * Basic board specific setup.  Pinmux has been handled already.
  */
 int board_init(void)
 {
+	u32 sys_reboot, sys_rtc_osc;
+
+	sys_reboot = readl(PRM_RSTST);
+	if (sys_reboot & (1 << 9))
+		puts("Reset Source: IcePick reset has occurred.\n");
+
+	if (sys_reboot & (1 << 5))
+		puts("Reset Source: Global external warm reset has occurred.\n");
+
+	if (sys_reboot & (1 << 4))
+		puts("Reset Source: watchdog reset has occurred.\n");
+
+	if (sys_reboot & (1 << 1))
+		puts("Reset Source: Global warm SW reset has occurred.\n");
+
+	if (sys_reboot & (1 << 0))
+		puts("Reset Source: Power-on reset has occurred.\n");
+
+	sys_rtc_osc = readl(RTC_OSC);
+	if (sys_rtc_osc & (1 << 3)) {
+		puts("RTC 32KCLK Source: External.\n");
+	} else {
+		puts("RTC 32KCLK Source: Internal.\n");
+	}
+
 #if defined(CONFIG_HW_WATCHDOG)
 	hw_watchdog_init();
 #endif
@@ -811,6 +867,8 @@ int board_late_init(void)
 	char *name = NULL;
 
 	if (board_is_bone_lt()) {
+		puts("Board: BeagleBone Black\n");
+		name = "A335BNLT";
 		/* BeagleBoard.org BeagleBone Black Wireless: */
 		if (!strncmp(board_ti_get_rev(), "BWA", 3)) {
 			name = "BBBW";
@@ -819,16 +877,49 @@ int board_late_init(void)
 		if (!strncmp(board_ti_get_rev(), "GW1", 3)) {
 			name = "BBGW";
 		}
+		/* SeeedStudio BeagleBone Green Gateway */
+		if (!strncmp(board_ti_get_rev(), "GG1", 3)) {
+			name = "BBGG";
+		}
 		/* BeagleBoard.org BeagleBone Blue */
 		if (!strncmp(board_ti_get_rev(), "BLA", 3)) {
 			name = "BBBL";
 		}
+		/* Octavo Systems OSD3358-SM-RED */
+		if (!strncmp(board_ti_get_rev(), "OS00", 4)) {
+			puts("Model: Octavo Systems OSD3358-SM-RED\n");
+			name = "OS00";
+		}
+		/* Octavo Systems OSD3358-SM-RED 01*/
+		if (!strncmp(board_ti_get_rev(), "OS01", 4)) {
+			puts("Model: Octavo Systems OSD3358-SM-RED 01\n");
+			name = "OS01";
+		}
 	}
 
-	if (board_is_bbg1())
+	if (board_is_bbg1()) {
 		name = "BBG1";
-	if (board_is_bben())
-		name = "BBEN";
+	}
+
+	if (board_is_bben()) {
+		char subtype_id = board_ti_get_config()[1];
+		if (subtype_id == 'L') {
+			puts("Model: Sancloud BeagleBone Enhanced Lite (BBE Lite)\n");
+			name = "BBELITE";
+		} else {
+			puts("Model: SanCloud BeagleBone Enhanced\n");
+			name = "BBEN";
+		}
+	}
+
+	if (board_is_pb()) {
+		puts("Model: BeagleBoard.org PocketBeagle\n");
+	}
+
+	if (board_is_beaglelogic()) {
+		puts("Model: BeagleLogic\n");
+	}
+
 	set_board_info_env(name);
 
 	/*
