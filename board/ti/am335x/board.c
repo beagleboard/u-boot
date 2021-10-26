@@ -87,10 +87,13 @@ void do_board_detect(void)
 }
 #endif
 
+#define CAPE_EEPROM_BUS_NUM 2
 #define CAPE_EEPROM_ADDR0	0x54
 #define CAPE_EEPROM_ADDR1	0x55
 #define CAPE_EEPROM_ADDR2	0x56
 #define CAPE_EEPROM_ADDR3	0x57
+
+#define CAPE_EEPROM_ADDR_LEN 0x10
 
 #define NOT_POP		0x0
 #define PINS_TAKEN	0x0
@@ -101,6 +104,7 @@ void do_board_detect(void)
 #define BBGW_BASE_DTB	0x3
 #define BBBL_BASE_DTB	0x4
 #define BBE_BASE_DTB	0x5
+#define BBEL_BASE_DTB	0x6
 
 #define BBB_EMMC	0x1
 
@@ -115,8 +119,8 @@ void do_board_detect(void)
 
 #define M_BBG1	0x01
 #define M_OS00	0x02
-#define M_BBGG	0x03
-#define M_OS01	0x04
+#define M_OS01	0x03
+#define M_BBGG	0x04
 
 static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 {
@@ -195,9 +199,16 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 			puts("Model: BeagleBone Black Industrial:\n");
 		}
 		if (!strncmp(board_ti_get_rev(), "SE", 2)) {
-			puts("Model: SanCloud BeagleBone Enhanced:\n");
-			base_dtb=BBE_BASE_DTB;
-			name = "BBEN";
+			char subtype_id = board_ti_get_config()[1];
+			if (subtype_id == 'L') {
+				name = "BBELITE";
+				base_dtb=BBEL_BASE_DTB;
+				virtual_video=NOT_POP;
+				virtual_audio=NOT_POP;
+			} else {
+				name = "BBEN";
+				base_dtb=BBE_BASE_DTB;
+			}
 		}
 		if (!strncmp(board_ti_get_rev(), "ME0", 3)) {
 			puts("Model: MENTOREL BeagleBone uSomIQ:\n");
@@ -452,6 +463,10 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 			env_set("uboot_base_dtb_univ", "am335x-sancloud-bbe-uboot-univ.dtb");
 			env_set("uboot_base_dtb", "am335x-sancloud-bbe-uboot.dtb");
 			break;
+		case BBEL_BASE_DTB:
+			env_set("uboot_base_dtb_univ", "am335x-sancloud-bbe-lite-uboot-univ.dtb");
+			env_set("uboot_base_dtb", "am335x-sancloud-bbe-lite-uboot.dtb");
+			break;
 		case BBBL_BASE_DTB:
 			env_set("uboot_base_dtb_univ", "am335x-boneblue.dtb");
 			break;
@@ -509,11 +524,11 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 		case M_OS00:
 			env_set("uboot_model", "M-BB-OSD3358-SM-RED-00A0.dtbo");
 			break;
-		case M_BBGG:
-			env_set("uboot_model", "M-BB-BBGG-00A0.dtbo");
-			break;
 		case M_OS01:
 			env_set("uboot_model", "M-BB-OSD3358-SM-RED-00A1.dtbo");
+			break;
+		case M_BBGG:
+			env_set("uboot_model", "M-BB-BBGG-00A0.dtbo");
 			break;
 	}
 
@@ -1330,22 +1345,25 @@ int board_late_init(void)
 			puts("Model: Octavo Systems OSD3358-SM-RED\n");
 			name = "OS00";
 		}
+		/* Octavo Systems OSD3358-SM-RED 01*/
+		if (!strncmp(board_ti_get_rev(), "OS01", 4)) {
+			puts("Model: Octavo Systems OSD3358-SM-RED 01\n");
+			name = "OS01";
+		}
 	}
 
-	if (board_is_bbg1())
+	if (board_is_bbg1()) {
 		name = "BBG1";
+	}
 
 	if (board_is_bben()) {
-		puts("Model: SanCloud BeagleBone Enhanced\n");
-		if (board_is_bben()) {
-			char subtype_id = board_ti_get_config()[1];
-			if (subtype_id == 'L') {
-				puts("Model: Sancloud BeagleBone Enhanced Lite (BBE Lite)\n");
-				name = "BBELITE";
-			} else {
-				puts("Model: SanCloud BeagleBone Enhanced\n");
-				name = "BBEN";
-			}
+		char subtype_id = board_ti_get_config()[1];
+		if (subtype_id == 'L') {
+			puts("Model: Sancloud BeagleBone Enhanced Lite (BBE Lite)\n");
+			name = "BBELITE";
+		} else {
+			puts("Model: SanCloud BeagleBone Enhanced\n");
+			name = "BBEN";
 		}
 	}
 

@@ -125,9 +125,9 @@ static struct module_pin_mux i2c1_pin_mux[] = {
 
 static struct module_pin_mux i2c2_pin_mux[] = {
 	{OFFSET(uart1_ctsn), (MODE(3) | RXACTIVE |
-			PULLUP_EN | PULLUDEN | SLEWCTRL)},	/* I2C_DATA */
+			PULLUDEN | PULLUP_EN | SLEWCTRL)},	/* I2C_DATA */
 	{OFFSET(uart1_rtsn), (MODE(3) | RXACTIVE |
-			PULLUP_EN | PULLUDEN | SLEWCTRL)},	/* I2C_SCLK */
+			PULLUDEN | PULLUP_EN | SLEWCTRL)},	/* I2C_SCLK */
 	{-1},
 };
 
