@@ -54,6 +54,8 @@
 #define CONFIG_SYS_SPL_MALLOC_SIZE     SZ_16M
 #endif
 
+#define CONFIG_SYS_BOOTM_LEN            SZ_64M
+
 #define PARTS_DEFAULT \
 	/* Linux partitions */ \
 	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0"
@@ -142,6 +144,7 @@
 /* Incorporate settings into the U-Boot environment */
 #define CONFIG_EXTRA_ENV_SETTINGS					\
 	DEFAULT_LINUX_BOOT_ENV						\
+	DEFAULT_FIT_TI_ARGS						\
 	DEFAULT_MMC_TI_ARGS						\
 	EXTRA_ENV_AM642_BOARD_SETTINGS					\
 	EXTRA_ENV_AM642_BOARD_SETTINGS_MMC				\
