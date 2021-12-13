@@ -109,6 +109,7 @@ void do_board_detect(void)
 #define BBBL_BASE_DTB	0x4
 #define BBE_BASE_DTB	0x5
 #define BBEL_BASE_DTB	0x6
+#define BBE_EX_WIFI_BASE_DTB	0x7
 
 #define BBB_EMMC	0x1
 
@@ -206,14 +207,22 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 		}
 		if (!strncmp(board_ti_get_rev(), "SE", 2)) {
 			char subtype_id = board_ti_get_config()[1];
-			if (subtype_id == 'L') {
-				name = "BBELITE";
-				base_dtb=BBEL_BASE_DTB;
-				virtual_video=NOT_POP;
-				virtual_audio=NOT_POP;
-			} else {
-				name = "BBEN";
-				base_dtb=BBE_BASE_DTB;
+			switch (subtype_id) {
+				case 'L':
+					name = "BBELITE";
+					base_dtb=BBEL_BASE_DTB;
+					virtual_video=NOT_POP;
+					virtual_audio=NOT_POP;
+					break;
+				case 'I':
+					name = "BBE_EX_WIFI";
+					base_dtb=BBE_EX_WIFI_BASE_DTB;
+					virtual_video=NOT_POP;
+					virtual_audio=NOT_POP;
+					break;
+				default:
+					name = "BBEN";
+					base_dtb=BBE_BASE_DTB;
 			}
 		}
 		if (!strncmp(board_ti_get_rev(), "ME0", 3)) {
@@ -475,6 +484,10 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 		case BBEL_BASE_DTB:
 			env_set("uboot_base_dtb_univ", "am335x-sancloud-bbe-lite-uboot-univ.dtb");
 			env_set("uboot_base_dtb", "am335x-sancloud-bbe-lite-uboot.dtb");
+			break;
+		case BBE_EX_WIFI_BASE_DTB:
+			env_set("uboot_base_dtb_univ", "am335x-sancloud-bbe-extended-wifi-uboot-univ.dtb");
+			env_set("uboot_base_dtb", "am335x-sancloud-bbe-extended-wifi-uboot.dtb");
 			break;
 		case BBBL_BASE_DTB:
 			env_set("uboot_base_dtb_univ", "am335x-boneblue.dtb");
@@ -1363,12 +1376,15 @@ int board_late_init(void)
 
 	if (board_is_bben()) {
 		char subtype_id = board_ti_get_config()[1];
-		if (subtype_id == 'L') {
-			puts("Model: Sancloud BeagleBone Enhanced Lite (BBE Lite)\n");
-			name = "BBELITE";
-		} else {
-			puts("Model: SanCloud BeagleBone Enhanced\n");
-			name = "BBEN";
+		switch (subtype_id) {
+			case 'L':
+				name = "BBELITE";
+				break;
+			case 'I':
+				name = "BBE_EX_WIFI";
+				break;
+			default:
+				name = "BBEN";
 		}
 	}
 

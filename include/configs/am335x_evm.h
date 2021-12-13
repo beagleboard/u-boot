@@ -202,6 +202,8 @@
 			"setenv fdtfile am335x-sancloud-bbe.dtb; fi; " \
 		"if test $board_name = BBELITE; then " \
 			"setenv fdtfile am335x-sancloud-bbe-lite.dtb; fi; " \
+		"if test $board_name = BBE_EX_WIFI; then " \
+			"setenv fdtfile am335x-sancloud-bbe-extended-wifi.dtb; fi; " \
 		"if test $board_name = OS00; then " \
 			"setenv fdtfile am335x-osd3358-sm-red.dtb; fi; " \
 		"if test $board_name = OS01; then " \
