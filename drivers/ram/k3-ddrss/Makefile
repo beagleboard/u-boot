@@ -16,3 +16,7 @@ ccflags-$(CONFIG_K3_AM64_DDRSS) += -Idrivers/ram/k3-ddrss/16bit/
 obj-$(CONFIG_K3_J721E_DDRSS) += lpddr4_32bit.o
 obj-$(CONFIG_K3_J721E_DDRSS) += lpddr4_32bit_ctl_regs_rw_masks.o
 ccflags-$(CONFIG_K3_J721E_DDRSS) += -Idrivers/ram/k3-ddrss/32bit/
+
+obj-$(CONFIG_K3_J721S2_DDRSS) += lpddr4_32bit.o
+obj-$(CONFIG_K3_J721S2_DDRSS) += lpddr4_32bit_ctl_regs_rw_masks.o
+ccflags-$(CONFIG_K3_J721S2_DDRSS) += -Idrivers/ram/k3-ddrss/32bit/
