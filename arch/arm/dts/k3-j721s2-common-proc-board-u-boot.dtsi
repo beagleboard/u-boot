@@ -137,6 +137,15 @@
 	};
 };
 
+&wiz0_pll1_refclk {
+	assigned-clocks = <&wiz0_pll1_refclk>, <&wiz0_pll0_refclk>;
+	assigned-clock-parents = <&k3_clks 365 3>, <&k3_clks 365 0>;
+};
+
+&serdes_ln_ctrl {
+	u-boot,mux-autoprobe;
+};
+
 &main_sdhci0 {
 	u-boot,dm-spl;
 };
