@@ -41,6 +41,8 @@
 		can2 = &mcu_mcan1;
 		can3 = &main_mcan3;
 		can4 = &main_mcan5;
+		spi0 = &ospi0;
+		spi1 = &ospi1;
 	};
 
 	chosen { };
