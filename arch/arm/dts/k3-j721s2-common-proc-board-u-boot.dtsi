@@ -128,6 +128,10 @@
 	u-boot,dm-spl;
 };
 
+&fss {
+	u-boot,dm-spl;
+};
+
 &usbss0 {
 	u-boot,dm-spl;
 };
@@ -150,6 +154,10 @@
 	};
 };
 
+&mcu_fss0_ospi0_pins_default {
+	u-boot,dm-spl;
+};
+
 &wiz0_pll1_refclk {
 	assigned-clocks = <&wiz0_pll1_refclk>, <&wiz0_pll0_refclk>;
 	assigned-clock-parents = <&k3_clks 365 3>, <&k3_clks 365 0>;
@@ -161,6 +169,20 @@
 
 &usb_serdes_mux {
 	u-boot,mux-autoprobe;
+};
+
+&ospi0 {
+	u-boot,dm-spl;
+
+	flash@0 {
+		u-boot,dm-spl;
+
+		partition@3fc0000 {
+			label = "ospi.phypattern";
+			reg = <0x3fc0000 0x40000>;
+			u-boot,dm-spl;
+		};
+	};
 };
 
 &main_sdhci0 {
