@@ -1,0 +1,7 @@
+J721S2 BOARD
+M:	Aswath Govindraju <a-govindraju@ti.com>
+S:	Maintained
+F:	board/ti/j721s2
+F:	include/configs/j721s2_evm.h
+F:	configs/j721s2_evm_r5_defconfig
+F:	configs/j721s2_evm_a72_defconfig
