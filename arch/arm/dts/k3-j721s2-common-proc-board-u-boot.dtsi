@@ -96,6 +96,10 @@
 	u-boot,dm-spl;
 };
 
+&main_usbss0_pins_default {
+	u-boot,dm-spl;
+};
+
 &wkup_pmx0 {
 	u-boot,dm-spl;
 };
@@ -124,6 +128,15 @@
 	u-boot,dm-spl;
 };
 
+&usbss0 {
+	u-boot,dm-spl;
+};
+
+&usb0 {
+	dr_mode = "peripheral";
+	u-boot,dm-spl;
+};
+
 &mcu_cpsw {
 	reg = <0x0 0x46000000 0x0 0x200000>,
 	      <0x0 0x40f00200 0x0 0x8>;
@@ -143,6 +156,10 @@
 };
 
 &serdes_ln_ctrl {
+	u-boot,mux-autoprobe;
+};
+
+&usb_serdes_mux {
 	u-boot,mux-autoprobe;
 };
 
