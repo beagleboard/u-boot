@@ -282,6 +282,13 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 		if (fit_image_get_data_size(fit, node, &len))
 			return -ENOENT;
 
+		/* Dont bother to copy 0 byte data, but warn, though */
+		if (!len) {
+			log_warning("%s: Skip load '%s': image size is 0!\n",
+				    __func__, fit_get_name(fit, node, NULL));
+			return 0;
+			}
+
 		load_ptr = (load_addr + align_len) & ~align_len;
 		length = len;
 
