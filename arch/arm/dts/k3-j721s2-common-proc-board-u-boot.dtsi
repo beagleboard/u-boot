@@ -5,16 +5,21 @@
 
 / {
 	chosen {
-		stdout-path = "serial10:115200n8";
+		stdout-path = "serial2:115200n8";
 		tick-timer = &timer1;
 	};
 
 	aliases {
+		serial0 = &wkup_uart0;
+		serial1 = &mcu_uart0;
+		serial2 = &main_uart8;
 		i2c0 = &wkup_i2c0;
 		i2c1 = &mcu_i2c0;
 		i2c2 = &mcu_i2c1;
 		i2c3 = &main_i2c0;
 		ethernet0 = &cpsw_port1;
+		spi0 = &ospi0;
+		spi1 = &ospi1;
 	};
 };
 
