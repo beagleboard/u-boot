@@ -9,7 +9,9 @@ sys=$(uname -m)
 DIR="$PWD"
 
 if [ "x${sys}" = "xaarch64" ] ; then
-	echo "to make changes: [touch load.menuconfig]"
+	if [ ! -f ./load.menuconfig ] ; then
+		echo "Developers: too make changes: [touch load.menuconfig]"
+	fi
 fi
 
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean
@@ -20,6 +22,7 @@ if [ "x${sys}" = "xaarch64" ] ; then
 		make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig
 		make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- savedefconfig
 		cp -v defconfig ./configs/j721e_evm_r5_defconfig
+		make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean
 	fi
 
 	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- j721e_evm_r5_defconfig O=../r5
@@ -46,6 +49,7 @@ if [ "x${sys}" = "xaarch64" ] ; then
 		make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- menuconfig
 		make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- savedefconfig
 		cp -v defconfig ./configs/j721e_evm_a72_defconfig
+		make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- distclean
 	fi
 
 	make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- j721e_evm_a72_defconfig O=../a72
