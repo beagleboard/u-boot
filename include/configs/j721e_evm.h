@@ -76,14 +76,165 @@
 #define EXTRA_ENV_J721E_BOARD_SETTINGS					\
 	"default_device_tree=" CONFIG_DEFAULT_DEVICE_TREE ".dtb\0"	\
 	"findfdt="							\
+		"echo board_name=[$board_name] ...;"			\
 		"setenv name_fdt ${default_device_tree};"		\
 		"if test $board_name = J721EX-PM1-SOM; then "		\
-			"setenv name_fdt k3-j721e-proc-board-tps65917.dtb; fi;" \
-		"if test $board_name = j721e; then "			\
-			"setenv name_fdt k3-j721e-common-proc-board.dtb; fi;" \
-		"if test $board_name = j721e-eaik || test $board_name = j721e-sk; then " \
-			"setenv name_fdt k3-j721e-sk.dtb; fi;"	\
+			"setenv name_fdt k3-j721e-proc-board-tps65917.dtb; " \
+		"elif test $board_name = J721EX-PM2-SOM; then "		\
+			"setenv name_fdt k3-j721e-beagleboneai64.dtb; " \
+		"elif test $board_name = BBONEAI-64-B0-; then "		\
+			"setenv name_fdt k3-j721e-beagleboneai64.dtb; " \
+		"elif test $board_name = j721e; then "			\
+			"setenv name_fdt k3-j721e-common-proc-board.dtb; " \
+		"elif test $board_name = j721e-eaik || test $board_name = j721e-sk; then " \
+			"setenv name_fdt k3-j721e-sk.dtb; "		\
+		"else " \
+			"setenv name_fdt k3-j721e-beagleboneai64.dtb; "	\
+		"fi; " \
+		"echo name_fdt=[${name_fdt}] ...;"			\
 		"setenv fdtfile ${name_fdt}\0"				\
+	"eeprom_dump=i2c dev 0; "					\
+		"i2c md 0x51 0x00.1 40; "				\
+		"\0"							\
+	"eeprom_production_bbai=i2c dev 0; "				\
+		"i2c md 0x51 0x00.1 40; "				\
+		"i2c mw 0x51 0x00.1 aa; "				\
+		"i2c mw 0x51 0x01.1 55; "				\
+		"i2c mw 0x51 0x02.1 33; "				\
+		"i2c mw 0x51 0x03.1 ee; "				\
+		"i2c mw 0x51 0x04.1 01; "				\
+		"i2c mw 0x51 0x05.1 37; "				\
+		"i2c mw 0x51 0x06.1 00; "				\
+		"i2c mw 0x51 0x07.1 10; "				\
+		"i2c mw 0x51 0x08.1 2e; "				\
+		"i2c mw 0x51 0x09.1 00; "				\
+		"i2c mw 0x51 0x0a.1 42; "				\
+		"i2c mw 0x51 0x0b.1 42; "				\
+		"i2c mw 0x51 0x0c.1 4f; "				\
+		"i2c mw 0x51 0x0d.1 4e; "				\
+		"i2c mw 0x51 0x0e.1 45; "				\
+		"i2c mw 0x51 0x0f.1 41; "				\
+		"i2c mw 0x51 0x10.1 49; "				\
+		"i2c mw 0x51 0x11.1 2d; "				\
+		"i2c mw 0x51 0x12.1 36; "				\
+		"i2c mw 0x51 0x13.1 34; "				\
+		"i2c mw 0x51 0x14.1 2d; "				\
+		"i2c mw 0x51 0x15.1 42; "				\
+		"i2c mw 0x51 0x16.1 30; "				\
+		"i2c mw 0x51 0x17.1 2d; "				\
+		"i2c mw 0x51 0x18.1 00; "				\
+		"i2c mw 0x51 0x19.1 00; "				\
+		"i2c mw 0x51 0x1a.1 42; "				\
+		"i2c mw 0x51 0x1b.1 30; "				\
+		"i2c mw 0x51 0x1c.1 30; "				\
+		"i2c mw 0x51 0x1d.1 30; "				\
+		"i2c mw 0x51 0x1e.1 37; "				\
+		"i2c mw 0x51 0x1f.1 38; "				\
+		"i2c mw 0x51 0x20.1 30; "				\
+		"i2c mw 0x51 0x21.1 31; "				\
+		"i2c mw 0x51 0x22.1 42; "				\
+		"i2c mw 0x51 0x23.1 30; "				\
+		"i2c mw 0x51 0x24.1 30; "				\
+		"i2c mw 0x51 0x25.1 30; "				\
+		"i2c mw 0x51 0x26.1 30; "				\
+		"i2c mw 0x51 0x27.1 31; "				\
+		"i2c mw 0x51 0x28.1 36; "				\
+		"i2c mw 0x51 0x29.1 34; "				\
+		"i2c mw 0x51 0x2a.1 57; "				\
+		"i2c mw 0x51 0x2b.1 57; "				\
+		"i2c mw 0x51 0x2c.1 32; "				\
+		"i2c mw 0x51 0x2d.1 32; "				\
+		"i2c mw 0x51 0x2e.1 42; "				\
+		"i2c mw 0x51 0x2f.1 42; "				\
+		"i2c mw 0x51 0x30.1 42; "				\
+		"i2c mw 0x51 0x31.1 42; "				\
+		"i2c mw 0x51 0x32.1 42; "				\
+		"i2c mw 0x51 0x33.1 42; "				\
+		"i2c mw 0x51 0x34.1 53; "				\
+		"i2c mw 0x51 0x35.1 53; "				\
+		"i2c mw 0x51 0x36.1 53; "				\
+		"i2c mw 0x51 0x37.1 53; "				\
+		"i2c mw 0x51 0x38.1 11; "				\
+		"i2c mw 0x51 0x39.1 02; "				\
+		"i2c mw 0x51 0x3a.1 00; "				\
+		"i2c mw 0x51 0x3b.1 60; "				\
+		"i2c mw 0x51 0x3c.1 7d; "				\
+		"i2c mw 0x51 0x3d.1 fe; "				\
+		"i2c mw 0x51 0x3e.1 ff; "				\
+		"i2c mw 0x51 0x3f.1 ff; "				\
+		"i2c md 0x51 0x00.1 40; "				\
+		"\0"							\
+	"eeprom_bbai_erase=i2c dev 0; "				\
+		"i2c md 0x51 0x00.1 40; "				\
+		"i2c mw 0x51 0x00.1 ff; "				\
+		"i2c mw 0x51 0x01.1 ff; "				\
+		"i2c mw 0x51 0x02.1 ff; "				\
+		"i2c mw 0x51 0x03.1 ff; "				\
+		"i2c mw 0x51 0x04.1 ff; "				\
+		"i2c mw 0x51 0x05.1 ff; "				\
+		"i2c mw 0x51 0x06.1 ff; "				\
+		"i2c mw 0x51 0x07.1 ff; "				\
+		"i2c mw 0x51 0x08.1 ff; "				\
+		"i2c mw 0x51 0x09.1 ff; "				\
+		"i2c mw 0x51 0x0a.1 ff; "				\
+		"i2c mw 0x51 0x0b.1 ff; "				\
+		"i2c mw 0x51 0x0c.1 ff; "				\
+		"i2c mw 0x51 0x0d.1 ff; "				\
+		"i2c mw 0x51 0x0e.1 ff; "				\
+		"i2c mw 0x51 0x0f.1 ff; "				\
+		"i2c mw 0x51 0x10.1 ff; "				\
+		"i2c mw 0x51 0x11.1 ff; "				\
+		"i2c mw 0x51 0x12.1 ff; "				\
+		"i2c mw 0x51 0x13.1 ff; "				\
+		"i2c mw 0x51 0x14.1 ff; "				\
+		"i2c mw 0x51 0x15.1 ff; "				\
+		"i2c mw 0x51 0x16.1 ff; "				\
+		"i2c mw 0x51 0x17.1 ff; "				\
+		"i2c mw 0x51 0x18.1 ff; "				\
+		"i2c mw 0x51 0x19.1 ff; "				\
+		"i2c mw 0x51 0x1a.1 ff; "				\
+		"i2c mw 0x51 0x1b.1 ff; "				\
+		"i2c mw 0x51 0x1c.1 ff; "				\
+		"i2c mw 0x51 0x1d.1 ff; "				\
+		"i2c mw 0x51 0x1e.1 ff; "				\
+		"i2c mw 0x51 0x1f.1 ff; "				\
+		"i2c mw 0x51 0x20.1 ff; "				\
+		"i2c mw 0x51 0x21.1 ff; "				\
+		"i2c mw 0x51 0x22.1 ff; "				\
+		"i2c mw 0x51 0x23.1 ff; "				\
+		"i2c mw 0x51 0x24.1 ff; "				\
+		"i2c mw 0x51 0x25.1 ff; "				\
+		"i2c mw 0x51 0x26.1 ff; "				\
+		"i2c mw 0x51 0x27.1 ff; "				\
+		"i2c mw 0x51 0x28.1 ff; "				\
+		"i2c mw 0x51 0x29.1 ff; "				\
+		"i2c mw 0x51 0x2a.1 ff; "				\
+		"i2c mw 0x51 0x2b.1 ff; "				\
+		"i2c mw 0x51 0x2c.1 ff; "				\
+		"i2c mw 0x51 0x2d.1 ff; "				\
+		"i2c mw 0x51 0x2e.1 ff; "				\
+		"i2c mw 0x51 0x2f.1 ff; "				\
+		"i2c mw 0x51 0x30.1 ff; "				\
+		"i2c mw 0x51 0x31.1 ff; "				\
+		"i2c mw 0x51 0x32.1 ff; "				\
+		"i2c mw 0x51 0x33.1 ff; "				\
+		"i2c mw 0x51 0x34.1 ff; "				\
+		"i2c mw 0x51 0x35.1 ff; "				\
+		"i2c mw 0x51 0x36.1 ff; "				\
+		"i2c mw 0x51 0x37.1 ff; "				\
+		"i2c mw 0x51 0x38.1 ff; "				\
+		"i2c mw 0x51 0x39.1 ff; "				\
+		"i2c mw 0x51 0x3a.1 ff; "				\
+		"i2c mw 0x51 0x3b.1 ff; "				\
+		"i2c mw 0x51 0x3c.1 ff; "				\
+		"i2c mw 0x51 0x3d.1 ff; "				\
+		"i2c mw 0x51 0x3e.1 ff; "				\
+		"i2c mw 0x51 0x3f.1 ff; "				\
+		"i2c md 0x51 0x00.1 40; "				\
+		"\0"							\
+	"emmc_erase_boot0=mmc dev 0 1; "				\
+		"mmc erase 0 0x2400; "					\
+		"\0"							\
 	"name_kern=Image\0"						\
 	"console=ttyS2,115200n8\0"					\
 	"args_all=setenv optargs earlycon=ns16550a,mmio32,0x02800000 "	\
@@ -193,6 +344,26 @@
 #define EXTRA_ENV_J721E_BOARD_SETTINGS_MTD
 #endif
 
+#if CONFIG_IS_ENABLED(CMD_PXE)
+# define BOOT_TARGET_PXE(func) func(PXE, pxe, na)
+#else
+# define BOOT_TARGET_PXE(func)
+#endif
+
+#if CONFIG_IS_ENABLED(CMD_DHCP)
+# define BOOT_TARGET_DHCP(func) func(DHCP, dhcp, na)
+#else
+# define BOOT_TARGET_DHCP(func)
+#endif
+
+#define BOOT_TARGET_DEVICES(func) \
+	func(MMC, mmc, 1) \
+	func(MMC, mmc, 0) \
+	BOOT_TARGET_PXE(func) \
+	BOOT_TARGET_DHCP(func)
+
+#include <config_distro_bootcmd.h>
+
 /* Incorporate settings into the U-Boot environment */
 #define CONFIG_EXTRA_ENV_SETTINGS					\
 	DEFAULT_LINUX_BOOT_ENV						\
@@ -204,7 +375,8 @@
 	EXTRA_ENV_DFUARGS						\
 	DEFAULT_UFS_TI_ARGS						\
 	EXTRA_ENV_J721E_BOARD_SETTINGS_MTD				\
-	EXTRA_ENV_CONFIG_MAIN_CPSW0_QSGMII_PHY
+	EXTRA_ENV_CONFIG_MAIN_CPSW0_QSGMII_PHY				\
+	BOOTENV
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>

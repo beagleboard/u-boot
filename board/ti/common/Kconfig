@@ -16,6 +16,12 @@ config EEPROM_CHIP_ADDRESS
 	default 0x50
 	depends on TI_I2C_BOARD_DETECT
 
+config EEPROM_OFFSET_LEN
+	hex "Board EEPROM's offset len"
+	range 1 4
+	default 2
+	depends on TI_I2C_BOARD_DETECT
+
 config TI_COMMON_CMD_OPTIONS
 	bool "Enable cmd options on TI platforms"
 	imply CMD_ASKENV
