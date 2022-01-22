@@ -7,6 +7,7 @@
 
 / {
 	chosen {
+		firmware-loader = &fs_loader0;
 		stdout-path = "serial2:115200n8";
 		tick-timer = &timer1;
 	};
@@ -22,6 +23,11 @@
 		remoteproc6 = &c66_0;
 		remoteproc7 = &c66_1;
 		remoteproc8 = &c71_0;
+	};
+
+	fs_loader0: fs_loader@0 {
+		u-boot,dm-pre-reloc;
+		compatible = "u-boot,fs-loader";
 	};
 };
 
