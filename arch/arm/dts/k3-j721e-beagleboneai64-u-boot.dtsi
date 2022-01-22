@@ -13,16 +13,10 @@
 	};
 
 	aliases {
-		ethernet0 = &cpsw_port1;
-		remoteproc0 = &mcu_r5fss0_core0;
-		remoteproc1 = &mcu_r5fss0_core1;
+		remoteproc0 = &sysctrler;
+		remoteproc1 = &a72_0;
 		remoteproc2 = &main_r5fss0_core0;
 		remoteproc3 = &main_r5fss0_core1;
-		remoteproc4 = &main_r5fss1_core0;
-		remoteproc5 = &main_r5fss1_core1;
-		remoteproc6 = &c66_0;
-		remoteproc7 = &c66_1;
-		remoteproc8 = &c71_0;
 	};
 
 	fs_loader0: fs_loader@0 {
