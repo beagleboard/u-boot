@@ -34,6 +34,7 @@ else
 	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- j721e_evm_r5_defconfig
 	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig
 	make ARCH=arm -j4 CROSS_COMPILE=arm-linux-gnueabihf-
+exit 2
 
 	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- savedefconfig
 	cp -v defconfig ./configs/j721e_evm_r5_defconfig

@@ -150,6 +150,7 @@
 			alignment = <0x1000>;
 			no-map;
 		};
+	};
 
 	a72_0: a72@0 {
 		compatible = "ti,am654-rproc";
