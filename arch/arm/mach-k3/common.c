@@ -6,6 +6,10 @@
  *	Lokesh Vutla <lokeshvutla@ti.com>
  */
 
+#define DEBUG
+#undef CONFIG_LOGLEVEL
+#define CONFIG_LOGLEVEL 8
+
 #include <common.h>
 #include <cpu_func.h>
 #include <image.h>
