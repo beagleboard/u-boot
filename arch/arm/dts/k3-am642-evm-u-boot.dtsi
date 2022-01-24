@@ -8,10 +8,6 @@
 		stdout-path = "serial2:115200n8";
 		tick-timer = &timer1;
 	};
-
-	aliases {
-		ethernet0 = &cpsw3g;
-	};
 };
 
 &cbass_main{

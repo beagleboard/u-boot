@@ -10,7 +10,7 @@
 	};
 
 	aliases {
-		ethernet0 = &mcu_cpsw;
+		ethernet0 = &cpsw_port1;
 		i2c0 = &wkup_i2c0;
 		i2c1 = &mcu_i2c0;
 		i2c2 = &mcu_i2c1;
