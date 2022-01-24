@@ -5,6 +5,11 @@
  *
  * Aneesh V <aneesh@ti.com>
  */
+
+#define DEBUG
+#undef CONFIG_LOGLEVEL
+#define CONFIG_LOGLEVEL 8
+
 #include <common.h>
 #include <dm.h>
 #include <log.h>
