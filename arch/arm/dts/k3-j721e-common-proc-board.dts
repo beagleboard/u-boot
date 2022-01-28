@@ -9,6 +9,7 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/net/ti-dp83867.h>
+#include <dt-bindings/phy/phy-cadence.h>
 
 / {
 	chosen {
@@ -635,7 +636,20 @@
 	status = "disabled";
 };
 
+&wiz0_pll1_refclk {
+	assigned-clocks = <&wiz0_pll1_refclk>;
+	assigned-clock-parents = <&dummy_cmn_refclk1>;
+};
+
+&wiz0_refclk_dig {
+	assigned-clocks = <&wiz0_refclk_dig>;
+	assigned-clock-parents = <&dummy_cmn_refclk1>;
+};
+
 &serdes0 {
+	assigned-clocks = <&serdes0 CDNS_SIERRA_PLL_CMNLC>;
+	assigned-clock-parents = <&wiz0_pll1_refclk>;
+
 	serdes0_pcie_link: link@0 {
 		reg = <0>;
 		cdns,num-lanes = <1>;

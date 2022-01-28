@@ -430,10 +430,13 @@
 			reg = <0x5000000 0x10000>;
 			#address-cells = <1>;
 			#size-cells = <0>;
+			#clock-cells = <1>;
 			resets = <&serdes_wiz0 0>;
 			reset-names = "sierra_reset";
-			clocks = <&wiz0_cmn_refclk_dig_div>, <&wiz0_cmn_refclk1_dig_div>;
-			clock-names = "cmn_refclk_dig_div", "cmn_refclk1_dig_div";
+			clocks = <&wiz0_cmn_refclk_dig_div>, <&wiz0_cmn_refclk1_dig_div>,
+				 <&wiz0_pll0_refclk>, <&wiz0_pll1_refclk>;
+			clock-names = "cmn_refclk_dig_div", "cmn_refclk1_dig_div",
+				       "pll0_refclk", "pll1_refclk";
 		};
 	};
 
