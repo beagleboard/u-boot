@@ -10,7 +10,7 @@ sys=$(uname -m)
 wdir="$PWD"
 
 if [ "x${sys}" = "xarmv7l" ] ; then
-	if [ -f ${wdir}/MLO ] && [ -f ${wdir}/u-boot-dtb.img ]
+	if [ -f ${wdir}/MLO ] && [ -f ${wdir}/u-boot-dtb.img ] ; then
 		if [ -b /dev/mmcblk0 ] ; then
 			echo "dd if=${wdir}/MLO of=/dev/mmcblk0 count=2 seek=1 bs=128k"
 			dd if=${wdir}/MLO of=/dev/mmcblk0 count=2 seek=1 bs=128k
