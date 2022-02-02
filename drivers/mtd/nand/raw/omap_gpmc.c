@@ -45,6 +45,7 @@ struct omap_nand_info {
 	enum omap_ecc ecc_scheme;
 	uint8_t cs;
 	uint8_t ws;		/* wait status pin (0,1) */
+	void __iomem *fifo;
 };
 
 /* We are wasting a bit of memory but al least we are safe */
@@ -340,6 +341,21 @@ static int omap_calculate_ecc(struct mtd_info *mtd, const uint8_t *dat,
 	return 0;
 }
 
+static inline void omap_nand_read_buf(struct mtd_info *mtd, uint8_t *buf,
+				      int len, bool force_8bit)
+{
+	struct nand_chip *chip = mtd_to_nand(mtd);
+	struct omap_nand_info *info = nand_get_controller_data(chip);
+	u32 alignment = ((uintptr_t)buf | len) & 3;
+
+	if (force_8bit || alignment & 1)
+		readsb(info->fifo, buf, len);
+	else if (alignment & 3)
+		readsw(info->fifo, buf, len >> 1);
+	else
+		readsl(info->fifo, buf, len >> 2);
+}
+
 #ifdef CONFIG_NAND_OMAP_GPMC_PREFETCH
 
 #define PREFETCH_CONFIG1_CS_SHIFT	24
@@ -405,7 +421,7 @@ static int __read_prefetch_aligned(struct nand_chip *chip, uint32_t *buf, int le
 		cnt = PREFETCH_STATUS_FIFO_CNT(cnt);
 
 		for (i = 0; i < cnt / 4; i++) {
-			*buf++ = readl(CONFIG_SYS_NAND_BASE);
+			*buf++ = readl(info->fifo);
 			len -= 4;
 		}
 	} while (len);
@@ -413,17 +429,6 @@ static int __read_prefetch_aligned(struct nand_chip *chip, uint32_t *buf, int le
 	omap_prefetch_reset();
 
 	return 0;
-}
-
-static inline void omap_nand_read(struct mtd_info *mtd, uint8_t *buf, int len,
-				  bool force_8bit)
-{
-	struct nand_chip *chip = mtd_to_nand(mtd);
-
-	if (chip->options & NAND_BUSWIDTH_16)
-		nand_read_buf16(mtd, buf, len, force_8bit);
-	else
-		nand_read_buf(mtd, buf, len, force_8bit);
 }
 
 static void omap_nand_read_prefetch(struct mtd_info *mtd, uint8_t *buf, int len,
@@ -434,7 +439,7 @@ static void omap_nand_read_prefetch(struct mtd_info *mtd, uint8_t *buf, int len,
 	struct nand_chip *chip = mtd_to_nand(mtd);
 
 	if (force_8bit) {
-		omap_nand_read(mtd, buf, len, true);
+		omap_nand_read_buf(mtd, buf, len, true);
 		return;
 	}
 
@@ -444,7 +449,7 @@ static void omap_nand_read_prefetch(struct mtd_info *mtd, uint8_t *buf, int len,
 	 */
 	head = ((uintptr_t)buf) % 4;
 	if (head) {
-		omap_nand_read(mtd, buf, head, false);
+		omap_nand_read_buf(mtd, buf, head, false);
 		buf += head;
 		len -= head;
 	}
@@ -458,10 +463,10 @@ static void omap_nand_read_prefetch(struct mtd_info *mtd, uint8_t *buf, int len,
 	ret = __read_prefetch_aligned(chip, (uint32_t *)buf, len - tail);
 	if (ret < 0) {
 		/* fallback in case the prefetch engine is busy */
-		omap_nand_read(mtd, buf, len, false);
+		omap_nand_read_buf(mtd, buf, len, false);
 	} else if (tail) {
 		buf += len - tail;
-		omap_nand_read(mtd, buf, tail, false);
+		omap_nand_read_buf(mtd, buf, tail, false);
 	}
 }
 #endif /* CONFIG_NAND_OMAP_GPMC_PREFETCH */
@@ -971,6 +976,8 @@ int board_nand_init(struct nand_chip *nand)
 	int32_t gpmc_config = 0;
 	int cs = cs_next++;
 	int err = 0;
+	struct omap_nand_info *info;
+
 	/*
 	 * xloader/Uboot's gpmc configuration would have configured GPMC for
 	 * nand type of memory. The following logic scans and latches on to the
@@ -999,9 +1006,12 @@ int board_nand_init(struct nand_chip *nand)
 
 	nand->IO_ADDR_R = (void __iomem *)&gpmc_cfg->cs[cs].nand_dat;
 	nand->IO_ADDR_W = (void __iomem *)&gpmc_cfg->cs[cs].nand_cmd;
-	omap_nand_info[cs].control = NULL;
-	omap_nand_info[cs].cs = cs;
-	omap_nand_info[cs].ws = wscfg[cs];
+
+	info = &omap_nand_info[cs];
+	info->control = NULL;
+	info->cs = cs;
+	info->ws = wscfg[cs];
+	info->fifo = (void __iomem *)CONFIG_SYS_NAND_BASE;
 	nand_set_controller_data(nand, &omap_nand_info[cs]);
 	nand->cmd_ctrl	= omap_nand_hwcontrol;
 	nand->options	|= NAND_NO_PADDING | NAND_CACHEPRG;
@@ -1032,10 +1042,7 @@ int board_nand_init(struct nand_chip *nand)
 #ifdef CONFIG_NAND_OMAP_GPMC_PREFETCH
 	nand->read_buf = omap_nand_read_prefetch;
 #else
-	if (nand->options & NAND_BUSWIDTH_16)
-		nand->read_buf = nand_read_buf16;
-	else
-		nand->read_buf = nand_read_buf;
+	nand->read_buf = omap_nand_read_buf;
 #endif
 
 	nand->dev_ready = omap_dev_ready;
