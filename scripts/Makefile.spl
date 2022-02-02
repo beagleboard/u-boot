@@ -93,6 +93,7 @@ endif
 endif
 
 libs-y += drivers/
+libs-y += drivers/memory/
 libs-$(CONFIG_SPL_USB_GADGET) += drivers/usb/dwc3/
 libs-$(CONFIG_SPL_USB_GADGET) += drivers/usb/cdns3/
 libs-y += dts/
