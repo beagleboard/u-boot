@@ -465,7 +465,8 @@ static void sunxi_nfc_select_chip(struct mtd_info *mtd, int chip)
 	sunxi_nand->selected = chip;
 }
 
-static void sunxi_nfc_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+static void sunxi_nfc_read_buf(struct mtd_info *mtd, uint8_t *buf, int len,
+			       bool force_8bit)
 {
 	struct nand_chip *nand = mtd_to_nand(mtd);
 	struct sunxi_nand_chip *sunxi_nand = to_sunxi_nand(nand);
@@ -533,7 +534,7 @@ static uint8_t sunxi_nfc_read_byte(struct mtd_info *mtd)
 {
 	uint8_t ret;
 
-	sunxi_nfc_read_buf(mtd, &ret, 1);
+	sunxi_nfc_read_buf(mtd, &ret, 1, false);
 
 	return ret;
 }
@@ -872,9 +873,9 @@ static int sunxi_nfc_hw_ecc_read_chunk(struct mtd_info *mtd,
 		 */
 		if (nand->options & NAND_NEED_SCRAMBLING) {
 			nand->cmdfunc(mtd, NAND_CMD_RNDOUT, data_off, -1);
-			nand->read_buf(mtd, data, ecc->size);
+			nand->read_buf(mtd, data, ecc->size, false);
 			nand->cmdfunc(mtd, NAND_CMD_RNDOUT, oob_off, -1);
-			nand->read_buf(mtd, oob, ecc->bytes + 4);
+			nand->read_buf(mtd, oob, ecc->bytes + 4, false);
 		}
 
 		ret = nand_check_erased_ecc_chunk(data,	ecc->size,

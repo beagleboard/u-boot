@@ -53,10 +53,16 @@
  * NOTE: This only works if the NAND is not connected to the 2 LSBs of
  * the address bus. On Davinci EVM platforms this has always been true.
  */
-static void nand_davinci_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+static void nand_davinci_read_buf(struct mtd_info *mtd, uint8_t *buf, int len,
+				  bool force_8bit)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	const u32 *nand = chip->IO_ADDR_R;
+
+	if (force_8bit) {
+		readsb(nand, buf, len);
+		return;
+	}
 
 	/* Make sure that buf is 32 bit aligned */
 	if (((int)buf & 0x3) != 0) {
@@ -442,7 +448,7 @@ static int nand_davinci_read_page_hwecc(struct mtd_info *mtd, struct nand_chip *
 
 	/* Read the OOB area first */
 	chip->cmdfunc(mtd, NAND_CMD_READOOB, 0, page);
-	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
+	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 	chip->cmdfunc(mtd, NAND_CMD_READ0, 0, page);
 
 	for (i = 0; i < chip->ecc.total; i++)
@@ -452,7 +458,7 @@ static int nand_davinci_read_page_hwecc(struct mtd_info *mtd, struct nand_chip *
 		int stat;
 
 		chip->ecc.hwctl(mtd, NAND_ECC_READ);
-		chip->read_buf(mtd, p, eccsize);
+		chip->read_buf(mtd, p, eccsize, false);
 		chip->ecc.calculate(mtd, p, &ecc_calc[i]);
 
 		stat = chip->ecc.correct(mtd, p, &ecc_code[i], NULL);

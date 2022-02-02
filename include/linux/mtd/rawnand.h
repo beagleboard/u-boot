@@ -902,7 +902,8 @@ struct nand_chip {
 	u16 (*read_word)(struct mtd_info *mtd);
 	void (*write_byte)(struct mtd_info *mtd, uint8_t byte);
 	void (*write_buf)(struct mtd_info *mtd, const uint8_t *buf, int len);
-	void (*read_buf)(struct mtd_info *mtd, uint8_t *buf, int len);
+	void (*read_buf)(struct mtd_info *mtd, uint8_t *buf, int len,
+			 bool force_8bit);
 	void (*select_chip)(struct mtd_info *mtd, int chip);
 	int (*block_bad)(struct mtd_info *mtd, loff_t ofs);
 	int (*block_markbad)(struct mtd_info *mtd, loff_t ofs);
@@ -1281,8 +1282,8 @@ static inline int jedec_feature(struct nand_chip *chip)
 /* Standard NAND functions from nand_base.c */
 void nand_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len);
 void nand_write_buf16(struct mtd_info *mtd, const uint8_t *buf, int len);
-void nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len);
-void nand_read_buf16(struct mtd_info *mtd, uint8_t *buf, int len);
+void nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len, bool force_8bit);
+void nand_read_buf16(struct mtd_info *mtd, uint8_t *buf, int len, bool force_8bit);
 uint8_t nand_read_byte(struct mtd_info *mtd);
 
 /* get timing characteristics from ONFI timing mode. */

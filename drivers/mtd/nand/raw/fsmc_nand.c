@@ -356,7 +356,7 @@ static int fsmc_read_page_hwecc(struct mtd_info *mtd, struct nand_chip *chip,
 
 		chip->cmdfunc(mtd, NAND_CMD_READ0, s * eccsize, page);
 		chip->ecc.hwctl(mtd, NAND_ECC_READ);
-		chip->read_buf(mtd, p, eccsize);
+		chip->read_buf(mtd, p, eccsize, false);
 
 		for (j = 0; j < eccbytes;) {
 			off = fsmc_eccpl->eccplace[group].offset;
@@ -371,7 +371,7 @@ static int fsmc_read_page_hwecc(struct mtd_info *mtd, struct nand_chip *chip,
 			if (chip->options & NAND_BUSWIDTH_16)
 				len = roundup(len, 2);
 			chip->cmdfunc(mtd, NAND_CMD_READOOB, off, page);
-			chip->read_buf(mtd, oob + j, len);
+			chip->read_buf(mtd, oob + j, len, false);
 			j += len;
 		}
 

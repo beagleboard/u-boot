@@ -190,7 +190,8 @@ static uint32_t denali_check_irq(struct denali_nand_info *denali)
 	return denali->irq_status;
 }
 
-static void denali_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+static void denali_read_buf(struct mtd_info *mtd, uint8_t *buf, int len,
+			    bool force_8bit)
 {
 	struct denali_nand_info *denali = mtd_to_denali(mtd);
 	u32 addr = DENALI_MAP11_DATA | DENALI_BANK(denali);
@@ -210,7 +211,8 @@ static void denali_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 		denali->host_write(denali, addr, buf[i]);
 }
 
-static void denali_read_buf16(struct mtd_info *mtd, uint8_t *buf, int len)
+static void denali_read_buf16(struct mtd_info *mtd, uint8_t *buf, int len,
+			      bool force_8bit)
 {
 	struct denali_nand_info *denali = mtd_to_denali(mtd);
 	u32 addr = DENALI_MAP11_DATA | DENALI_BANK(denali);
@@ -237,7 +239,7 @@ static uint8_t denali_read_byte(struct mtd_info *mtd)
 {
 	uint8_t byte;
 
-	denali_read_buf(mtd, &byte, 1);
+	denali_read_buf(mtd, &byte, 1, false);
 
 	return byte;
 }
@@ -251,7 +253,7 @@ static uint16_t denali_read_word(struct mtd_info *mtd)
 {
 	uint16_t word;
 
-	denali_read_buf16(mtd, (uint8_t *)&word, 2);
+	denali_read_buf16(mtd, (uint8_t *)&word, 2, false);
 
 	return word;
 }
@@ -628,7 +630,7 @@ static void denali_oob_xfer(struct mtd_info *mtd, struct nand_chip *chip,
 	if (write)
 		chip->write_buf(mtd, bufpoi, oob_skip);
 	else
-		chip->read_buf(mtd, bufpoi, oob_skip);
+		chip->read_buf(mtd, bufpoi, oob_skip, false);
 	bufpoi += oob_skip;
 
 	/* OOB ECC */
@@ -645,7 +647,7 @@ static void denali_oob_xfer(struct mtd_info *mtd, struct nand_chip *chip,
 		if (write)
 			chip->write_buf(mtd, bufpoi, len);
 		else
-			chip->read_buf(mtd, bufpoi, len);
+			chip->read_buf(mtd, bufpoi, len, false);
 		bufpoi += len;
 		if (len < ecc_bytes) {
 			len = ecc_bytes - len;
@@ -653,7 +655,7 @@ static void denali_oob_xfer(struct mtd_info *mtd, struct nand_chip *chip,
 			if (write)
 				chip->write_buf(mtd, bufpoi, len);
 			else
-				chip->read_buf(mtd, bufpoi, len);
+				chip->read_buf(mtd, bufpoi, len, false);
 			bufpoi += len;
 		}
 	}
@@ -664,7 +666,7 @@ static void denali_oob_xfer(struct mtd_info *mtd, struct nand_chip *chip,
 	if (write)
 		chip->write_buf(mtd, bufpoi, len);
 	else
-		chip->read_buf(mtd, bufpoi, len);
+		chip->read_buf(mtd, bufpoi, len, false);
 }
 
 static int denali_read_page_raw(struct mtd_info *mtd, struct nand_chip *chip,

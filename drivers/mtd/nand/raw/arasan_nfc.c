@@ -619,7 +619,7 @@ static int arasan_nand_read_oob(struct mtd_info *mtd, struct nand_chip *chip,
 				int page)
 {
 	chip->cmdfunc(mtd, NAND_CMD_READOOB, 0, page);
-	chip->read_buf(mtd, chip->oob_poi, (mtd->oobsize));
+	chip->read_buf(mtd, chip->oob_poi, (mtd->oobsize), false);
 
 	return 0;
 }
@@ -968,7 +968,8 @@ static int arasan_nand_send_rdcmd(struct arasan_nand_command_format *curr_cmd,
 	return 0;
 }
 
-static void arasan_nand_read_buf(struct mtd_info *mtd, u8 *buf, int size)
+static void arasan_nand_read_buf(struct mtd_info *mtd, u8 *buf, int size,
+				 bool force_8bit)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct nand_drv *info = nand_get_controller_data(chip);
@@ -1004,11 +1005,17 @@ static void arasan_nand_read_buf(struct mtd_info *mtd, u8 *buf, int size)
 	       &info->reg->intsts_reg);
 
 	buf_index = 0;
-	for (i = 0; i < size / 4; i++)
-		bufptr[i] = readl(&info->reg->buf_dataport);
 
-	if (size & 0x03)
-		bufptr[i] = readl(&info->reg->buf_dataport);
+	if (force_8bit) {
+		for (i = 0; i < size; i++)
+			bufptr[i] = readb(&info->reg->buf_dataport);
+	} else {
+		for (i = 0; i < size / 4; i++)
+			bufptr[i] = readl(&info->reg->buf_dataport);
+
+		if (size & 0x03)
+			bufptr[i] = readl(&info->reg->buf_dataport);
+	}
 
 	timeout = ARASAN_NAND_POLL_TIMEOUT;
 
@@ -1051,7 +1058,7 @@ static u8 arasan_nand_read_byte(struct mtd_info *mtd)
 			return readb(&info->reg->flash_sts_reg);
 		else
 			size = 8;
-		chip->read_buf(mtd, &buf_data[0], size);
+		chip->read_buf(mtd, &buf_data[0], size, false);
 	}
 
 	val = *(&buf_data[0] + buf_index);

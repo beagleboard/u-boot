@@ -516,11 +516,11 @@ static int stm32_fmc2_nfc_read_page(struct mtd_info *mtd,
 
 		/* Read the nand page sector (512 bytes) */
 		chip->cmdfunc(mtd, NAND_CMD_RNDOUT, s * eccsize, -1);
-		chip->read_buf(mtd, p, eccsize);
+		chip->read_buf(mtd, p, eccsize, false);
 
 		/* Read the corresponding ECC bytes */
 		chip->cmdfunc(mtd, NAND_CMD_RNDOUT, i, -1);
-		chip->read_buf(mtd, ecc_code, eccbytes);
+		chip->read_buf(mtd, ecc_code, eccbytes, false);
 
 		/* Correct the data */
 		stat = chip->ecc.correct(mtd, p, ecc_code, ecc_calc);
@@ -542,7 +542,7 @@ static int stm32_fmc2_nfc_read_page(struct mtd_info *mtd,
 	/* Read oob */
 	if (oob_required) {
 		chip->cmdfunc(mtd, NAND_CMD_RNDOUT, mtd->writesize, -1);
-		chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
+		chip->read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 	}
 
 	return max_bitflips;

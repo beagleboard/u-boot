@@ -1267,8 +1267,8 @@ static int pxa3xx_nand_read_page_hwecc(struct mtd_info *mtd,
 	struct pxa3xx_nand_info *info = host->info_data;
 	int bf;
 
-	chip->read_buf(mtd, buf, mtd->writesize);
-	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
+	chip->read_buf(mtd, buf, mtd->writesize, false);
+	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 
 	if (info->retcode == ERR_CORERR && info->use_ecc) {
 		mtd->ecc_stats.corrected += info->ecc_err_cnt;
@@ -1329,29 +1329,29 @@ static int pxa3xx_nand_read_page_raw(struct mtd_info *mtd,
 	for (chunk = 0; chunk < info->nfullchunks; chunk++) {
 		chip->read_buf(mtd,
 			       buf + (chunk * info->chunk_size),
-			       info->chunk_size);
+			       info->chunk_size, false);
 		chip->read_buf(mtd,
 			       chip->oob_poi +
 			       (chunk * (info->spare_size)),
-			       info->spare_size);
+			       info->spare_size, false);
 		chip->read_buf(mtd,
 			       chip->oob_poi + ecc_off_buf +
 			       (chunk * (info->ecc_size)),
-			       info->ecc_size - 2);
+			       info->ecc_size - 2, false);
 	}
 
 	if (info->ntotalchunks > info->nfullchunks) {
 		chip->read_buf(mtd,
 			       buf + (info->nfullchunks * info->chunk_size),
-			       info->last_chunk_size);
+			       info->last_chunk_size, false);
 		chip->read_buf(mtd,
 			       chip->oob_poi +
 			       (info->nfullchunks * (info->spare_size)),
-			       info->last_spare_size);
+			       info->last_spare_size, false);
 		chip->read_buf(mtd,
 			       chip->oob_poi + ecc_off_buf +
 			       (info->nfullchunks * (info->ecc_size)),
-			       info->ecc_size - 2);
+			       info->ecc_size - 2, false);
 	}
 
 	info->force_raw = false;
@@ -1397,7 +1397,8 @@ static u16 pxa3xx_nand_read_word(struct mtd_info *mtd)
 	return retval;
 }
 
-static void pxa3xx_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+static void pxa3xx_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len,
+				 bool force_8bit)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct pxa3xx_nand_host *host = nand_get_controller_data(chip);

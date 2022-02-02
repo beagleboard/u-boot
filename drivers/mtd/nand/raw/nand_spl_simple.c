@@ -123,11 +123,11 @@ static int nand_is_bad_block(int block)
 	 * Read one byte (or two if it's a 16 bit chip).
 	 */
 	if (this->options & NAND_BUSWIDTH_16) {
-		this->read_buf(mtd, bb_data, 2);
+		this->read_buf(mtd, bb_data, 2, false);
 		if (bb_data[0] != 0xff || bb_data[1] != 0xff)
 			return 1;
 	} else {
-		this->read_buf(mtd, bb_data, 1);
+		this->read_buf(mtd, bb_data, 1, false);
 		if (bb_data[0] != 0xff)
 			return 1;
 	}
@@ -149,7 +149,7 @@ static int nand_read_page(int block, int page, uchar *dst)
 	uint8_t *p = dst;
 
 	nand_command(block, page, 0, NAND_CMD_READOOB);
-	this->read_buf(mtd, oob_data, CONFIG_SYS_NAND_OOBSIZE);
+	this->read_buf(mtd, oob_data, CONFIG_SYS_NAND_OOBSIZE, false);
 	nand_command(block, page, 0, NAND_CMD_READ0);
 
 	/* Pick the ECC bytes out of the oob data */
@@ -159,7 +159,7 @@ static int nand_read_page(int block, int page, uchar *dst)
 
 	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
 		this->ecc.hwctl(mtd, NAND_ECC_READ);
-		this->read_buf(mtd, p, eccsize);
+		this->read_buf(mtd, p, eccsize, false);
 		this->ecc.calculate(mtd, p, &ecc_calc[i]);
 		this->ecc.correct(mtd, p, &ecc_code[i], &ecc_calc[i]);
 	}
@@ -184,10 +184,10 @@ static int nand_read_page(int block, int page, void *dst)
 	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
 		if (this->ecc.mode != NAND_ECC_SOFT)
 			this->ecc.hwctl(mtd, NAND_ECC_READ);
-		this->read_buf(mtd, p, eccsize);
+		this->read_buf(mtd, p, eccsize, false);
 		this->ecc.calculate(mtd, p, &ecc_calc[i]);
 	}
-	this->read_buf(mtd, oob_data, CONFIG_SYS_NAND_OOBSIZE);
+	this->read_buf(mtd, oob_data, CONFIG_SYS_NAND_OOBSIZE, false);
 
 	/* Pick the ECC bytes out of the oob data */
 	for (i = 0; i < ECCTOTAL; i++)

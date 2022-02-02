@@ -400,7 +400,7 @@ static int mxc_nand_read_oob_syndrome(struct mtd_info *mtd,
 	for (i = 0; i < chip->ecc.steps; i++) {
 		toread = min_t(int, length, chip->ecc.prepad);
 		if (toread) {
-			chip->read_buf(mtd, bufpoi, toread);
+			chip->read_buf(mtd, bufpoi, toread, false);
 			bufpoi += toread;
 			length -= toread;
 		}
@@ -410,13 +410,13 @@ static int mxc_nand_read_oob_syndrome(struct mtd_info *mtd,
 
 		toread = min_t(int, length, chip->ecc.postpad);
 		if (toread) {
-			chip->read_buf(mtd, bufpoi, toread);
+			chip->read_buf(mtd, bufpoi, toread, false);
 			bufpoi += toread;
 			length -= toread;
 		}
 	}
 	if (length > 0)
-		chip->read_buf(mtd, bufpoi, length);
+		chip->read_buf(mtd, bufpoi, length, false);
 
 	_mxc_nand_enable_hwecc(mtd, 0);
 	chip->cmdfunc(mtd, NAND_CMD_READOOB,
@@ -425,7 +425,7 @@ static int mxc_nand_read_oob_syndrome(struct mtd_info *mtd,
 	length = mtd->oobsize - chip->ecc.prepad;
 	for (i = 0; i < chip->ecc.steps; i++) {
 		toread = min_t(int, length, chip->ecc.bytes);
-		chip->read_buf(mtd, bufpoi, toread);
+		chip->read_buf(mtd, bufpoi, toread, false);
 		bufpoi += eccpitch;
 		length -= eccpitch;
 		host->col_addr += chip->ecc.postpad + chip->ecc.prepad;
@@ -453,27 +453,27 @@ static int mxc_nand_read_page_raw_syndrome(struct mtd_info *mtd,
 
 	for (n = 0, steps = chip->ecc.steps; steps > 0; n++, steps--) {
 		host->col_addr = n * eccsize;
-		chip->read_buf(mtd, buf, eccsize);
+		chip->read_buf(mtd, buf, eccsize, false);
 		buf += eccsize;
 
 		host->col_addr = mtd->writesize + n * eccpitch;
 		if (chip->ecc.prepad) {
-			chip->read_buf(mtd, oob, chip->ecc.prepad);
+			chip->read_buf(mtd, oob, chip->ecc.prepad, false);
 			oob += chip->ecc.prepad;
 		}
 
-		chip->read_buf(mtd, oob, eccbytes);
+		chip->read_buf(mtd, oob, eccbytes, false);
 		oob += eccbytes;
 
 		if (chip->ecc.postpad) {
-			chip->read_buf(mtd, oob, chip->ecc.postpad);
+			chip->read_buf(mtd, oob, chip->ecc.postpad, false);
 			oob += chip->ecc.postpad;
 		}
 	}
 
 	size = mtd->oobsize - (oob - chip->oob_poi);
 	if (size)
-		chip->read_buf(mtd, oob, size);
+		chip->read_buf(mtd, oob, size, false);
 	_mxc_nand_enable_hwecc(mtd, 1);
 
 	return 0;
@@ -502,12 +502,12 @@ static int mxc_nand_read_page_syndrome(struct mtd_info *mtd,
 
 		host->col_addr = n * eccsize;
 
-		chip->read_buf(mtd, p, eccsize);
+		chip->read_buf(mtd, p, eccsize, false);
 
 		host->col_addr = mtd->writesize + n * eccpitch;
 
 		if (chip->ecc.prepad) {
-			chip->read_buf(mtd, oob, chip->ecc.prepad);
+			chip->read_buf(mtd, oob, chip->ecc.prepad, false);
 			oob += chip->ecc.prepad;
 		}
 
@@ -520,7 +520,7 @@ static int mxc_nand_read_page_syndrome(struct mtd_info *mtd,
 		oob += eccbytes;
 
 		if (chip->ecc.postpad) {
-			chip->read_buf(mtd, oob, chip->ecc.postpad);
+			chip->read_buf(mtd, oob, chip->ecc.postpad, false);
 			oob += chip->ecc.postpad;
 		}
 	}
@@ -528,7 +528,7 @@ static int mxc_nand_read_page_syndrome(struct mtd_info *mtd,
 	/* Calculate remaining oob bytes */
 	n = mtd->oobsize - (oob - chip->oob_poi);
 	if (n)
-		chip->read_buf(mtd, oob, n);
+		chip->read_buf(mtd, oob, n, false);
 
 	/* Then switch ECC off and read the OOB area to get the ECC code */
 	_mxc_nand_enable_hwecc(mtd, 0);
@@ -539,7 +539,7 @@ static int mxc_nand_read_page_syndrome(struct mtd_info *mtd,
 		host->col_addr = mtd->writesize +
 				 n * eccpitch +
 				 chip->ecc.prepad;
-		chip->read_buf(mtd, oob, eccbytes);
+		chip->read_buf(mtd, oob, eccbytes, false);
 		oob += eccbytes + chip->ecc.postpad;
 	}
 	_mxc_nand_enable_hwecc(mtd, 1);
@@ -887,7 +887,8 @@ static void mxc_nand_write_buf(struct mtd_info *mtd,
  * Flash first the data output cycle is initiated by the NFC, which copies
  * the data to RAMbuffer. This data of length len is then copied to buffer buf.
  */
-static void mxc_nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
+static void mxc_nand_read_buf(struct mtd_info *mtd, u_char *buf, int len,
+			      bool force_8bit)
 {
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
 	struct mxc_nand_host *host = nand_get_controller_data(nand_chip);

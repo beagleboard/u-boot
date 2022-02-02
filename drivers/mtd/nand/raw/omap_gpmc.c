@@ -415,21 +415,28 @@ static int __read_prefetch_aligned(struct nand_chip *chip, uint32_t *buf, int le
 	return 0;
 }
 
-static inline void omap_nand_read(struct mtd_info *mtd, uint8_t *buf, int len)
+static inline void omap_nand_read(struct mtd_info *mtd, uint8_t *buf, int len,
+				  bool force_8bit)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
 
 	if (chip->options & NAND_BUSWIDTH_16)
-		nand_read_buf16(mtd, buf, len);
+		nand_read_buf16(mtd, buf, len, force_8bit);
 	else
-		nand_read_buf(mtd, buf, len);
+		nand_read_buf(mtd, buf, len, force_8bit);
 }
 
-static void omap_nand_read_prefetch(struct mtd_info *mtd, uint8_t *buf, int len)
+static void omap_nand_read_prefetch(struct mtd_info *mtd, uint8_t *buf, int len,
+				    bool force_8bit)
 {
 	int ret;
 	uintptr_t head, tail;
 	struct nand_chip *chip = mtd_to_nand(mtd);
+
+	if (force_8bit) {
+		omap_nand_read(mtd, buf, len, true);
+		return;
+	}
 
 	/*
 	 * If the destination buffer is unaligned, start with reading
@@ -437,7 +444,7 @@ static void omap_nand_read_prefetch(struct mtd_info *mtd, uint8_t *buf, int len)
 	 */
 	head = ((uintptr_t)buf) % 4;
 	if (head) {
-		omap_nand_read(mtd, buf, head);
+		omap_nand_read(mtd, buf, head, false);
 		buf += head;
 		len -= head;
 	}
@@ -451,10 +458,10 @@ static void omap_nand_read_prefetch(struct mtd_info *mtd, uint8_t *buf, int len)
 	ret = __read_prefetch_aligned(chip, (uint32_t *)buf, len - tail);
 	if (ret < 0) {
 		/* fallback in case the prefetch engine is busy */
-		omap_nand_read(mtd, buf, len);
+		omap_nand_read(mtd, buf, len, false);
 	} else if (tail) {
 		buf += len - tail;
-		omap_nand_read(mtd, buf, tail);
+		omap_nand_read(mtd, buf, tail, false);
 	}
 }
 #endif /* CONFIG_NAND_OMAP_GPMC_PREFETCH */
@@ -604,11 +611,11 @@ static int omap_read_page_bch(struct mtd_info *mtd, struct nand_chip *chip,
 		chip->ecc.hwctl(mtd, NAND_ECC_READ);
 		/* read data */
 		chip->cmdfunc(mtd, NAND_CMD_RNDOUT, data_pos, -1);
-		chip->read_buf(mtd, p, eccsize);
+		chip->read_buf(mtd, p, eccsize, false);
 
 		/* read respective ecc from oob area */
 		chip->cmdfunc(mtd, NAND_CMD_RNDOUT, oob_pos, -1);
-		chip->read_buf(mtd, oob, eccbytes);
+		chip->read_buf(mtd, oob, eccbytes, false);
 		/* read syndrome */
 		chip->ecc.calculate(mtd, p, &ecc_calc[i]);
 
