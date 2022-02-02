@@ -1220,3 +1220,62 @@ int board_nand_init(struct nand_chip *nand)
 
 	return 0;
 }
+
+#if defined(CONFIG_SPL_BUILD)
+
+static struct mtd_info *mtd;
+struct nand_chip *nand_chip;
+
+#if !defined(CONFIG_SPL_NAND_SIMPLE) && !defined(CONFIG_SPL_NAND_AM33XX_BCH)
+/* nand_init() - initialize data to make nand usable by SPL */
+void nand_init(void)
+{
+	int ret;
+
+	nand_chip = kzalloc(sizeof(*nand_chip), GFP_KERNEL);
+	if (!nand_chip)
+		return;
+
+	mtd = nand_to_mtd(nand_chip);
+
+	ret = board_nand_init(nand_chip);
+	if (ret)
+		printf("%s: board_nand_init failed: %d\n", __func__, ret);
+
+	ret = nand_scan(mtd, 1);
+	if (ret)
+		printf("%s: nand_scan() error: %d\n", __func__, ret);
+}
+
+#if !defined(CONFIG_SPL_NAND_SIMPLE) && !defined(CONFIG_SPL_NAND_AM33XX_BCH)
+/* Unselect after operation */
+void nand_deselect(void)
+{
+	if (nand_chip->select_chip)
+		nand_chip->select_chip(mtd, -1);
+}
+
+static int nand_is_bad_block(int block)
+{
+	loff_t ofs = block * CONFIG_SYS_NAND_BLOCK_SIZE;
+
+	return nand_chip->block_bad(mtd, ofs);
+}
+
+static int nand_read_page(int block, int page, uchar *dst)
+{
+	int page_addr = block * CONFIG_SYS_NAND_PAGE_COUNT + page;
+	loff_t ofs = page_addr * CONFIG_SYS_NAND_PAGE_SIZE;
+	int ret;
+	size_t len = CONFIG_SYS_NAND_PAGE_SIZE;
+
+	ret = nand_read(mtd, ofs, &len, dst);
+	if (ret)
+		printf("nand_read failed %d\n", ret);
+
+	return ret;
+}
+
+#include "nand_spl_loaders.c"
+#endif /* CONFIG_SPL_NAND_SIMPLE */
+#endif /* CONFIG_SPL_BUILD */
