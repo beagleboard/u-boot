@@ -453,7 +453,10 @@ static int nand_default_block_markbad(struct mtd_info *mtd, loff_t ofs)
 static int nand_block_markbad_lowlevel(struct mtd_info *mtd, loff_t ofs)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
-	int res, ret = 0;
+	int ret = 0;
+#ifndef CONFIG_SPL_BUILD
+	int res;
+#endif
 
 	if (!(chip->bbt_options & NAND_BBT_NO_OOB_BBM)) {
 		struct erase_info einfo;
@@ -471,12 +474,14 @@ static int nand_block_markbad_lowlevel(struct mtd_info *mtd, loff_t ofs)
 		nand_release_device(mtd);
 	}
 
+#ifndef CONFIG_SPL_BUILD
 	/* Mark block bad in BBT */
 	if (chip->bbt) {
 		res = nand_markbad_bbt(mtd, ofs);
 		if (!ret)
 			ret = res;
 	}
+#endif
 
 	if (!ret)
 		mtd->ecc_stats.badblocks++;
@@ -523,7 +528,11 @@ static int nand_block_isreserved(struct mtd_info *mtd, loff_t ofs)
 	if (!chip->bbt)
 		return 0;
 	/* Return info from the table */
+#ifndef CONFIG_SPL_BUILD
 	return nand_isreserved_bbt(mtd, ofs);
+#else
+	return 0;
+#endif
 }
 
 /**
@@ -549,7 +558,11 @@ static int nand_block_checkbad(struct mtd_info *mtd, loff_t ofs, int allowbbt)
 		return chip->block_bad(mtd, ofs);
 
 	/* Return info from the table */
+#ifndef CONFIG_SPL_BUILD
 	return nand_isbad_bbt(mtd, ofs, allowbbt);
+#else
+	return 0;
+#endif
 }
 
 /**
@@ -3745,8 +3758,11 @@ static void nand_set_defaults(struct nand_chip *chip, int busw)
 		chip->write_byte = busw ? nand_write_byte16 : nand_write_byte;
 	if (!chip->read_buf || chip->read_buf == nand_read_buf)
 		chip->read_buf = busw ? nand_read_buf16 : nand_read_buf;
+
+#ifndef CONFIG_SPL_BUILD
 	if (!chip->scan_bbt)
 		chip->scan_bbt = nand_default_bbt;
+#endif
 
 	if (!chip->controller) {
 		chip->controller = &chip->hwcontrol;
