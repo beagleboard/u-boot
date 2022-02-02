@@ -15,6 +15,7 @@
 #include <nand.h>
 #include <linux/mtd/omap_elm.h>
 #include <soc.h>
+#include <dm/uclass.h>
 
 #define BADBLOCK_MARKER_LENGTH	2
 #define SECTOR_BYTES		512
@@ -1003,6 +1004,17 @@ int board_nand_init(struct nand_chip *nand)
 	int cs = cs_next++;
 	int err = 0;
 	struct omap_nand_info *info;
+	struct udevice *dev;
+
+	if (IS_ENABLED(CONFIG_TI_GPMC)) {
+		err = uclass_get_device_by_driver(UCLASS_SIMPLE_BUS,
+						  DM_GET_DRIVER(ti_gpmc),
+						  &dev);
+		if (err) {
+			printf("GPMC init failed: %d\n", err);
+			return err;
+		}
+	}
 
 	/*
 	 * xloader/Uboot's gpmc configuration would have configured GPMC for
