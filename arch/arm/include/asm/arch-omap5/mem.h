@@ -53,8 +53,6 @@
 #define STNOR_GPMC_CONFIG6	0x08070280
 #define STNOR_GPMC_CONFIG7	0x00000048
 
-/* max number of GPMC Chip Selects */
-#define GPMC_MAX_CS		8
 /* max number of GPMC regs */
 #define GPMC_MAX_REG		7
 
