@@ -76,6 +76,7 @@ FSP_M_DATA            = b'fsp_m'
 FSP_S_DATA            = b'fsp_s'
 FSP_T_DATA            = b'fsp_t'
 ATF_BL31_DATA         = b'bl31'
+ATF_BL32_DATA         = b'bl32'
 SCP_DATA              = b'scp'
 TEST_FDT1_DATA        = b'fdt1'
 TEST_FDT2_DATA        = b'test-fdt2'
@@ -178,6 +179,7 @@ class TestFunctional(unittest.TestCase):
         TestFunctional._MakeInputFile('compress', COMPRESS_DATA)
         TestFunctional._MakeInputFile('compress_big', COMPRESS_DATA_BIG)
         TestFunctional._MakeInputFile('bl31.bin', ATF_BL31_DATA)
+        TestFunctional._MakeInputFile('bl32.bin', ATF_BL32_DATA)
         TestFunctional._MakeInputFile('scp.bin', SCP_DATA)
 
         # Add a few .dtb files for testing
@@ -3671,6 +3673,11 @@ class TestFunctional(unittest.TestCase):
         """Test that an image with an ATF BL31 binary can be created"""
         data = self._DoReadFile('169_atf_bl31.dts')
         self.assertEqual(ATF_BL31_DATA, data[:len(ATF_BL31_DATA)])
+
+    def testPackBl32(self):
+        """Test that an image with an ATF BL32 binary can be created"""
+        data = self._DoReadFile('170_atf_bl32.dts')
+        self.assertEqual(ATF_BL32_DATA, data[:len(ATF_BL32_DATA)])
 
     def testPackScp(self):
         """Test that an image with an SCP binary can be created"""

@@ -1335,6 +1335,7 @@ cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
 		-I . -I $(srctree) -I $(srctree)/board/$(BOARDDIR) \
 		-I arch/$(ARCH)/dts -a of-list=$(CONFIG_OF_LIST) \
 		-a atf-bl31-path=${BL31} \
+		-a atf-bl32-path=${BL32} \
 		-a default-dt=$(default_dt) \
 		-a scp-path=$(SCP) \
 		$(BINMAN_$(@F))
