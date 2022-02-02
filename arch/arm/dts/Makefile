@@ -987,7 +987,8 @@ dtb-$(CONFIG_SOC_K3_J721S2) += k3-j721s2-common-proc-board.dtb\
 dtb-$(CONFIG_SOC_K3_AM642) += k3-am642-evm.dtb \
 			      k3-am642-r5-evm.dtb \
 			      k3-am642-sk.dtb \
-			      k3-am642-r5-sk.dtb
+			      k3-am642-r5-sk.dtb \
+			      k3-am642-evm-nand.dtbo
 
 dtb-$(CONFIG_ARCH_MEDIATEK) += \
 	mt7622-rfb.dtb \
