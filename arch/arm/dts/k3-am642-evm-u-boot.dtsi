@@ -2,6 +2,9 @@
 /*
  * Copyright (C) 2020 Texas Instruments Incorporated - https://www.ti.com/
  */
+#include <config.h>
+
+#include "k3-am642-evm-binman.dtsi"
 
 / {
 	chosen {
