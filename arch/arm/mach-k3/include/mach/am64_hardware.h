@@ -55,4 +55,7 @@
 /* Use Last 2K as Scratch pad */
 #define TI_SRAM_SCRATCH_BOARD_EEPROM_START		0x7019f800
 
+/* GPMC/NAND */
+#define ELM_BASE					0x025010000
+
 #endif /* __ASM_ARCH_DRA8_HARDWARE_H */
