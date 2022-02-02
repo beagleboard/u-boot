@@ -8,7 +8,6 @@
 #include <log.h>
 #include <asm/io.h>
 #include <linux/errno.h>
-#include <asm/arch/mem.h>
 #include <linux/mtd/omap_gpmc.h>
 #include <linux/mtd/nand_ecc.h>
 #include <linux/bch.h>
@@ -49,7 +48,7 @@ struct omap_nand_info {
 };
 
 /* We are wasting a bit of memory but al least we are safe */
-static struct omap_nand_info omap_nand_info[GPMC_MAX_CS];
+static struct omap_nand_info omap_nand_info[GPMC_CS_NUM];
 
 /*
  * omap_nand_hwcontrol - Set the address pointers corretly for the
@@ -972,7 +971,7 @@ int board_nand_init(struct nand_chip *nand)
 	 * TBD: need to make this logic generic to handle multiple CS NAND
 	 * devices.
 	 */
-	while (cs < GPMC_MAX_CS) {
+	while (cs < GPMC_CS_NUM) {
 		/* Check if NAND type is set */
 		if ((readl(&gpmc_cfg->cs[cs].config1) & 0xC00) == 0x800) {
 			/* Found it!! */
@@ -980,7 +979,7 @@ int board_nand_init(struct nand_chip *nand)
 		}
 		cs++;
 	}
-	if (cs >= GPMC_MAX_CS) {
+	if (cs >= GPMC_CS_NUM) {
 		printf("nand: error: Unable to find NAND settings in "
 			"GPMC Configuration - quitting\n");
 		return -ENODEV;
