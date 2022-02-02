@@ -14,6 +14,7 @@
 #include <linux/compiler.h>
 #include <nand.h>
 #include <linux/mtd/omap_elm.h>
+#include <soc.h>
 
 #define BADBLOCK_MARKER_LENGTH	2
 #define SECTOR_BYTES		512
@@ -46,6 +47,7 @@ struct omap_nand_info {
 	uint8_t cs;
 	uint8_t ws;		/* wait status pin (0,1) */
 	void __iomem *fifo;
+	bool force_32bit;
 };
 
 /* We are wasting a bit of memory but al least we are safe */
@@ -347,6 +349,25 @@ static inline void omap_nand_read_buf(struct mtd_info *mtd, uint8_t *buf,
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct omap_nand_info *info = nand_get_controller_data(chip);
 	u32 alignment = ((uintptr_t)buf | len) & 3;
+
+	if (info->force_32bit) {
+		u32 val;
+		int left;
+		u8 *ptr;
+
+		readsl(info->fifo, buf, len >> 2);
+		left = len & 0x3;
+		if (left) {
+			val = readl(info->fifo);
+			ptr = (u8 *)(buf + (len - left));
+			while (left--) {
+				*ptr++ = val & 0xff;
+				val >>= 8;
+			}
+		}
+
+		return;
+	}
 
 	if (force_8bit || alignment & 1)
 		readsb(info->fifo, buf, len);
@@ -956,6 +977,11 @@ int __maybe_unused omap_nand_switch_ecc(uint32_t hardware, uint32_t eccstrength)
 }
 #endif /* CONFIG_SPL_BUILD */
 
+const struct soc_attr force32bit_soc_attr[] = {
+	{ .family = "AM64X", .revision = "SR1.0" },
+	{/* sentinel */}
+};
+
 /*
  * Board-specific NAND initialization. The following members of the
  * argument are board-specific:
@@ -1012,6 +1038,13 @@ int board_nand_init(struct nand_chip *nand)
 	info->cs = cs;
 	info->ws = wscfg[cs];
 	info->fifo = (void __iomem *)CONFIG_SYS_NAND_BASE;
+
+	/* Some SoC's have 32-bit at least, read limitation */
+	if (soc_device_match(force32bit_soc_attr)) {
+		debug("nand: forcing 32-bit reads\n");
+		info->force_32bit = true;
+	}
+
 	nand_set_controller_data(nand, &omap_nand_info[cs]);
 	nand->cmd_ctrl	= omap_nand_hwcontrol;
 	nand->options	|= NAND_NO_PADDING | NAND_CACHEPRG;
@@ -1046,6 +1079,9 @@ int board_nand_init(struct nand_chip *nand)
 #endif
 
 	nand->dev_ready = omap_dev_ready;
+
+	if (info->force_32bit)
+		nand->quirks |= NAND_QUIRK_FORCE_32BIT_READS;
 
 	return 0;
 }
