@@ -1131,15 +1131,13 @@ static int nand_read_param_page_op(struct nand_chip *chip, u8 page, void *buf,
 				   unsigned int len)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
-	unsigned int i;
-	u8 *p = buf;
 
 	if (len && !buf)
 		return -EINVAL;
 
 	chip->cmdfunc(mtd, NAND_CMD_PARAM, page, -1);
-	for (i = 0; i < len; i++)
-		p[i] = chip->read_byte(mtd);
+	if (len)
+		chip->read_buf(mtd, buf, len);
 
 	return 0;
 }
@@ -1356,16 +1354,14 @@ int nand_readid_op(struct nand_chip *chip, u8 addr, void *buf,
 		   unsigned int len)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
-	unsigned int i;
-	u8 *id = buf;
 
 	if (len && !buf)
 		return -EINVAL;
 
 	chip->cmdfunc(mtd, NAND_CMD_READID, addr, -1);
 
-	for (i = 0; i < len; i++)
-		id[i] = chip->read_byte(mtd);
+	if (len)
+		chip->read_buf(mtd, buf, len);
 
 	return 0;
 }
@@ -1493,12 +1489,9 @@ static int nand_get_features_op(struct nand_chip *chip, u8 feature,
 				void *data)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
-	u8 *params = data;
-	int i;
 
 	chip->cmdfunc(mtd, NAND_CMD_GET_FEATURES, feature, -1);
-	for (i = 0; i < ONFI_SUBFEATURE_PARAM_LEN; ++i)
-		params[i] = chip->read_byte(mtd);
+	chip->read_buf(mtd, data, ONFI_SUBFEATURE_PARAM_LEN);
 
 	return 0;
 }
@@ -1544,7 +1537,7 @@ int nand_read_data_op(struct nand_chip *chip, void *buf, unsigned int len,
 	if (!len || !buf)
 		return -EINVAL;
 
-	if (force_8bit) {
+	if (force_8bit && !(chip->quirks & NAND_QUIRK_FORCE_32BIT_READS)) {
 		u8 *p = buf;
 		unsigned int i;
 
