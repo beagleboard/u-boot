@@ -1120,7 +1120,7 @@ const struct soc_attr force32bit_soc_attr[] = {
  *   nand_scan about special functionality. See the defines for further
  *   explanation
  */
-int board_nand_init(struct nand_chip *nand)
+int gpmc_nand_init(struct nand_chip *nand)
 {
 	int32_t gpmc_config = 0;
 	int cs = cs_next++;
@@ -1222,16 +1222,80 @@ int board_nand_init(struct nand_chip *nand)
 	return 0;
 }
 
+static struct nand_chip *nand_chip;	/* First NAND chip for SPL use only */
+
+#ifdef CONFIG_SYS_NAND_SELF_INIT
+
+static int gpmc_nand_probe(struct udevice *dev)
+{
+	struct nand_chip *nand = dev_get_priv(dev);
+	struct mtd_info *mtd = nand_to_mtd(nand);
+	int ret;
+
+	gpmc_nand_init(nand);
+
+	ret = nand_scan(mtd, CONFIG_SYS_NAND_MAX_CHIPS);
+	if (ret)
+		return ret;
+
+	ret = nand_register(0, mtd);
+	if (ret)
+		return ret;
+
+	if (!nand_chip)
+		nand_chip = nand;
+
+	return 0;
+}
+
+static const struct udevice_id gpmc_nand_ids[] = {
+	{ .compatible = "ti,am64-nand" },
+	{ .compatible = "ti,omap2-nand" },
+	{ }
+};
+
+U_BOOT_DRIVER(gpmc_nand) = {
+	.name           = "gpmc-nand",
+	.id             = UCLASS_MTD,
+	.of_match       = gpmc_nand_ids,
+	.probe          = gpmc_nand_probe,
+	.priv_auto_alloc_size = sizeof(struct nand_chip),
+};
+
+void board_nand_init(void)
+{
+	struct udevice *dev;
+	int ret;
+
+	ret = uclass_get_device_by_driver(UCLASS_MTD,
+					  DM_GET_DRIVER(gpmc_nand), &dev);
+	if (ret && ret != -ENODEV)
+		pr_err("%s: Failed to get GPMC device: %d\n", __func__, ret);
+}
+#else
+int board_nand_init(struct nand_chip *chip) __attribute__((weak));
+int board_nand_init(struct nand_chip *chip)
+{
+	int ret;
+
+	ret = gpmc_nand_init(chip);
+	if (!ret && !nand_chip)
+		nand_chip = chip;
+
+	return ret;
+}
+
+#endif /* CONFIG_SYS_NAND_SELF_INIT */
+
 #if defined(CONFIG_SPL_BUILD)
 
-static struct mtd_info *mtd;
-struct nand_chip *nand_chip;
-
-#if !defined(CONFIG_SPL_NAND_SIMPLE) && !defined(CONFIG_SPL_NAND_AM33XX_BCH)
+#if !defined(CONFIG_SPL_NAND_INIT) && !defined(CONFIG_SPL_NAND_SIMPLE) && \
+	!defined(CONFIG_SPL_NAND_AM33XX_BCH)
 /* nand_init() - initialize data to make nand usable by SPL */
 void nand_init(void)
 {
 	int ret;
+	struct mtd_info *mtd;
 
 	nand_chip = kzalloc(sizeof(*nand_chip), GFP_KERNEL);
 	if (!nand_chip)
@@ -1247,17 +1311,22 @@ void nand_init(void)
 	if (ret)
 		printf("%s: nand_scan() error: %d\n", __func__, ret);
 }
+#endif
 
 #if !defined(CONFIG_SPL_NAND_SIMPLE) && !defined(CONFIG_SPL_NAND_AM33XX_BCH)
 /* Unselect after operation */
 void nand_deselect(void)
 {
+	struct mtd_info *mtd = nand_to_mtd(nand_chip);
+
 	if (nand_chip->select_chip)
 		nand_chip->select_chip(mtd, -1);
 }
 
 static int nand_is_bad_block(int block)
 {
+	struct mtd_info *mtd = nand_to_mtd(nand_chip);
+
 	loff_t ofs = block * CONFIG_SYS_NAND_BLOCK_SIZE;
 
 	return nand_chip->block_bad(mtd, ofs);
@@ -1269,6 +1338,7 @@ static int nand_read_page(int block, int page, uchar *dst)
 	loff_t ofs = page_addr * CONFIG_SYS_NAND_PAGE_SIZE;
 	int ret;
 	size_t len = CONFIG_SYS_NAND_PAGE_SIZE;
+	struct mtd_info *mtd = nand_to_mtd(nand_chip);
 
 	ret = nand_read(mtd, ofs, &len, dst);
 	if (ret)
