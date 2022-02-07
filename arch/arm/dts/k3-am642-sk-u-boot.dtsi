@@ -3,6 +3,10 @@
  * Copyright (C) 2021 Texas Instruments Incorporated - https://www.ti.com/
  */
 
+#include <config.h>
+
+#include "k3-am642-evm-binman.dtsi"
+
 / {
 	chosen {
 		stdout-path = "serial2:115200n8";
