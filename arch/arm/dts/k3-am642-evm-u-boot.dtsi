@@ -26,10 +26,9 @@
 
 &main_conf {
 	u-boot,dm-spl;
-};
-
-&chipid {
-	u-boot,dm-spl;
+	chipid@14 {
+		u-boot,dm-spl;
+	};
 };
 
 &main_pmx0 {
