@@ -366,7 +366,8 @@ int board_late_init(void)
 		board_ti_am6_set_ethaddr(1, ep->mac_addr_cnt);
 
 		/* Check for and probe any plugged-in daughtercards */
-		probe_daughtercards();
+		if (board_is_am64x_gpevm())
+			probe_daughtercards();
 	}
 
 	return 0;
@@ -388,6 +389,7 @@ void spl_board_init(void)
 	/* Init DRAM size for R5/A53 SPL */
 	dram_init_banksize();
 
-	probe_daughtercards();
+	if (board_is_am64x_gpevm())
+		probe_daughtercards();
 }
 #endif
