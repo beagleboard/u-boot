@@ -232,5 +232,4 @@
 		#size-cells = <1>;
 	};
 };
-
 #include "k3-j721s2-common-proc-board-u-boot.dtsi"

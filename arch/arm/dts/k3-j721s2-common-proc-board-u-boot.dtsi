@@ -35,6 +35,14 @@
 	u-boot,dm-spl;
 };
 
+&main_r5fss0 {
+	ti,cluster-mode = <0>;
+};
+
+&main_r5fss1 {
+	ti,cluster-mode = <0>;
+};
+
 &cbass_mcu_wakeup {
 	u-boot,dm-spl;
 
