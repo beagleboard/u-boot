@@ -856,7 +856,7 @@ static const struct k3_r5f_ip_data k3_data = {
 	.tcm_ecc_autoinit = false,
 };
 
-static const struct k3_r5f_ip_data j7200_data = {
+static const struct k3_r5f_ip_data j7200_j721s2_data = {
 	.tcm_is_double = true,
 	.tcm_ecc_autoinit = true,
 };
@@ -864,7 +864,8 @@ static const struct k3_r5f_ip_data j7200_data = {
 static const struct udevice_id k3_r5f_rproc_ids[] = {
 	{ .compatible = "ti,am654-r5f", .data = (ulong)&k3_data, },
 	{ .compatible = "ti,j721e-r5f", .data = (ulong)&k3_data, },
-	{ .compatible = "ti,j7200-r5f", .data = (ulong)&j7200_data, },
+	{ .compatible = "ti,j7200-r5f", .data = (ulong)&j7200_j721s2_data, },
+	{ .compatible = "ti,j721s2-r5f", .data = (ulong)&j7200_j721s2_data, },
 	{}
 };
 
@@ -902,6 +903,7 @@ static const struct udevice_id k3_r5fss_ids[] = {
 	{ .compatible = "ti,am654-r5fss"},
 	{ .compatible = "ti,j721e-r5fss"},
 	{ .compatible = "ti,j7200-r5fss"},
+	{ .compatible = "ti,j721s2-r5fss"},
 	{}
 };
 
