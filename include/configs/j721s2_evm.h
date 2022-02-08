@@ -128,11 +128,11 @@
 
 #ifdef CONFIG_TARGET_J721S2_A72_EVM
 #define DEFAULT_RPROCS	""						\
-		"2 /lib/firmware/j721s2-main-r5f0_0-fw "			\
-		"3 /lib/firmware/j721s2-main-r5f0_1-fw "			\
-		"4 /lib/firmware/j721s2-main-r5f1_0-fw "			\
-		"5 /lib/firmware/j721s2-main-r5f1_1-fw "			\
-		"6 /lib/firmware/j721s2-c71_0-fw "				\
+		"2 /lib/firmware/j721s2-main-r5f0_0-fw "		\
+		"3 /lib/firmware/j721s2-main-r5f0_1-fw "		\
+		"4 /lib/firmware/j721s2-main-r5f1_0-fw "		\
+		"5 /lib/firmware/j721s2-main-r5f1_1-fw "		\
+		"6 /lib/firmware/j721s2-c71_0-fw "			\
 		"7 /lib/firmware/j721s2-c71_1-fw "
 #endif /* CONFIG_TARGET_J721S2_A72_EVM */
 
