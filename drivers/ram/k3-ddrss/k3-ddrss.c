@@ -719,6 +719,23 @@ static void k3_ddrss_lpddr4_ecc_init(struct k3_ddrss_desc *ddrss)
 	writel(val, base + DDRSS_ECC_CTRL_REG);
 }
 
+#ifdef CONFIG_K3_J721E_DDRSS
+#define DDRSS_V2A_LPT_DEF_PRI_MAP_REG (0x02980030u)
+#define DDRSS_V2A_HPT_DEF_PRI_MAP_REG (0x0298004Cu)
+#define DDRSS_V2A_LPT_HPT_PRI_MAP_VAL (0x77777777u)
+
+void j721e_lpddr4_priority_map(void)
+{
+	/* Override defaults with a flattened priority */
+	/* This makes VBUSM.C priority take effect */
+    /* LPT */
+    writel(DDRSS_V2A_LPT_HPT_PRI_MAP_VAL, (uintptr_t)DDRSS_V2A_LPT_DEF_PRI_MAP_REG);
+
+    /* HPT */
+    writel(DDRSS_V2A_LPT_HPT_PRI_MAP_VAL, (uintptr_t)DDRSS_V2A_HPT_DEF_PRI_MAP_REG);
+}
+#endif
+
 #define AM64_DDRSS_SS_BASE  0x0F300000
 static int k3_ddrss_probe(struct udevice *dev)
 {
@@ -750,6 +767,10 @@ static int k3_ddrss_probe(struct udevice *dev)
 	ret = k3_ddrss_init_freq(ddrss);
 	if (ret)
 		return ret;
+
+#ifdef CONFIG_K3_J721E_DDRSS
+    j721e_lpddr4_priority_map();
+#endif
 
 	k3_lpddr4_start(ddrss);
 

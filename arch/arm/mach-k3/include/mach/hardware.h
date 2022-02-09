@@ -12,6 +12,7 @@
 
 #ifdef CONFIG_SOC_K3_J721E
 #include "j721e_hardware.h"
+#include "j721e_qos_params.h"
 #endif
 
 #ifdef CONFIG_SOC_K3_J721S2
