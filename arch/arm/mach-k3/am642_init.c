@@ -32,17 +32,6 @@ static void ctrl_mmr_unlock(void)
 	/* Unlock all PADCFG_MMR1 module registers */
 	mmr_unlock(PADCFG_MMR1_BASE, 1);
 
-	/* Unlock all CTRL_MMR0 module registers */
-	mmr_unlock(CTRL_MMR0_BASE, 0);
-	mmr_unlock(CTRL_MMR0_BASE, 1);
-	mmr_unlock(CTRL_MMR0_BASE, 2);
-	mmr_unlock(CTRL_MMR0_BASE, 3);
-	mmr_unlock(CTRL_MMR0_BASE, 5);
-	mmr_unlock(CTRL_MMR0_BASE, 6);
-}
-
-static void mcu_ctrl_mmr_unlock(void)
-{
 	/* Unlock all MCU_CTRL_MMR0 module registers */
 	mmr_unlock(MCU_CTRL_MMR0_BASE, 0);
 	mmr_unlock(MCU_CTRL_MMR0_BASE, 1);
@@ -50,6 +39,14 @@ static void mcu_ctrl_mmr_unlock(void)
 	mmr_unlock(MCU_CTRL_MMR0_BASE, 3);
 	mmr_unlock(MCU_CTRL_MMR0_BASE, 4);
 	mmr_unlock(MCU_CTRL_MMR0_BASE, 6);
+
+	/* Unlock all CTRL_MMR0 module registers */
+	mmr_unlock(CTRL_MMR0_BASE, 0);
+	mmr_unlock(CTRL_MMR0_BASE, 1);
+	mmr_unlock(CTRL_MMR0_BASE, 2);
+	mmr_unlock(CTRL_MMR0_BASE, 3);
+	mmr_unlock(CTRL_MMR0_BASE, 5);
+	mmr_unlock(CTRL_MMR0_BASE, 6);
 }
 
 /*
@@ -152,6 +149,7 @@ void do_dt_magic(void)
 }
 #endif
 
+#if defined(CONFIG_ESM_K3)
 static void enable_mcu_esm_reset(void)
 {
 	/* Set CTRLMMR_MCU_RST_CTRL:MCU_ESM_ERROR_RST_EN_Z  to '0' (low active) */
@@ -160,10 +158,11 @@ static void enable_mcu_esm_reset(void)
 	stat &= 0xFFFDFFFF;
 	writel(stat, CTRLMMR_MCU_RST_CTRL);
 }
+#endif
 
 void board_init_f(ulong dummy)
 {
-#if defined(CONFIG_K3_LOAD_SYSFW) || defined(CONFIG_K3_AM64_DDRSS)
+#if defined(CONFIG_K3_LOAD_SYSFW) || defined(CONFIG_K3_AM64_DDRSS) || defined(CONFIG_ESM_K3)
 	struct udevice *dev;
 	int ret;
 #endif
@@ -179,9 +178,6 @@ void board_init_f(ulong dummy)
 	store_boot_info_from_rom();
 
 	ctrl_mmr_unlock();
-	mcu_ctrl_mmr_unlock();
-
-	enable_mcu_esm_reset();
 
 	/* Init DM early */
 	spl_early_init();
@@ -216,7 +212,9 @@ void board_init_f(ulong dummy)
 	/* Output System Firmware version info */
 	k3_sysfw_print_ver();
 
-#ifdef CONFIG_ESM_K3
+#if defined(CONFIG_ESM_K3)
+	enable_mcu_esm_reset();
+
 	/* Probe/configure ESM0 */
 	ret = uclass_get_device_by_name(UCLASS_MISC, "esm@420000", &dev);
 	if (ret)
