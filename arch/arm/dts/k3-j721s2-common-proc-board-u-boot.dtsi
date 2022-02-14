@@ -188,6 +188,7 @@
 	u-boot,dm-spl;
 
 	flash@0 {
+		cdns,phy-mode;
 		u-boot,dm-spl;
 
 		partition@3fc0000 {
