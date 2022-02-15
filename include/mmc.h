@@ -734,6 +734,8 @@ struct mmc {
 				  */
 	u32 quirks;
 	u8 hs400_tuning;
+
+	enum bus_mode user_speed_mode; /* input speed mode from user */
 };
 
 struct mmc_hwpart_conf {
