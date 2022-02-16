@@ -213,8 +213,6 @@ void board_init_f(ulong dummy)
 	k3_sysfw_print_ver();
 
 #if defined(CONFIG_ESM_K3)
-	enable_mcu_esm_reset();
-
 	/* Probe/configure ESM0 */
 	ret = uclass_get_device_by_name(UCLASS_MISC, "esm@420000", &dev);
 	if (ret)
@@ -224,6 +222,8 @@ void board_init_f(ulong dummy)
 	ret = uclass_get_device_by_name(UCLASS_MISC, "esm@4100000", &dev);
 	if (ret)
 		printf("esm mcu init failed: %d\n", ret);
+
+	enable_mcu_esm_reset();
 #endif
 
 #if defined(CONFIG_K3_AM64_DDRSS)
