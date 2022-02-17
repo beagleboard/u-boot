@@ -50,6 +50,7 @@ tiboot3.bin: image_check FORCE
 INPUTS-y	+= tiboot3.bin
 endif
 
+ifndef CONFIG_BINMAN
 ifdef CONFIG_ARM64
 
 ifeq ($(CONFIG_SOC_K3_J721E),)
@@ -80,9 +81,11 @@ cmd_k3_mkits = \
 $(SPL_ITS): FORCE
 	$(call cmd,k3_mkits)
 endif
+endif
 
 else
 
+ifndef CONFIG_BINMAN
 ifeq ($(CONFIG_TI_SECURE_DEVICE),y)
 INPUTS-y	+= u-boot.img_HS
 else
@@ -90,4 +93,8 @@ INPUTS-y	+= u-boot.img
 endif
 endif
 
+endif
+
+ifndef CONFIG_BINMAN
 include $(srctree)/arch/arm/mach-k3/config_secure.mk
+endif
