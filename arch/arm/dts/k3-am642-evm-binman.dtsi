@@ -11,9 +11,26 @@
 
 #ifdef CONFIG_TARGET_AM642_A53_EVM
 
+#ifdef CONFIG_TI_SECURE_DEVICE
+#define TISPL "tispl.bin_HS"
+#define UBOOT_IMG "u-boot.img_HS"
+#else
+#define TISPL "tispl.bin"
+#define UBOOT_IMG "u-boot.img"
+#endif
+
+#define SPL_NODTB "spl/u-boot-spl-nodtb.bin"
+#define SPL_AM642_EVM_DTB "spl/dts/k3-am642-evm.dtb"
+#define SPL_AM642_SK_DTB "spl/dts/k3-am642-sk.dtb"
+
+#define UBOOT_NODTB "u-boot-nodtb.bin"
+#define AM642_EVM_DTB "arch/arm/dts/k3-am642-evm.dtb"
+#define AM642_SK_DTB "arch/arm/dts/k3-am642-sk.dtb"
+#define AM642_NAND_DTB "arch/arm/dts/k3-am642-evm-nand.dtbo"
+
 &binman {
 	ti-spl {
-		filename = "tispl.bin";
+		filename = TISPL;
 		pad-byte = <0xff>;
 
 		fit {
@@ -69,8 +86,12 @@
 					compression = "none";
 					load = <0x80080000>;
 					entry = <0x80080000>;
+#ifdef CONFIG_TI_SECURE_DEVICE
+					ti-secure {
+#else
 					blob {
-						filename = "spl/u-boot-spl-nodtb.bin";
+#endif
+						filename = SPL_NODTB;
 					};
 				};
 
@@ -79,8 +100,12 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+#ifdef CONFIG_TI_SECURE_DEVICE
+					ti-secure {
+#else
 					blob {
-						filename = "arch/arm/dts/k3-am642-evm.dtb";
+#endif
+						filename = SPL_AM642_EVM_DTB;
 					};
 				};
 
@@ -89,8 +114,12 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+#ifdef CONFIG_TI_SECURE_DEVICE
+					ti-secure {
+#else
 					blob {
-						filename = "arch/arm/dts/k3-am642-sk.dtb";
+#endif
+						filename = SPL_AM642_SK_DTB;
 					};
 				};
 
@@ -99,8 +128,12 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+#ifdef CONFIG_TI_SECURE_DEVICE
+					ti-secure {
+#else
 					blob {
-						filename = "arch/arm/dts/k3-am642-evm-nand.dtbo";
+#endif
+						filename = AM642_NAND_DTB;
 					};
 				};
 			};
@@ -135,7 +168,7 @@
 
 &binman {
 	u-boot {
-		filename = "u-boot.img";
+		filename = UBOOT_IMG;
 		pad-byte = <0xff>;
 
 		fit {
@@ -149,7 +182,12 @@
 					arch = "arm";
 					compression = "none";
 					load = <CONFIG_SYS_TEXT_BASE>;
-					u-boot-nodtb {
+#ifdef CONFIG_TI_SECURE_DEVICE
+					ti-secure {
+#else
+					blob {
+#endif
+						filename = UBOOT_NODTB;
 					};
 					hash {
 						algo = "crc32";
@@ -161,8 +199,12 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+#ifdef CONFIG_TI_SECURE_DEVICE
+					ti-secure {
+#else
 					blob {
-						filename = "arch/arm/dts/k3-am642-evm.dtb";
+#endif
+						filename = AM642_EVM_DTB;
 					};
 					hash {
 						algo = "crc32";
@@ -174,8 +216,12 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+#ifdef CONFIG_TI_SECURE_DEVICE
+					ti-secure {
+#else
 					blob {
-						filename = "arch/arm/dts/k3-am642-sk.dtb";
+#endif
+						filename = AM642_SK_DTB;
 					};
 					hash {
 						algo = "crc32";
@@ -187,8 +233,12 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+#ifdef CONFIG_TI_SECURE_DEVICE
+					ti-secure {
+#else
 					blob {
-						filename = "arch/arm/dts/k3-am642-evm-nand.dtbo";
+#endif
+						filename = AM642_NAND_DTB;
 					};
 					hash {
 						algo = "crc32";
