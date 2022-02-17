@@ -81,6 +81,7 @@ SCP_DATA              = b'scp'
 TEST_FDT1_DATA        = b'fdt1'
 TEST_FDT2_DATA        = b'test-fdt2'
 ENV_DATA              = b'var1=1\nvar2="2"'
+TI_UNSECURE_DATA      = b'this is some unsecure data'
 
 # Subdirectory of the input dir to use to put test FDTs
 TEST_FDT_SUBDIR       = 'fdts'
@@ -189,6 +190,7 @@ class TestFunctional(unittest.TestCase):
                                       TEST_FDT2_DATA)
 
         TestFunctional._MakeInputFile('env.txt', ENV_DATA)
+        TestFunctional._MakeInputFile('ti_unsecure.bin', TI_UNSECURE_DATA)
 
         # Travis-CI may have an old lz4
         cls.have_lz4 = True
@@ -4145,6 +4147,12 @@ class TestFunctional(unittest.TestCase):
             'size': len(data),
             }
         self.assertEqual(expected, props)
+
+    def testPackTisecure(self):
+        """Test that an image with a TI secured binary can be created"""
+        data = self._DoReadFile('187_ti_secure.dts')
+	securedata = tools.ReadFile('ti_unsecure.bin_HS')
+	self.assertEquals(data, securedata)
 
 
 if __name__ == "__main__":
