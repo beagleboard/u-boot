@@ -28,8 +28,8 @@
 					arch = "arm64";
 					compression = "none";
 					os = "arm-trusted-firmware";
-					load = <0x701c0000>;
-					entry = <0x701c0000>;
+					load = <CONFIG_K3_ATF_LOAD_ADDR>;
+					entry = <CONFIG_K3_ATF_LOAD_ADDR>;
 					atf-bl31 {
 						filename = "bl31.bin";
 					};
