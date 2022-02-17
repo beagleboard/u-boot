@@ -158,3 +158,15 @@
 		};
 	};
 };
+
+&gpmc0 {
+	u-boot,dm-spl;
+};
+
+&elm0 {
+	u-boot,dm-spl;
+};
+
+&main_gpio0 {
+	u-boot,dm-spl;
+};
