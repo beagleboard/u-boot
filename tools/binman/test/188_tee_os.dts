@@ -7,10 +7,8 @@
 	#size-cells = <1>;
 
 	binman {
-		size = <16>;
-
-		atf-bl32 {
-			filename = "bl32.bin";
+		tee-os {
+			filename = "tee-pager.bin";
 		};
 	};
 };

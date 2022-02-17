@@ -1329,9 +1329,6 @@ u-boot.ldr:	u-boot
 ifneq ($(ATF),)
 BL31 = $(ATF)
 endif
-ifneq ($(TEE),)
-BL32 = $(TEE)
-endif
 default_dt := $(if $(DEVICE_TREE),$(DEVICE_TREE),$(CONFIG_DEFAULT_DEVICE_TREE))
 quiet_cmd_binman = BINMAN  $@
 cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
@@ -1341,7 +1338,7 @@ cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
 		-I . -I $(srctree) -I $(srctree)/board/$(BOARDDIR) \
 		-I arch/$(ARCH)/dts -a of-list=$(CONFIG_OF_LIST) \
 		-a atf-bl31-path=${BL31} \
-		-a atf-bl32-path=${BL32} \
+		-a tee-os-path=${TEE} \
 		-a default-dt=$(default_dt) \
 		-a scp-path=$(SCP) \
 		$(BINMAN_$(@F))

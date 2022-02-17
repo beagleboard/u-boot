@@ -25,12 +25,12 @@ about ATF.
 
 
 
-Entry: atf-bl32: Entry containing an OP-TEE Trusted OS (TEE) BL32 blob
--------------------------------------------------------------------------
+Entry: tee-os: Entry containing an OP-TEE Trusted OS (TEE) blob
+---------------------------------------------------------------
 
 Properties / Entry arguments:
-    - atf-bl32-path: Filename of file to read into entry. This is typically
-        called bl32.bin or bl32.elf
+    - tee-os-path: Filename of file to read into entry. This is typically
+        called tee-pager.bin
 
 This entry holds the run-time firmware, typically started by U-Boot SPL.
 See the U-Boot README for your architecture or board for how to use it. See
