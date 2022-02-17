@@ -43,8 +43,8 @@
 					os = "tee";
 					load = <0x9e800000>;
 					entry = <0x9e800000>;
-					atf-bl32 {
-						filename = "bl32.bin";
+					tee-os {
+						filename = "tee-pager_v2.bin";
 					};
 				};
 
