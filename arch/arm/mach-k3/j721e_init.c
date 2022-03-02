@@ -341,7 +341,7 @@ u32 spl_mmc_boot_mode(const u32 boot_device)
 {
 	switch (boot_device) {
 	case BOOT_DEVICE_MMC1:
-		return MMCSD_MODE_EMMCBOOT;
+		return MMCSD_MODE_FS;
 	case BOOT_DEVICE_MMC2:
 		return MMCSD_MODE_FS;
 	default:
