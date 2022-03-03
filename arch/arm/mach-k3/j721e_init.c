@@ -191,8 +191,6 @@ void do_dt_magic(void)
 }
 #endif
 
-void __asm_k3_enable_serror(void);
-
 void board_init_f(ulong dummy)
 {
 #if defined(CONFIG_CPU_V7R) && defined(CONFIG_K3_AVS0)
@@ -216,8 +214,6 @@ void board_init_f(ulong dummy)
 #ifdef CONFIG_CPU_V7R
 	disable_linefill_optimization();
 	setup_k3_mpu_regions();
-#else
-	__asm_k3_enable_serror();
 #endif
 
 	/* Init DM early */
