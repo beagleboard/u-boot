@@ -320,8 +320,8 @@ static ulong ti_clk_set_rate(struct clk *clk, ulong rate)
 		if (new_diff > diff) {
 			new_rate = clk_set_rate(clkp, rate / div);
 		} else {
-			debug("%s: Using better rate %u that gives diff %d\n",
-			       __func__, new_rate, new_diff);
+			debug("%s: Using better rate %lu that gives diff %lu\n",
+			      __func__, new_rate, new_diff);
 		}
 	}
 
