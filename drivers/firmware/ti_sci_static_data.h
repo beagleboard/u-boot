@@ -118,6 +118,13 @@ static struct ti_sci_resource_static_data rm_static_data[] = {
 };
 #endif /* CONFIG_TARGET_J721S2_R5_EVM */
 
+#if IS_ENABLED(CONFIG_TARGET_AM625_R5_EVM)
+static struct ti_sci_resource_static_data rm_static_data[] = {
+	{ },
+};
+
+#endif /* CONFIG_TARGET_AM625_R5_EVM */
+
 #else
 static struct ti_sci_resource_static_data rm_static_data[] = {
 	{ },
