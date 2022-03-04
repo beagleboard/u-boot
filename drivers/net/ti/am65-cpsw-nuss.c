@@ -798,7 +798,7 @@ out:
 static const struct udevice_id am65_cpsw_nuss_ids[] = {
 	{ .compatible = "ti,am654-cpsw-nuss" },
 	{ .compatible = "ti,j721e-cpsw-nuss" },
-	{ .compatible = "ti,am64-cpsw-nuss" },
+	{ .compatible = "ti,am642-cpsw-nuss" },
 	{ }
 };
 

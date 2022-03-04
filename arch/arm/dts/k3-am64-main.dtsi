@@ -545,7 +545,7 @@
 	};
 
 	cpsw3g: ethernet@8000000 {
-		compatible = "ti,am64-cpsw-nuss";
+		compatible = "ti,am642-cpsw-nuss";
 		#address-cells = <2>;
 		#size-cells = <2>;
 		reg = <0x0 0x8000000 0x0 0x200000>;
