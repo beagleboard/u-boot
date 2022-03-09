@@ -56,6 +56,10 @@
 
 #define CONFIG_SYS_NAND_BASE            0x51000000
 
+#if defined(CONFIG_ENV_IS_IN_NAND)
+#define CONFIG_SYS_ENV_SECT_SIZE        CONFIG_SYS_NAND_BLOCK_SIZE
+#endif
+
 /*-- end NAND config --*/
 
 #ifdef CONFIG_SYS_K3_SPL_ATF
