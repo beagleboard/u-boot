@@ -67,8 +67,8 @@ CONFIG_CMD_MMC=y
 CONFIG_CMD_MTD=y
 CONFIG_CMD_USB=y
 CONFIG_CMD_TIME=y
-CONFIG_MTDIDS_DEFAULT="nor0=fc40000.spi.0"
-CONFIG_MTDPARTS_DEFAULT="mtdparts=fc40000.spi.0:1m(ospi.tiboot3),2m(ospi.tispl),4m(ospi.u-boot),256k(ospi.env),256k(ospi.env.backup),57088k@8m(ospi.rootfs),256k(ospi.phypattern)"
+CONFIG_MTDIDS_DEFAULT="nor0=fc40000.spi.0,nand0=omap2-nand.0"
+CONFIG_MTDPARTS_DEFAULT="mtdparts=fc40000.spi.0:1m(ospi.tiboot3),2m(ospi.tispl),4m(ospi.u-boot),256k(ospi.env),256k(ospi.env.backup),57088k@8m(ospi.rootfs),256k(ospi.phypattern);omap2-nand.0:2m(NAND.tiboot3),2m(NAND.tispl),2m(NAND.tiboot3.backup),4m(NAND.u-boot),256k(NAND.u-boot-env),256k(NAND.u-boot-env.backup),-(NAND.file-system)"
 CONFIG_CMD_UBI=y
 CONFIG_OF_CONTROL=y
 CONFIG_SPL_OF_CONTROL=y
@@ -201,3 +201,4 @@ CONFIG_SPL_NAND_ECC=y
 CONFIG_SPL_MTD_SUPPORT=y
 CONFIG_SPL_LOAD_FIT_APPLY_OVERLAY=y
 CONFIG_SPL_BOARD_INIT=y
+CONFIG_CMD_MTDPARTS=y
