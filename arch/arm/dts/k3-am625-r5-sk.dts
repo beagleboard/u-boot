@@ -14,6 +14,8 @@
 	aliases {
 		remoteproc0 = &sysctrler;
 		remoteproc1 = &a53_0;
+		serial0 = &wkup_uart0;
+		serial3 = &main_uart1;
 	};
 
 	chosen {
@@ -85,7 +87,7 @@
 	};
 };
 
-&main_pmx0 {
+&mcu_pmx0 {
 	u-boot,dm-spl;
 	wkup_uart0_pins_default: wkup-uart0-pins-default {
 		pinctrl-single,pins = <
@@ -96,7 +98,10 @@
 		>;
 		u-boot,dm-spl;
 	};
+};
 
+&main_pmx0 {
+	u-boot,dm-spl;
 	main_uart1_pins_default: main-uart1-pins-default {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x194, PIN_INPUT, 2) /* (B19) MCASP0_AXR3.UART1_CTSn */
