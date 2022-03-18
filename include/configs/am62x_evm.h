@@ -36,10 +36,11 @@
  * Link BSS to be within SPL in a dedicated region located near the top of
  * the MCU SRAM, this way making it available also before relocation. Note
  * that we are not using the actual top of the MCU SRAM as there is a memory
- * location filled in by the boot ROM that we want to read out without any
- * interference from the C context.
+ * location allocated for Device Manager data and some memory filled in by
+ * the boot ROM that we want to read out without any interference from the
+ * C context.
  */
-#define CONFIG_SPL_BSS_START_ADDR	(CONFIG_SYS_K3_BOOT_PARAM_TABLE_INDEX -\
+#define CONFIG_SPL_BSS_START_ADDR	(0x43c3c800 -\
 					 CONFIG_SPL_BSS_MAX_SIZE)
 /* Set the stack right below the SPL BSS section */
 #define CONFIG_SYS_INIT_SP_ADDR         0x7000ffff
