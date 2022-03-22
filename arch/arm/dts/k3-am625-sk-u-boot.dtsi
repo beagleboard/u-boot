@@ -11,6 +11,7 @@
 	};
 
 	aliases {
+		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
 	};
 };
@@ -96,6 +97,10 @@
 };
 
 &main_i2c0_pins_default {
+	u-boot,dm-spl;
+};
+
+&sdhci0 {
 	u-boot,dm-spl;
 };
 
