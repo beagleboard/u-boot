@@ -294,17 +294,20 @@ static const struct dev_clk soc_dev_clk_data[] = {
 	DEV_CLK(161, 3, "main_usb0_refclk_sel_out0"),
 	DEV_CLK(161, 4, "gluelogic_hfosc0_clkout"),
 	DEV_CLK(161, 5, "postdiv4_16ff_main_0_hsdivout8_clk"),
+	DEV_CLK(161, 10, "board_0_tck_out"),
 	DEV_CLK(162, 0, "sam62_pll_ctrl_wrap_main_0_chip_div1_clk_clk"),
 	DEV_CLK(162, 1, "sam62_pll_ctrl_wrap_main_0_chip_div1_clk_clk"),
 	DEV_CLK(162, 2, "sam62_pll_ctrl_wrap_main_0_chip_div1_clk_clk"),
 	DEV_CLK(162, 3, "main_usb1_refclk_sel_out0"),
 	DEV_CLK(162, 4, "gluelogic_hfosc0_clkout"),
 	DEV_CLK(162, 5, "postdiv4_16ff_main_0_hsdivout8_clk"),
+	DEV_CLK(162, 10, "board_0_tck_out"),
 	DEV_CLK(166, 3, "hsdiv0_16fft_main_8_hsdivout0_clk"),
 	DEV_CLK(166, 5, "sam62_pll_ctrl_wrap_main_0_chip_div1_clk_clk"),
 	DEV_CLK(169, 0, "sam62_pll_ctrl_wrap_main_0_chip_div1_clk_clk"),
 	DEV_CLK(169, 1, "sam62_pll_ctrl_wrap_main_0_chip_div1_clk_clk"),
 	DEV_CLK(170, 0, "hsdiv0_16fft_main_12_hsdivout0_clk"),
+	DEV_CLK(170, 1, "board_0_tck_out"),
 	DEV_CLK(170, 2, "sam62_pll_ctrl_wrap_main_0_chip_div1_clk_clk"),
 };
 
@@ -312,5 +315,5 @@ const struct ti_k3_clk_platdata am62x_clk_platdata = {
 	.clk_list = clk_list,
 	.clk_list_cnt = 80,
 	.soc_dev_clk_data = soc_dev_clk_data,
-	.soc_dev_clk_data_cnt = 108,
+	.soc_dev_clk_data_cnt = 111,
 };
