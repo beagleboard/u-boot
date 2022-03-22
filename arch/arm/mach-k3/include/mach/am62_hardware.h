@@ -33,6 +33,8 @@
 /* Primary Bootmode MMC Config macros */
 #define MAIN_DEVSTAT_PRIMARY_MMC_PORT_MASK	0x4
 #define MAIN_DEVSTAT_PRIMARY_MMC_PORT_SHIFT	2
+#define MAIN_DEVSTAT_PRIMARY_MMC_FS_RAW_MASK	0x1
+#define MAIN_DEVSTAT_PRIMARY_MMC_FS_RAW_SHIFT	0
 
 /*
  * The CTRL_MMR0 memory space is divided into several equally-spaced
