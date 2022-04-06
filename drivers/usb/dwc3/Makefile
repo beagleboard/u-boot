@@ -7,6 +7,7 @@ dwc3-y					:= core.o
 obj-$(CONFIG_USB_DWC3_GADGET)		+= gadget.o ep0.o
 
 obj-$(CONFIG_USB_DWC3_OMAP)		+= dwc3-omap.o
+obj-$(CONFIG_USB_DWC3_AM62)		+= dwc3-am62.o
 obj-$(CONFIG_USB_DWC3_MESON_G12A)	+= dwc3-meson-g12a.o
 obj-$(CONFIG_USB_DWC3_MESON_GXL)	+= dwc3-meson-gxl.o
 obj-$(CONFIG_USB_DWC3_GENERIC)		+= dwc3-generic.o
