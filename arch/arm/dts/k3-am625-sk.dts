@@ -21,6 +21,8 @@
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
 		mmc2 = &sdhci2;
+		usb0 = &usb0;
+		usb1 = &usb1;
 	};
 
 	chosen {
@@ -130,6 +132,13 @@
 			function = LED_FUNCTION_HEARTBEAT;
 			default-state = "off";
 		};
+	};
+
+	extcon_usb0: extcon-usb0 {
+		compatible = "linux,extcon-usb-gpio";
+		id-gpios = <&main_gpio1 50 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&extcon_usb0_gpio_id_pins_default>;
 	};
 };
 
@@ -241,6 +250,18 @@
 			AM62X_IOPAD(0x07c, PIN_OUTPUT, 7) /* (P25) GPMC0_CLK.GPIO0_31 */
 		>;
 	};
+
+	extcon_usb0_gpio_id_pins_default: extcon-usb0-gpio-id-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x254, PIN_INPUT_PULLUP, 7) /* (C20) USB0_DRVVBUS.GPIO1_50 */
+		>;
+	};
+
+	main_usb1_pins_default: main-usb1-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x0258, PIN_OUTPUT, 0) /* (F18) USB1_DRVVBUS */
+		>;
+	};
 };
 
 &wkup_uart0 {
@@ -344,6 +365,20 @@
 	pinctrl-0 = <&main_mmc1_pins_default>;
 	ti,driver-strength-ohm = <50>;
 	disable-wp;
+};
+
+&usbss0 {
+	ti,vbus-divider;
+};
+
+&usb0 {
+	extcon = <&extcon_usb0>;
+};
+
+&usb1 {
+	dr_mode = "host";
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_usb1_pins_default>;
 };
 
 &cpsw3g {

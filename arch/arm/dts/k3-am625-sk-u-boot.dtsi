@@ -112,6 +112,29 @@
 	u-boot,dm-spl;
 };
 
+&usbss0 {
+	u-boot,dm-spl;
+};
+
+&usb0 {
+	dr_mode = "peripheral";
+	/* Since role switching is not supported in U-Boot */
+	/delete-property/ extcon;
+	u-boot,dm-spl;
+};
+
+&usbss1 {
+	u-boot,dm-spl;
+};
+
+&usb1 {
+	u-boot,dm-spl;
+};
+
+&main_usb1_pins_default {
+	u-boot,dm-spl;
+};
+
 &cpsw3g {
 	reg = <0x0 0x8000000 0x0 0x200000>,
 	      <0x0 0x43000200 0x0 0x8>;
