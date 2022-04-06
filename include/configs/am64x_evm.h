@@ -171,14 +171,14 @@
 		"run run_kern\0"
 
 #define EXTRA_ENV_AM642_BOARD_SETTINGS_NAND				\
-	"bootpart=NAND.file-system\0"					\
-	"bootvolume=ubi0:rootfs\0"					\
+	"nbootpart=NAND.file-system\0"					\
+	"nbootvolume=ubi0:rootfs\0"					\
 	"bootdir=/boot\0"						\
 	"rd_spec=-\0"							\
-	"ubi_init=ubi part ${bootpart}; ubifsmount ${bootvolume};\0"	\
+	"ubi_init=ubi part ${nbootpart}; ubifsmount ${nbootvolume};\0"	\
 	"args_nand=setenv bootargs console=${console} "			\
-		"${optargs} ubi.mtd=${bootpart} "			\
-		"root=${bootvolume} rootfstype=ubifs\0"			\
+		"${optargs} ubi.mtd=${nbootpart} "			\
+		"root=${nbootvolume} rootfstype=ubifs\0"			\
 	"init_nand=run args_all args_nand ubi_init\0"			\
 	"get_fdt_nand=ubifsload ${fdtaddr} ${bootdir}/${fdtfile};\0"	\
 	"get_overlay_nand="						\
