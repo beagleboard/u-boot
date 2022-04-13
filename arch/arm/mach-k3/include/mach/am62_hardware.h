@@ -36,6 +36,13 @@
 #define MAIN_DEVSTAT_PRIMARY_MMC_FS_RAW_MASK	0x1
 #define MAIN_DEVSTAT_PRIMARY_MMC_FS_RAW_SHIFT	0
 
+/* Primary Bootmode USB Config macros */
+#define MAIN_DEVSTAT_PRIMARY_USB_MODE_SHIFT	1
+#define MAIN_DEVSTAT_PRIMARY_USB_MODE_MASK	0x02
+
+/* Backup Bootmode USB Config macros */
+#define MAIN_DEVSTAT_BACKUP_USB_MODE_MASK	0x01
+
 /*
  * The CTRL_MMR0 memory space is divided into several equally-spaced
  * partitions, so defining the partition size allows us to determine
