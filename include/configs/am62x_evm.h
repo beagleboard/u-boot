@@ -21,10 +21,11 @@
 #define CONFIG_SPL_FS_LOAD_PAYLOAD_NAME	"tispl.bin"
 #endif
 
-#define CONFIG_SPL_MAX_SIZE		CONFIG_SYS_K3_MAX_DOWNLODABLE_IMAGE_SIZE
 #if defined(CONFIG_TARGET_AM625_A53_EVM)
+#define CONFIG_SPL_MAX_SIZE		SZ_1M
 #define CONFIG_SYS_INIT_SP_ADDR         (CONFIG_SPL_TEXT_BASE + SZ_4M)
 #else
+#define CONFIG_SPL_MAX_SIZE		CONFIG_SYS_K3_MAX_DOWNLODABLE_IMAGE_SIZE
 /*
  * Maximum size in memory allocated to the SPL BSS. Keep it as tight as
  * possible (to allow the build to go through), as this directly affects
