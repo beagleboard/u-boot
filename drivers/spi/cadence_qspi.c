@@ -893,7 +893,7 @@ static void cadence_spi_mem_do_calibration(struct spi_slave *spi,
 	struct cadence_spi_platdata *plat = bus->platdata;
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(CADENCE_QSPI_PHY) || !plat->has_phy)
+	if (!IS_ENABLED(CONFIG_CADENCE_QSPI_PHY) || !plat->has_phy)
 		return;
 
 	plat->phy_read_op = *op;
