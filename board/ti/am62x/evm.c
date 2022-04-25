@@ -148,10 +148,24 @@ int board_late_init(void)
 }
 #endif
 
+#define CTRLMMR_USB0_PHY_CTRL	0x43004008
+#define CTRLMMR_USB1_PHY_CTRL	0x43004018
+#define CORE_VOLTAGE		0x80000000
+
 #ifdef CONFIG_SPL_BOARD_INIT
 void spl_board_init(void)
 {
 	u32 val;
+
+	/* Set USB0 PHY core voltage to 0.85V */
+	val = readl(CTRLMMR_USB0_PHY_CTRL);
+	val &= ~(CORE_VOLTAGE);
+	writel(val, CTRLMMR_USB0_PHY_CTRL);
+
+	/* Set USB1 PHY core voltage to 0.85V */
+	val = readl(CTRLMMR_USB1_PHY_CTRL);
+	val &= ~(CORE_VOLTAGE);
+	writel(val, CTRLMMR_USB1_PHY_CTRL);
 
 	/* We have 32k crystal, so lets enable it */
 	val = readl(MCU_CTRL_LFXOSC_CTRL);
