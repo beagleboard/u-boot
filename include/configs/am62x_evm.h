@@ -89,7 +89,7 @@
 		"${bootdir}/${name_fit}\0"				\
 	"partitions=" PARTS_DEFAULT
 
-#define EXTRA_ENV_AM642_BOARD_SETTING_USBMSC				\
+#define EXTRA_ENV_AM625_BOARD_SETTING_USBMSC				\
 	"args_usb=run finduuid;setenv bootargs console=${console} "	\
 		"${optargs} "						\
 		"root=PARTUUID=${uuid} rw "				\
@@ -130,7 +130,7 @@
 	EXTRA_ENV_AM625_BOARD_SETTINGS					\
 	EXTRA_ENV_AM625_BOARD_SETTINGS_MMC				\
 	EXTRA_ENV_DFUARGS						\
-	EXTRA_ENV_AM642_BOARD_SETTING_USBMSC
+	EXTRA_ENV_AM625_BOARD_SETTING_USBMSC
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
