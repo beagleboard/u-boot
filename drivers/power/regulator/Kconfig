@@ -353,3 +353,12 @@ config DM_REGULATOR_TPS65941
 	TPS65941 series of PMICs have 5 single phase BUCKs that can also
 	be configured in multi phase modes & 4 LDOs. The driver implements
 	get/set api for value and enable.
+
+config DM_REGULATOR_TPS65219
+	bool "Enable driver for TPS65219 PMIC regulators"
+        depends on PMIC_TPS65219
+	help
+	This enables implementation of driver-model regulator uclass
+	features for REGULATOR TPS65219 and the family of TPS65219 PMICs.
+	TPS65219 series of PMICs have 3 single phase BUCKs & 4 LDOs.
+	The driver implements get/set api for value and enable.
