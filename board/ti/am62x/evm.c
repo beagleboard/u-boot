@@ -175,5 +175,8 @@ void spl_board_init(void)
 	/* Make sure to mux up to take the SoC 32k from the crystal */
 	writel(MCU_CTRL_DEVICE_CLKOUT_LFOSC_SELECT_VAL,
 	       MCU_CTRL_DEVICE_CLKOUT_32K_CTRL);
+
+	/* Init DRAM size for R5/A53 SPL */
+	dram_init_banksize();
 }
 #endif
