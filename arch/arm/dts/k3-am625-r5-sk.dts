@@ -57,6 +57,16 @@
 		ti,sci-host-id = <10>;
 		u-boot,dm-spl;
 	};
+
+	dm_tifs: dm-tifs {
+		compatible = "ti,j721e-dm-sci";
+		ti,host-id = <36>;
+		ti,secure-host;
+		mbox-names = "rx", "tx";
+		mboxes= <&secure_proxy_main 22>,
+			<&secure_proxy_main 23>;
+		u-boot,dm-spl;
+	};
 };
 
 &dmsc {
@@ -132,4 +142,8 @@
 &ospi0 {
 	reg = <0x00 0x0fc40000 0x00 0x100>,
 	      <0x00 0x60000000 0x00 0x08000000>;
+};
+
+&main_pktdma {
+	ti,sci = <&dm_tifs>;
 };
