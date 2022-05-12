@@ -59,8 +59,16 @@ static int ab_control_default(struct bootloader_control *abc)
 	abc->version = BOOT_CTRL_VERSION;
 	abc->nb_slot = NUM_SLOTS;
 	memset(abc->reserved0, 0, sizeof(abc->reserved0));
-	for (i = 0; i < abc->nb_slot; ++i)
+	for (i = 0; i < abc->nb_slot; ++i) {
 		abc->slot_info[i] = metadata;
+
+		/* One slot should always have higher priority than other slots,
+		 * otherwise we can ping-pong between slots based on tries_remaining.
+		 * Since the default slot is _a, make _a highest priority.
+		 */
+		if (i != 0)
+			abc->slot_info[i].priority = metadata.priority - 1;
+	}
 
 	memset(abc->reserved1, 0, sizeof(abc->reserved1));
 	abc->crc32_le = ab_control_compute_crc(abc);
@@ -153,6 +161,11 @@ static int ab_control_store(struct blk_desc *dev_desc,
 	return 0;
 }
 
+static bool is_slot_bootable(const struct slot_metadata* slot)
+{
+	return slot->tries_remaining > 0 || slot->successful_boot;
+}
+
 /**
  * Compare two slots.
  *
@@ -166,19 +179,14 @@ static int ab_control_store(struct blk_desc *dev_desc,
 static int ab_compare_slots(const struct slot_metadata *a,
 			    const struct slot_metadata *b)
 {
-	/* Higher priority is better */
-	if (a->priority != b->priority)
-		return b->priority - a->priority;
+	/* Pick the highest priority slot that can be considered bootable. */
+	if (a->priority > b->priority && is_slot_bootable(a))
+		return -1;
+	if (b->priority > a->priority && is_slot_bootable(b))
+		return 1;
 
-	/* Higher successful_boot value is better, in case of same priority */
-	if (a->successful_boot != b->successful_boot)
-		return b->successful_boot - a->successful_boot;
-
-	/* Higher tries_remaining is better to ensure round-robin */
-	if (a->tries_remaining != b->tries_remaining)
-		return b->tries_remaining - a->tries_remaining;
-
-	return 0;
+	/* The higher priority slot is not bootable, so pick the slot that is. */
+	return b->successful_boot - a->successful_boot;
 }
 
 int ab_select_slot(struct blk_desc *dev_desc, struct disk_partition *part_info,
@@ -267,6 +275,12 @@ int ab_select_slot(struct blk_desc *dev_desc, struct disk_partition *part_info,
 				     &abc->slot_info[slot]) < 0) {
 			slot = i;
 		}
+	}
+
+	/* Fail to boot normally if there is no bootable slot. */
+	if (normal_boot && !is_slot_bootable(&abc->slot_info[slot])) {
+		log_err("ANDROID: No bootable slot was found.\n");
+		return -EINVAL;
 	}
 
 	/* Note that we only count the boot attempt as a valid try when performing
