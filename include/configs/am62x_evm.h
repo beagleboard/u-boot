@@ -53,7 +53,116 @@
 
 #define PARTS_DEFAULT \
 	/* Linux partitions */ \
-	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0"
+	"uuid_disk=${uuid_gpt_disk};" \
+	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0" \
+	/* Android partitions */ \
+	"partitions_android=" \
+	"uuid_disk=${uuid_gpt_disk};" \
+	"name=bootloader,start=5M,size=8M,uuid=${uuid_gpt_bootloader};" \
+	"name=tiboot3,start=4M,size=1M,uuid=${uuid_gpt_tiboot3};" \
+	"name=uboot-env,start=13M,size=512K,uuid=${uuid_gpt_env};" \
+	"name=misc,start=13824K,size=512K,uuid=${uuid_gpt_misc};" \
+	"name=boot_a,size=40M,uuid=${uuid_gpt_boot_a};" \
+	"name=boot_b,size=40M,uuid=${uuid_gpt_boot_b};" \
+	"name=dtbo_a,size=8M,uuid=${uuid_gpt_dtbo_a};" \
+	"name=dtbo_b,size=8M,uuid=${uuid_gpt_dtbo_b};" \
+	"name=vbmeta_a,size=64K,uuid=${uuid_gpt_vbmeta_a};" \
+	"name=vbmeta_b,size=64K,uuid=${uuid_gpt_vbmeta_b};" \
+	"name=super,size=4608M,uuid=${uuid_gpt_super};" \
+	"name=metadata,size=16M,uuid=${uuid_gpt_metadata};" \
+	"name=userdata,size=-,uuid=${uuid_gpt_userdata}\0"
+
+/* ANDROID BOOT */
+#ifndef BOOT_PARTITION
+#define BOOT_PARTITION "boot"
+#endif
+
+#ifndef CONTROL_PARTITION
+#define CONTROL_PARTITION "misc"
+#endif
+
+#if defined(CONFIG_CMD_AVB)
+#define AVB_VERIFY_CHECK \
+	"if test \"${force_avb}\" -eq 1; then " \
+		"if run avb_verify; then " \
+			"echo AVB verification OK.;" \
+			"setenv bootargs \"$bootargs $avb_bootargs\";" \
+		"else " \
+			"echo AVB verification failed.;" \
+		"exit; fi;" \
+	"else " \
+		"setenv bootargs \"$bootargs androidboot.verifiedbootstate=orange\";" \
+		"echo Running without AVB...; "\
+	"fi;"
+
+#define AVB_VERIFY_CMD "avb_verify=avb init ${mmcdev}; avb verify $slot_suffix;\0"
+#else
+#define AVB_VERIFY_CHECK ""
+#define AVB_VERIFY_CMD ""
+#endif
+
+#if defined(CONFIG_CMD_AB_SELECT)
+#define ANDROIDBOOT_GET_CURRENT_SLOT_CMD "get_current_slot=" \
+	"if part number mmc ${mmcdev} " CONTROL_PARTITION " control_part_number; " \
+	"then " \
+		"echo " CONTROL_PARTITION \
+			" partition number:${control_part_number};" \
+		"ab_select current_slot mmc ${mmcdev}:${control_part_number};" \
+	"else " \
+		"echo " CONTROL_PARTITION " partition not found;" \
+	"fi;\0"
+
+#define AB_SELECT_SLOT \
+	"run get_current_slot; " \
+	"if test -e \"${current_slot}\"; " \
+	"then " \
+		"setenv slot_suffix _${current_slot}; " \
+	"else " \
+		"echo current_slot not found;" \
+		"exit;" \
+	"fi;"
+
+#define AB_SELECT_ARGS \
+	"setenv bootargs_ab androidboot.slot_suffix=${slot_suffix}; " \
+	"echo A/B cmdline addition: ${bootargs_ab};" \
+	"setenv bootargs ${bootargs} ${bootargs_ab};"
+
+#define AB_BOOTARGS " androidboot.force_normal_boot=1"
+#define RECOVERY_PARTITION "boot"
+#else
+#define AB_SELECT_SLOT ""
+#define AB_SELECT_ARGS " "
+#define ANDROIDBOOT_GET_CURRENT_SLOT_CMD ""
+#define AB_BOOTARGS " "
+#define RECOVERY_PARTITION "recovery"
+#endif
+
+/*
+ * Prepares complete device tree blob for current board (for Android boot).
+ *
+ * Boot image or recovery image should be loaded into $loadaddr prior to running
+ * these commands. The logic of these commnads is next:
+ *
+ *   1. Read correct DTB for current SoC/board from boot image in $loadaddr
+ *      to $fdtaddr
+ *   2. Merge all needed DTBO for current board from 'dtbo' partition into read
+ *      DTB
+ *   3. User should provide $fdtaddr as 3rd argument to 'bootm'
+ */
+#define PREPARE_FDT \
+	"echo Preparing FDT...; " \
+	"if test $board_name = am62x_skevm; then " \
+		"echo \"  Reading DTB for am62x_skevm...\"; " \
+		"setenv dtb_index 0;" \
+	"else " \
+		"echo Error: Android boot is not supported for $board_name; " \
+		"exit; " \
+	"fi; " \
+	"abootimg get dtb --index=$dtb_index dtb_start dtb_size; " \
+	"cp.b $dtb_start $fdt_addr_r $dtb_size; " \
+	"fdt addr $fdt_addr_r  0x80000; " \
+
+#define BOOT_CMD "bootm ${loadaddr} ${loadaddr} ${fdt_addr_r};"
 
 /* U-Boot general configuration */
 #define EXTRA_ENV_AM625_BOARD_SETTINGS					\
@@ -118,14 +227,148 @@
 		"run get_fdt_usb;"					\
 		"run run_kern\0"
 
+#define BOOTENV_DEV_FASTBOOT(devtypeu, devtypel, instance) \
+	"bootcmd_fastboot=" \
+		"if test \"${android_boot}\" -eq 1; then;" \
+			"setenv run_fastboot 0;" \
+			"if gpt verify mmc ${mmcdev} ${partitions}; then; " \
+			"else " \
+				"echo Broken MMC partition scheme;" \
+				"setenv run_fastboot 1;" \
+			"fi; " \
+			"if test \"${run_fastboot}\" -eq 0; then " \
+				"if bcb load " __stringify(CONFIG_FASTBOOT_FLASH_MMC_DEV) " " \
+				CONTROL_PARTITION "; then " \
+					"if bcb test command = bootonce-bootloader; then " \
+						"echo BCB: Bootloader boot...; " \
+						"bcb clear command; bcb store; " \
+						"setenv run_fastboot 1;" \
+					"elif bcb test command = boot-fastboot; then " \
+						"echo BCB: fastboot userspace boot...; " \
+						"setenv force_recovery 1;" \
+					"fi; " \
+				"else " \
+					"echo Warning: BCB is corrupted or does not exist; " \
+				"fi;" \
+			"fi;" \
+			"if test \"${run_fastboot}\" -eq 1; then " \
+				"echo Running Fastboot...;" \
+				"fastboot " __stringify(CONFIG_FASTBOOT_USB_DEV) "; " \
+			"fi;" \
+		"fi\0"
+
+#define BOOTENV_DEV_NAME_FASTBOOT(devtypeu, devtypel, instance)	\
+		"fastboot "
+
+#define BOOTENV_DEV_RECOVERY(devtypeu, devtypel, instance) \
+	"bootcmd_recovery=" \
+		"if test \"${android_boot}\" -eq 1; then;" \
+			"setenv run_recovery 0;" \
+			"if bcb load " __stringify(CONFIG_FASTBOOT_FLASH_MMC_DEV) " " \
+			CONTROL_PARTITION "; then " \
+				"if bcb test command = boot-recovery; then; " \
+					"echo BCB: Recovery boot...; " \
+					"setenv run_recovery 1;" \
+				"fi;" \
+			"else " \
+				"echo Warning: BCB is corrupted or does not exist; " \
+			"fi;" \
+			"if test \"${skip_recovery}\" -eq 1; then " \
+				"echo Recovery skipped by environment;" \
+				"setenv run_recovery 0;" \
+			"fi;" \
+			"if test \"${force_recovery}\" -eq 1; then " \
+				"echo Recovery forced by environment;" \
+				"setenv run_recovery 1;" \
+			"fi;" \
+			"if test \"${run_recovery}\" -eq 1; then " \
+				"echo Running Recovery...;" \
+				"mmc dev ${mmcdev};" \
+				"setenv bootargs \"${bootargs} androidboot.serialno=${serial#}\";" \
+				AB_SELECT_SLOT \
+				AB_SELECT_ARGS \
+				AVB_VERIFY_CHECK \
+				"part start mmc ${mmcdev} " RECOVERY_PARTITION "${slot_suffix} boot_start;" \
+				"part size mmc ${mmcdev} " RECOVERY_PARTITION "${slot_suffix} boot_size;" \
+				"if mmc read ${loadaddr} ${boot_start} ${boot_size}; then " \
+					PREPARE_FDT \
+					"echo Running Android Recovery...;" \
+					BOOT_CMD \
+				"fi;" \
+				"echo Failed to boot Android...;" \
+				"reset;" \
+			"fi;" \
+		"fi\0"
+
+#define BOOTENV_DEV_NAME_RECOVERY(devtypeu, devtypel, instance)	\
+		"recovery "
+
+#define BOOTENV_DEV_SYSTEM(devtypeu, devtypel, instance) \
+	"bootcmd_system=" \
+		"if test \"${android_boot}\" -eq 1; then;" \
+			"echo Loading Android " BOOT_PARTITION " partition...;" \
+			"mmc dev ${mmcdev};" \
+			"setenv bootargs ${bootargs} androidboot.serialno=${serial#};" \
+			AB_SELECT_SLOT \
+			AB_SELECT_ARGS \
+			AVB_VERIFY_CHECK \
+			"part start mmc ${mmcdev} " BOOT_PARTITION "${slot_suffix} boot_start;" \
+			"part size mmc ${mmcdev} " BOOT_PARTITION "${slot_suffix} boot_size;" \
+			"if mmc read ${loadaddr} ${boot_start} ${boot_size}; then " \
+				PREPARE_FDT \
+				"setenv bootargs \"${bootargs} " AB_BOOTARGS "\"  ; " \
+				"echo Running Android...;" \
+				BOOT_CMD \
+			"fi;" \
+			"echo Failed to boot Android...;" \
+		"fi\0"
+
+#define BOOTENV_DEV_NAME_SYSTEM(devtypeu, devtypel, instance)	\
+		"system "
+
+#define BOOTENV_DEV_PANIC(devtypeu, devtypel, instance) \
+	"bootcmd_panic=" \
+		"if test \"${android_boot}\" -eq 1; then;" \
+			"fastboot " __stringify(CONFIG_FASTBOOT_USB_DEV) "; " \
+			"reset;" \
+		"fi\0"
+
+#define BOOTENV_DEV_NAME_PANIC(devtypeu, devtypel, instance)	\
+		"panic "
+
+#define EXTRA_ANDROID_ENV_SETTINGS                                     \
+	"set_android_boot=setenv android_boot 1;setenv partitions $partitions_android;setenv mmcdev 0;setenv force_avb 0;saveenv;\0" \
+	ANDROIDBOOT_GET_CURRENT_SLOT_CMD                              \
+	AVB_VERIFY_CMD                                                \
+	BOOTENV
+
+#define BOOTENV_DEV_LINUX(devtypeu, devtypel, instance) \
+	"bootcmd_linux=" \
+		"if test \"${android_boot}\" -eq 0; then;" \
+			"run findfdt; run envboot;" \
+			"run init_${boot}; run get_kern_${boot}; "\
+			"run get_fdt_${boot}; run get_overlay_${boot}; run run_kern;" \
+		"fi\0"
+
+#define BOOTENV_DEV_NAME_LINUX(devtypeu, devtypel, instance)	\
+		"linux "
+
 #define EXTRA_ENV_DFUARGS \
 	DFU_ALT_INFO_MMC \
 	DFU_ALT_INFO_EMMC \
 	DFU_ALT_INFO_RAM \
 	DFU_ALT_INFO_OSPI
 
+#define BOOT_TARGET_DEVICES(func) \
+	func(LINUX, linux, na) \
+	func(FASTBOOT, fastboot, na) \
+	func(RECOVERY, recovery, na) \
+	func(SYSTEM, system, na) \
+	func(PANIC, panic, na) \
+
 /* Incorporate settings into the U-Boot environment */
 #define CONFIG_EXTRA_ENV_SETTINGS					\
+	EXTRA_ANDROID_ENV_SETTINGS	\
 	DEFAULT_LINUX_BOOT_ENV						\
 	DEFAULT_MMC_TI_ARGS						\
 	EXTRA_ENV_AM625_BOARD_SETTINGS					\
@@ -141,5 +384,10 @@
 #define CONFIG_SYS_MMC_ENV_DEV		0
 #define CONFIG_SYS_MMC_ENV_PART		1
 #endif
+
+#ifdef CONFIG_SYS_MALLOC_LEN
+#undef CONFIG_SYS_MALLOC_LEN
+#endif
+#define CONFIG_SYS_MALLOC_LEN           SZ_128M
 
 #endif /* __CONFIG_AM625_EVM_H */
