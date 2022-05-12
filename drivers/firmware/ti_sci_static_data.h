@@ -120,6 +120,13 @@ static struct ti_sci_resource_static_data rm_static_data[] = {
 
 #if IS_ENABLED(CONFIG_TARGET_AM625_R5_EVM)
 static struct ti_sci_resource_static_data rm_static_data[] = {
+	/* BC channels */
+	{
+		.dev_id = 26,
+		.subtype = 32,
+		.range_start = 18,
+		.range_num = 2,
+	},
 	{ },
 };
 
