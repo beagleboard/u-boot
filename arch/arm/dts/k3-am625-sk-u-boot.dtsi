@@ -248,3 +248,11 @@
 &vdd_sd_dv_pins_default {
 	u-boot,dm-spl;
 };
+
+&dmsc {
+	u-boot,dm-spl;
+	k3_sysreset: sysreset-controller {
+		compatible = "ti,sci-sysreset";
+		u-boot,dm-spl;
+	};
+};
