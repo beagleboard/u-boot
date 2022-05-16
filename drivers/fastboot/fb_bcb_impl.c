@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <fastboot.h>
+#include <command.h>
 
 /**
  * fastboot_set_reboot_flag() - Set flag to indicate reboot-bootloader
