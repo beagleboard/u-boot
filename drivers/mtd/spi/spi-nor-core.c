@@ -3081,6 +3081,13 @@ static int spi_nor_cypress_octal_dtr_enable(struct spi_nor *nor)
 	return 0;
 }
 
+static int s28hs512t_erase_non_uniform(struct spi_nor *nor, loff_t addr)
+{
+	/* Factory default configuration: 32 x 4 KiB sectors at bottom. */
+	return spansion_erase_non_uniform(nor, addr, SPINOR_OP_S28_SE_4K,
+					  0, SZ_128K);
+}
+
 static int s28hs512t_setup(struct spi_nor *nor, const struct flash_info *info,
 			   const struct spi_nor_flash_parameter *params)
 {
@@ -3094,9 +3101,8 @@ static int s28hs512t_setup(struct spi_nor *nor, const struct flash_info *info,
 		return ret;
 
 	/*
-	 * This Cypress flash also supports hybrid sector sizes. Make sure
-	 * uniform sector mode is selected. This is done by setting the bit
-	 * CFR3N[3].
+	 * Check CFR3V to check if non-uniform sector mode is selected. If it
+	 * is, set the erase hook to the non-uniform erase procedure.
 	 */
 	op = (struct spi_mem_op)
 		SPI_MEM_OP(SPI_MEM_OP_CMD(SPINOR_OP_RD_ANY_REG, 1),
@@ -3108,27 +3114,8 @@ static int s28hs512t_setup(struct spi_nor *nor, const struct flash_info *info,
 	if (ret)
 		return ret;
 
-	ret = write_enable(nor);
-	if (ret)
-		return ret;
-
-	/* Set the uniform sector mode bit. */
-	buf |= SPINOR_REG_CYPRESS_CFR3N_UNISECT;
-	op = (struct spi_mem_op)
-		SPI_MEM_OP(SPI_MEM_OP_CMD(SPINOR_OP_WR_ANY_REG, 1),
-			   SPI_MEM_OP_ADDR(addr_width,
-					   SPINOR_REG_CYPRESS_CFR3N, 1),
-			   SPI_MEM_OP_NO_DUMMY,
-			   SPI_MEM_OP_DATA_OUT(1, &buf, 1));
-	ret = spi_mem_exec_op(nor->spi, &op);
-	if (ret) {
-		dev_err(nor->dev, "Failed to change to uniform sector mode\n");
-		return ret;
-	}
-
-	ret = spi_nor_wait_till_ready(nor);
-	if (ret)
-		return ret;
+	if (!(buf & SPINOR_REG_CYPRESS_CFR3N_UNISECT))
+		nor->erase = s28hs512t_erase_non_uniform;
 
 	return spi_nor_default_setup(nor, info, params);
 }
