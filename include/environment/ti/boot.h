@@ -199,6 +199,7 @@
 #ifdef CONFIG_OMAP54XX
 
 #define DEFAULT_FDT_TI_ARGS \
+        "idk_lcd=no\0" \
 	"findfdt_iter1=" \
 		"if test $board_name = omap5_uevm; then " \
 			"setenv fdtfile omap5-uevm.dtb; fi; " \
