@@ -21,6 +21,7 @@
 
 #define board_is_am62x_skevm()		board_ti_k3_is("AM62-SKEVM")
 #define board_is_am62x_lp_skevm()	board_ti_k3_is("AM62-LP-SKEVM")
+#define board_is_am62x_play()		board_ti_k3_is("BEAGLEPLAY")
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -52,6 +53,9 @@ int board_fit_config_name_match(const char *name)
 			return 0;
 	} else if (board_is_am62x_skevm()) {
 		if (!strcmp(name, "k3-am625-r5-sk") || !strcmp(name, "k3-am625-sk"))
+			return 0;
+	} else if (board_is_am62x_play()) {
+		if (!strcmp(name, "k3-am625-r5-beagleplay") || !strcmp(name, "k3-am625-beagleplay"))
 			return 0;
 	}
 
@@ -143,7 +147,7 @@ int checkboard(void)
 #ifdef CONFIG_BOARD_LATE_INIT
 static void setup_board_eeprom_env(void)
 {
-	char *name = "am62x_skevm";
+	char *name = "am62x_play";
 
 	if (do_board_detect())
 		goto invalid_eeprom;
@@ -152,6 +156,8 @@ static void setup_board_eeprom_env(void)
 		name = "am62x_skevm";
 	else if (board_is_am62x_lp_skevm())
 		name = "am62x_lp_skevm";
+	else if (board_is_am62x_play())
+		name = "am62x_play";
 	else
 		printf("Unidentified board claims %s in eeprom header\n",
 		       board_ti_get_name());
