@@ -54,6 +54,7 @@
 	"ramdisk_addr_r=0x88080000\0" \
 	"scriptaddr=0x80000000\0" \
 	"pxefile_addr_r=0x80100000\0" \
+	"fdtoverlay_addr_r=0x80200000\0" \
 	"bootm_size=0x10000000\0" \
 	"boot_fdt=try\0"
 
