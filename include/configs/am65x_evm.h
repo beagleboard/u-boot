@@ -69,8 +69,8 @@
 	"name_kern=Image\0"						\
 	"console=ttyS2,115200n8\0"					\
 	"stdin=serial,usbkbd\0"						\
-	"args_all=setenv optargs earlycon=ns16550a,mmio32,0x02800000 "  \
-		"${mtdparts}\0"						\
+	"args_all=setenv optargs ${optargs} "				\
+		"earlycon=ns16550a,mmio32,0x02880000 ${mtdparts}\0"	\
 	"run_kern=booti ${loadaddr} ${rd_spec} ${fdtaddr}\0"		\
 
 /* U-Boot MMC-specific configuration */
