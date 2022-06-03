@@ -407,12 +407,6 @@ u32 spl_spi_boot_bus(void)
 	return (bootmode == BOOT_DEVICE_QSPI) ? 1 : 0;
 }
 
-/* both OSPI and QSPI flash are in CS0 */
-u32 spl_spi_boot_cs(void)
-{
-	return 0;
-}
-
 u32 spl_boot_device(void)
 {
 	u32 wkup_devstat = readl(CTRLMMR_WKUP_DEVSTAT);
