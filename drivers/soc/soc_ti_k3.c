@@ -64,6 +64,10 @@ static char *j721e_rev_string_map[] = {
 	"1.0", "1.1",
 };
 
+static char *am64x_rev_string_map[] = {
+	"1.0", "2.0",
+};
+
 static char *am65x_rev_string_map[] = {
 	"1.0", "2.0",
 };
@@ -88,6 +92,10 @@ static const char *get_rev_string(u32 idreg)
 		return am65x_rev_string_map[rev];
 
 	case AM64X:
+		if (rev > ARRAY_SIZE(am64x_rev_string_map))
+			goto bail;
+		return am64x_rev_string_map[rev];
+
 	case J7200:
 	default:
 		if (!rev)
