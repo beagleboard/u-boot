@@ -36,7 +36,7 @@
 	"tiboot3.bin.raw raw 0x0 0x800 mmcpart 1;" \
 	"tispl.bin.raw raw 0x800 0x1000 mmcpart 1;" \
 	"u-boot.img.raw raw 0x1800 0x2000 mmcpart 1;" \
-	"u-env.raw raw 0x3800 0x100 mmcpart 1;\0"
+	"u-env.raw raw 0x3800 0x100 mmcpart 1\0"
 
 #define DFU_ALT_INFO_OSPI \
 	"dfu_alt_info_ospi=" \
