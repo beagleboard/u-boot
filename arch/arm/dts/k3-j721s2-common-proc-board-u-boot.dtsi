@@ -171,6 +171,10 @@
 	u-boot,dm-spl;
 };
 
+&mcu_fss0_ospi1_pins_default {
+	u-boot,dm-spl;
+};
+
 &wiz0_pll1_refclk {
 	assigned-clocks = <&wiz0_pll1_refclk>, <&wiz0_pll0_refclk>;
 	assigned-clock-parents = <&k3_clks 365 3>, <&k3_clks 365 0>;
@@ -196,6 +200,14 @@
 			reg = <0x3fc0000 0x40000>;
 			u-boot,dm-spl;
 		};
+	};
+};
+
+&ospi1 {
+	u-boot,dm-spl;
+
+	flash@0 {
+		u-boot,dm-spl;
 	};
 };
 
