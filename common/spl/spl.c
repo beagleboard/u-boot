@@ -602,12 +602,6 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 
 	spl_set_bd();
 
-#if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
-	(defined(CONFIG_CPU_V7A) || defined(CONFIG_ARM64) ||    \
-	 defined(CONFIG_CPU_V7R))
-	enable_caches();
-#endif
-
 #if defined(CONFIG_SYS_SPL_MALLOC_START)
 	mem_malloc_init(CONFIG_SYS_SPL_MALLOC_START,
 			CONFIG_SYS_SPL_MALLOC_SIZE);
