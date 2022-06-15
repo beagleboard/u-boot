@@ -60,16 +60,12 @@ static const char *get_family_string(u32 idreg)
 	return family;
 }
 
+static char *typical_rev_string_map[] = {
+	"1.0", "2.0", "3.0",
+};
+
 static char *j721e_rev_string_map[] = {
 	"1.0", "1.1",
-};
-
-static char *am64x_rev_string_map[] = {
-	"1.0", "2.0",
-};
-
-static char *am65x_rev_string_map[] = {
-	"1.0", "2.0",
 };
 
 static const char *get_rev_string(u32 idreg)
@@ -86,20 +82,10 @@ static const char *get_rev_string(u32 idreg)
 			goto bail;
 		return j721e_rev_string_map[rev];
 
-	case AM65X:
-		if (rev > ARRAY_SIZE(am65x_rev_string_map))
-			goto bail;
-		return am65x_rev_string_map[rev];
-
-	case AM64X:
-		if (rev > ARRAY_SIZE(am64x_rev_string_map))
-			goto bail;
-		return am64x_rev_string_map[rev];
-
-	case J7200:
 	default:
-		if (!rev)
-			return "1.0";
+		if (rev > ARRAY_SIZE(typical_rev_string_map))
+			goto bail;
+		return typical_rev_string_map[rev];
 	};
 
 bail:
