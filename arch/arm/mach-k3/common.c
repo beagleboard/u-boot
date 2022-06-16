@@ -292,9 +292,7 @@ void board_fit_image_post_process(const void *fit, int node, void **p_image,
 	}
 #endif
 
-#ifdef CONFIG_TI_SECURE_DEVICE
 	ti_secure_image_post_process(p_image, p_size);
-#endif
 }
 #endif
 
