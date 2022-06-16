@@ -36,7 +36,7 @@ enum {
 	IMAGE_AMT,
 };
 
-#ifdef CONFIG_SPL_FIT_IMAGE_POST_PROCESS
+#if CONFIG_IS_ENABLED(FIT_IMAGE_POST_PROCESS)
 static const char *image_os_match[IMAGE_AMT] = {
 	"arm-trusted-firmware",
 	"tee",
@@ -266,7 +266,7 @@ start_arm64:
 }
 #endif
 
-#ifdef CONFIG_SPL_FIT_IMAGE_POST_PROCESS
+#if CONFIG_IS_ENABLED(FIT_IMAGE_POST_PROCESS)
 void board_fit_image_post_process(const void *fit, int node, void **p_image,
 				  size_t *p_size)
 {
