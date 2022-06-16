@@ -2,10 +2,11 @@
 /*
  * K3: Security functions
  *
- * Copyright (C) 2018 Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (C) 2018-2022 Texas Instruments Incorporated - http://www.ti.com/
  *	Andrew F. Davis <afd@ti.com>
  */
 
+#include <asm/io.h>
 #include <common.h>
 #include <cpu_func.h>
 #include <dm.h>
@@ -17,6 +18,17 @@
 #include <mach/spl.h>
 #include <spl.h>
 #include <asm/arch/sys_proto.h>
+
+#include "common.h"
+
+static bool ti_secure_cert_detected(void *p_image)
+{
+	/* Primitive certificate detection, check for DER starting with
+	 * two 4-Octet SEQUENCE tags
+	 */
+	return (((u8 *)p_image)[0] == 0x30 && ((u8 *)p_image)[1] == 0x82 &&
+		((u8 *)p_image)[4] == 0x30 && ((u8 *)p_image)[5] == 0x82);
+}
 
 void ti_secure_image_post_process(void **p_image, size_t *p_size)
 {
@@ -31,6 +43,14 @@ void ti_secure_image_post_process(void **p_image, size_t *p_size)
 
 	if (!image_size)
 		return;
+
+	if (get_device_type() != K3_DEVICE_TYPE_HS_SE &&
+	    !ti_secure_cert_detected(*p_image)) {
+		printf("Warning: Did not detect image signing certificate. "
+		       "Skipping authentication to prevent boot failure. "
+		       "This will fail on Security Enforcing(HS-SE) devices\n");
+		return;
+	}
 
 	debug("Authenticating image at address 0x%016llx\n", image_addr);
 	debug("Authenticating image of size %d bytes\n", image_size);
