@@ -116,11 +116,12 @@ int board_fit_config_name_match(const char *name)
 static void __maybe_unused detect_enable_hyperflash(void *blob)
 {
 	struct gpio_desc desc = {0};
+	char *hypermux_sel_gpio = (board_is_j721e_som()) ? "8" : "6";
 
-	if (dm_gpio_lookup_name("6", &desc))
+	if (dm_gpio_lookup_name(hypermux_sel_gpio, &desc))
 		return;
 
-	if (dm_gpio_request(&desc, "6"))
+	if (dm_gpio_request(&desc, hypermux_sel_gpio))
 		return;
 
 	if (dm_gpio_set_dir_flags(&desc, GPIOD_IS_IN))
@@ -139,7 +140,8 @@ static void __maybe_unused detect_enable_hyperflash(void *blob)
 }
 #endif
 
-#if defined(CONFIG_SPL_BUILD) && (defined(CONFIG_TARGET_J7200_A72_EVM) || defined(CONFIG_TARGET_J7200_R5_EVM))
+#if defined(CONFIG_SPL_BUILD) && (defined(CONFIG_TARGET_J7200_A72_EVM) || defined(CONFIG_TARGET_J7200_R5_EVM) || \
+					defined(CONFIG_TARGET_J721E_A72_EVM) || defined(CONFIG_TARGET_J721E_R5_EVM))
 void spl_perform_fixups(struct spl_image_info *spl_image)
 {
 	detect_enable_hyperflash(spl_image->fdt_addr);
