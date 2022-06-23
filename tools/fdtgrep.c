@@ -1231,9 +1231,11 @@ int main(int argc, char *argv[])
 		disp.fout = stdout;
 	}
 
+#ifdef CONFIG_SPL_LOAD_FIT_APPLY_OVERLAY
 	/* include symbol table */
 	if (value_add(&disp, &disp.value_head, FDT_IS_NODE, 1, "/__symbols__"))
 		usage("Cannot add __symbols__ value");
+#endif
 
 	/* Run the grep and output the results */
 	ret = do_fdtgrep(&disp, filename);
