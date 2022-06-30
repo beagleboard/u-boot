@@ -344,6 +344,12 @@
 #define EXTRA_ENV_J721E_BOARD_SETTINGS_MTD
 #endif
 
+#if CONFIG_IS_ENABLED(CMD_USB)
+# define BOOT_TARGET_USB(func) func(USB, usb, 0)
+#else
+# define BOOT_TARGET_USB(func)
+#endif
+
 #if CONFIG_IS_ENABLED(CMD_PXE)
 # define BOOT_TARGET_PXE(func) func(PXE, pxe, na)
 #else
@@ -359,6 +365,7 @@
 #define BOOT_TARGET_DEVICES(func) \
 	func(MMC, mmc, 1) \
 	func(MMC, mmc, 0) \
+	BOOT_TARGET_USB(func) \
 	BOOT_TARGET_PXE(func) \
 	BOOT_TARGET_DHCP(func)
 
