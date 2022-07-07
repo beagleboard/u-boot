@@ -8,6 +8,7 @@
 
 #include <asm/armv7_mpu.h>
 #include <asm/hardware.h>
+#include <linux/soc/ti/ti_sci_protocol.h>
 
 #define J721E  0xbb64
 #define J7200  0xbb6d
@@ -30,6 +31,7 @@ enum k3_device_type {
 void setup_k3_mpu_regions(void);
 int early_console_init(void);
 void disable_linefill_optimization(void);
+int set_fwls(const struct ti_sci_msg_fwl_region *fwl_data, size_t fwl_data_size);
 void remove_fwl_configs(struct fwl_data *fwl_data, size_t fwl_data_size);
 int load_firmware(char *name_fw, char *name_loadaddr, u32 *loadaddr);
 void k3_sysfw_print_ver(void);

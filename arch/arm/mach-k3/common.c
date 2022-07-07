@@ -530,6 +530,25 @@ void disable_linefill_optimization(void)
 }
 #endif
 
+int set_fwls(const struct ti_sci_msg_fwl_region *fwl_data, size_t fwl_data_size)
+{
+	struct ti_sci_handle *ti_sci = get_ti_sci_handle();
+	struct ti_sci_fwl_ops *fwl_ops = &ti_sci->ops.fwl_ops;
+	int ret = 0;
+	int i;
+
+	for (i = 0; i < fwl_data_size; i++) {
+		ret = fwl_ops->set_fwl_region(ti_sci, &fwl_data[i]);
+		if (ret) {
+			printf("Could not set firewall ID = %d with region = %d\n",
+			       fwl_data[i].fwl_id, fwl_data[i].region);
+			return ret;
+		}
+	}
+
+	return 0;
+}
+
 void remove_fwl_configs(struct fwl_data *fwl_data, size_t fwl_data_size)
 {
 	struct ti_sci_msg_fwl_region region;
