@@ -280,6 +280,7 @@ void board_init_f(ulong dummy)
 		if (uclass_get_device_by_driver(UCLASS_MISC, DM_GET_DRIVER(am65_cpsw_nuss), &cpswdev))
 			printf("Failed to probe am65_cpsw_nuss driver\n");
 	}
+	spl_enable_dcache();
 }
 
 u32 spl_mmc_boot_mode(const u32 boot_device)
