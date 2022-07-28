@@ -164,9 +164,9 @@ static struct ti_sci_xfer *ti_sci_setup_one_xfer(struct ti_sci_info *info,
  *	   return corresponding error, else if all goes well,
  *	   return 0.
  */
-static inline int ti_sci_get_response(struct ti_sci_info *info,
-				      struct ti_sci_xfer *xfer,
-				      struct mbox_chan *chan)
+static int ti_sci_get_response(struct ti_sci_info *info,
+			       struct ti_sci_xfer *xfer,
+			       struct mbox_chan *chan)
 {
 	struct k3_sec_proxy_msg *msg = &xfer->tx_message;
 	struct ti_sci_secure_msg_hdr *secure_hdr;
@@ -218,8 +218,8 @@ static inline int ti_sci_get_response(struct ti_sci_info *info,
  *
  * Return: 0 if all went fine, else return appropriate error.
  */
-static inline int ti_sci_do_xfer(struct ti_sci_info *info,
-				 struct ti_sci_xfer *xfer)
+static int ti_sci_do_xfer(struct ti_sci_info *info,
+			  struct ti_sci_xfer *xfer)
 {
 	struct k3_sec_proxy_msg *msg = &xfer->tx_message;
 	u8 secure_buf[info->desc->max_msg_size];
@@ -310,7 +310,7 @@ static int ti_sci_cmd_get_revision(struct ti_sci_handle *handle)
  *
  * Return: true if the response was an ACK, else returns false.
  */
-static inline bool ti_sci_is_response_ack(void *r)
+static bool ti_sci_is_response_ack(void *r)
 {
 	struct ti_sci_msg_hdr *hdr = r;
 
