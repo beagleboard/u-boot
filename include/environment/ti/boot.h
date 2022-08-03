@@ -234,10 +234,6 @@
 	"run read_board_eeprom; " \
 	"run findfdt; " \
 	"setenv mmcdev 0; " \
-	"setenv devtype usb; " \
-	"echo usb_boot is currently disabled;" \
-	"setenv devtype scsi; " \
-	"echo scsi_boot is currently disabled;" \
 	"setenv devtype mmc; " \
 	"run mmc_boot;" \
 	"setenv mmcdev 1; " \
