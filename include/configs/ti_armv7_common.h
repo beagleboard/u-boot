@@ -92,7 +92,7 @@
 #define CONFIG_SYS_I2C
 #endif
 
-#define EEPROM_PROGRAMMING \
+#define BBAI_EEPROM_PROGRAMMING \
 	"eeprom_dump=i2c dev 0; " \
 		"i2c md 0x50 0x00.2 20; " \
 		"\0" \
@@ -236,7 +236,7 @@
 		"i2c md 0x50 0x00.2 20; " \
 		"\0" \
 
-#define EEWIKI_MMC_BOOT \
+#define BBAI_MMC_BOOT \
 	"mmc_boot=${devtype} dev ${mmcdev}; ${devtype} part; " \
 		"if ${devtype} rescan; then " \
 			"echo Scanning ${devtype} device ${mmcdev};" \
@@ -274,7 +274,7 @@
 			"done;" \
 		"fi;\0" \
 
-#define EEWIKI_UNAME_BOOT \
+#define BBAI_UNAME_BOOT \
 	"uname_boot="\
 		"setenv bootdir /boot; " \
 		"setenv bootfile vmlinuz-${uname_r}; " \
