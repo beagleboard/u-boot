@@ -132,7 +132,6 @@
 	"bootpart=0:2\0" \
 	"bootdir=/boot\0" \
 	"bootfile=zImage\0" \
-	"board_eeprom_header=undefined\0" \
 	"usbtty=cdc_acm\0" \
 	"vram=16M\0" \
 	AVB_VERIFY_CMD \
@@ -184,14 +183,7 @@
 		"else " \
 			"echo $apart partition not found; " \
 			"exit; " \
-		"fi;\0 " \
-	"read_board_eeprom=" \
-		"if test $board_eeprom_header = beagle_x15_revb1_blank; then " \
-			"run eeprom_dump; run eeprom_x15_b1; reset; fi; " \
-		"if test $board_eeprom_header = beagle_x15_revc_blank; then " \
-			"run eeprom_dump; run eeprom_x15_c; reset; fi; " \
-		"if test $board_eeprom_header = bbai_a2_blank; then " \
-			"run eeprom_dump; run eeprom_bbai_a2; reset; fi;  \0 "
+		"fi;\0"
 
 #ifdef CONFIG_OMAP54XX
 
@@ -231,7 +223,6 @@
 			"echo WARNING: Could not determine device tree to use; fi; \0"
 
 #define CONFIG_BOOTCOMMAND \
-	"run read_board_eeprom; " \
 	"run findfdt; " \
 	"setenv mmcdev 0; " \
 	"setenv devtype mmc; " \
