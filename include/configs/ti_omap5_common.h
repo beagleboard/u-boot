@@ -261,27 +261,13 @@
 			"echo WARNING: Could not determine device tree to use; fi; \0"
 
 #define CONFIG_BOOTCOMMAND \
-	"if test ${dofastboot} -eq 1; then " \
-		"echo Boot fastboot requested, resetting dofastboot ...;" \
-		"setenv dofastboot 0; saveenv;" \
-		FASTBOOT_CMD \
-	"fi;" \
-	"if test ${boot_fit} -eq 1; then "	\
-		"run update_to_fit;"	\
-	"fi;"	\
 	"run findfdt; " \
-	"run finduuid; " \
-	"run distro_bootcmd;" \
-	"run emmc_android_boot; " \
+	"setenv mmcdev 0; " \
+	"setenv devtype mmc; " \
+	"run mmc_boot;" \
+	"setenv mmcdev 1; " \
+	"run mmc_boot;" \
 	""
-
-#define BOOT_TARGET_DEVICES(func) \
-	func(MMC, mmc, 0) \
-	func(MMC, mmc, 1) \
-	func(PXE, pxe, na) \
-	func(DHCP, dhcp, na)
-
-#include <config_distro_bootcmd.h>
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DEFAULT_LINUX_BOOT_ENV \
@@ -289,10 +275,12 @@
 	DEFAULT_FIT_TI_ARGS \
 	DEFAULT_COMMON_BOOT_TI_ARGS \
 	DEFAULT_FDT_TI_ARGS \
+	BBAI_MMC_BOOT \
+	BBAI_UNAME_BOOT \
+	BBAI_EEPROM_PROGRAMMING \
 	DFUARGS \
 	NETARGS \
 	NANDARGS \
-	BOOTENV
 
 /*
  * SPL related defines.  The Public RAM memory map the ROM defines the
