@@ -19,7 +19,8 @@
 
 #include "../common/board_detect.h"
 
-#define board_is_am62x_skevm()	board_ti_k3_is("AM62-SKEVM")
+#define board_is_am62x_skevm()		board_ti_k3_is("AM62-SKEVM")
+#define board_is_am62x_lp_skevm()	board_ti_k3_is("AM62-LP-SKEVM")
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -43,7 +44,13 @@ int board_fit_config_name_match(const char *name)
 {
 	bool eeprom_read = board_ti_was_eeprom_read();
 
-	if (!eeprom_read || board_is_am62x_skevm()) {
+	if (!eeprom_read)
+		return -1;
+
+	if (board_is_am62x_lp_skevm()) {
+		if (!strcmp(name, "k3-am62x-r5-lp-sk") || !strcmp(name, "k3-am62x-lp-sk"))
+			return 0;
+	} else if (board_is_am62x_skevm()) {
 		if (!strcmp(name, "k3-am625-r5-sk") || !strcmp(name, "k3-am625-sk"))
 			return 0;
 	}
@@ -141,7 +148,7 @@ static void setup_board_eeprom_env(void)
 	if (do_board_detect())
 		goto invalid_eeprom;
 
-	if (board_is_am62x_skevm())
+	if (board_is_am62x_skevm() || board_is_am62x_lp_skevm())
 		name = "am62x_skevm";
 	else
 		printf("Unidentified board claims %s in eeprom header\n",
