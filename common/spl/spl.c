@@ -31,7 +31,6 @@
 #include <fdt_support.h>
 #include <bootcount.h>
 #include <wdt.h>
-#include <cpu_func.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -602,12 +601,6 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	debug(">>" SPL_TPL_PROMPT "board_init_r()\n");
 
 	spl_set_bd();
-
-#if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
-	(defined(CONFIG_CPU_V7A) || defined(CONFIG_ARM64) ||    \
-	 defined(CONFIG_CPU_V7R))
-	enable_caches();
-#endif
 
 #if defined(CONFIG_SYS_SPL_MALLOC_START)
 	mem_malloc_init(CONFIG_SYS_SPL_MALLOC_START,
