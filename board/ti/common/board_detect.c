@@ -86,7 +86,6 @@ __weak void gpi2c_init(void)
 static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 					    u32 header, u32 size, uint8_t *ep)
 {
-	u32 hdr_read = 0xdeadbeef;
 	int rc;
 
 #if defined(CONFIG_DM_I2C)
@@ -113,10 +112,10 @@ static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 	 * We must allow for fall through to check the data if 2 byte
 	 * addressing works
 	 */
-	(void)dm_i2c_read(dev, 0, (uint8_t *)&hdr_read, 4);
+	rc = dm_i2c_read(dev, 0, ep, size);
 
 	/* Corrupted data??? */
-	if (hdr_read != header) {
+	if (rc || (*((u32*)ep) != header)) {
 		/*
 		 * read the eeprom header using i2c again, but use only a
 		 * 2 byte address (some newer boards need this..)
@@ -125,16 +124,13 @@ static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 		if (rc)
 			return rc;
 
-		rc = dm_i2c_read(dev, 0, (uint8_t *)&hdr_read, 4);
+		rc = dm_i2c_read(dev, 0, ep, size);
 		if (rc)
 			return rc;
 	}
-	if (hdr_read != header)
+	if (*((u32*)ep) != header)
 		return -1;
 
-	rc = dm_i2c_read(dev, 0, ep, size);
-	if (rc)
-		return rc;
 #else
 	u32 byte;
 
