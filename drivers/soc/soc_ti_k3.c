@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright (C) 2020 Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (C) 2020-2022 Texas Instruments Incorporated - http://www.ti.com/
  *	Dave Gerlach <d-gerlach@ti.com>
  */
 
@@ -15,6 +15,7 @@
 #define J7200			0xbb6d
 #define AM64X			0xbb38
 #define J721S2			0xbb75
+#define J784S4			0xbb80
 #define AM62X			0xbb7e
 
 #define JTAG_ID_VARIANT_SHIFT	28
@@ -52,6 +53,9 @@ static const char *get_family_string(u32 idreg)
 		break;
 	case AM62X:
 		family = "AM62X";
+		break;
+	case J784S4:
+		family = "J784S4";
 		break;
 	default:
 		family = "Unknown Silicon";
