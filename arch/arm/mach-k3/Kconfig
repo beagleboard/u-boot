@@ -13,6 +13,9 @@ config SOC_K3_J721E
 config SOC_K3_J721S2
 	bool "TI's K3 based J721S2 SoC Family Support"
 
+config SOC_K3_J784S4
+	bool "TI's K3 based J784S4 SoC Family Support"
+
 config SOC_K3_AM642
 	bool "TI's K3 based AM642 SoC Family Support"
 	select BINMAN if TARGET_AM642_A53_EVM
@@ -30,6 +33,7 @@ config SYS_K3_NON_SECURE_MSRAM_SIZE
 	default 0x80000 if SOC_K3_AM6
 	default 0x100000 if SOC_K3_J721E
 	default 0x100000 if SOC_K3_J721S2
+	default 0x100000 if SOC_K3_J784S4
 	default 0x1c0000 if SOC_K3_AM642
 	default 0x3c000 if SOC_K3_AM625
 	help
@@ -43,6 +47,7 @@ config SYS_K3_MAX_DOWNLODABLE_IMAGE_SIZE
 	default 0x58000 if SOC_K3_AM6
 	default 0xc0000 if SOC_K3_J721E
 	default 0xc0000 if SOC_K3_J721S2
+	default 0xc0000 if SOC_K3_J784S4
 	default 0x180000 if SOC_K3_AM642
 	default 0x38000 if SOC_K3_AM625
 	help
@@ -54,6 +59,7 @@ config SYS_K3_MCU_SCRATCHPAD_BASE
 	default 0x40280000 if SOC_K3_AM6
 	default 0x40280000 if SOC_K3_J721E
 	default 0x40280000 if SOC_K3_J721S2
+	default 0x40280000 if SOC_K3_J784S4
 	help
 	  Describes the base address of MCU Scratchpad RAM.
 
@@ -62,6 +68,7 @@ config SYS_K3_MCU_SCRATCHPAD_SIZE
 	default 0x200 if SOC_K3_AM6
 	default 0x200 if SOC_K3_J721E
 	default 0x200 if SOC_K3_J721S2
+	default 0x200 if SOC_K3_J784S4
 	help
 	  Describes the size of MCU Scratchpad RAM.
 
@@ -70,6 +77,7 @@ config SYS_K3_BOOT_PARAM_TABLE_INDEX
 	default 0x41c7fbfc if SOC_K3_AM6
 	default 0x41cffbfc if SOC_K3_J721E
 	default 0x41cfdbfc if SOC_K3_J721S2
+	default 0x41cfdbfc if SOC_K3_J784S4
 	default 0x701bebfc if SOC_K3_AM642
 	default 0x43c3f290 if SOC_K3_AM625
 	help
@@ -165,7 +173,7 @@ config SYS_K3_SPL_ATF
 
 config K3_DM_FW
 	bool "Separate DM firmware image"
-	depends on SPL && CPU_V7R && (SOC_K3_J721E || SOC_K3_J721S2 || SOC_K3_AM625) && !CLK_TI_SCI && !TI_SCI_POWER_DOMAIN
+	depends on SPL && CPU_V7R && (SOC_K3_J721E || SOC_K3_J721S2 || SOC_K3_AM625 || SOC_K3_J784S4) && !CLK_TI_SCI && !TI_SCI_POWER_DOMAIN
 	default y
 	help
 	  Enabling this will indicate that the system has separate DM
@@ -192,4 +200,5 @@ source "board/ti/am64x/Kconfig"
 source "board/ti/am62x/Kconfig"
 source "board/ti/j721e/Kconfig"
 source "board/ti/j721s2/Kconfig"
+source "board/ti/j784s4/Kconfig"
 endif
