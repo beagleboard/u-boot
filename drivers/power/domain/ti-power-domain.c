@@ -2,7 +2,7 @@
 /*
  * Texas Instruments power domain driver
  *
- * Copyright (C) 2020-2021 Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (C) 2020-2022 Texas Instruments Incorporated - http://www.ti.com/
  *	Tero Kristo <t-kristo@ti.com>
  */
 
@@ -84,6 +84,11 @@ static const struct soc_attr ti_k3_soc_pd_data[] = {
 	{
 		.family = "J721S2",
 		.data = &j721s2_pd_platdata,
+	},
+#elif CONFIG_SOC_K3_J784S4
+	{
+		.family = "J784S4",
+		.data = &j784s4_pd_platdata,
 	},
 #endif
 #ifdef CONFIG_SOC_K3_AM625
