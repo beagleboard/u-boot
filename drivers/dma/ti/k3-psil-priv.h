@@ -40,6 +40,7 @@ struct psil_endpoint_config *psil_get_ep_config(u32 thread_id);
 extern struct psil_ep_map am654_ep_map;
 extern struct psil_ep_map j721e_ep_map;
 extern struct psil_ep_map j721s2_ep_map;
+extern struct psil_ep_map j784s4_ep_map;
 extern struct psil_ep_map am64_ep_map;
 extern struct psil_ep_map am62_ep_map;
 
