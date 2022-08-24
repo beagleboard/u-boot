@@ -35,6 +35,14 @@
 	u-boot,dm-spl;
 };
 
+&main_r5fss0 {
+	ti,cluster-mode = <0>;
+};
+
+&main_r5fss1 {
+	ti,cluster-mode = <0>;
+};
+
 &cbass_mcu_wakeup {
 	u-boot,dm-spl;
 
@@ -101,6 +109,9 @@
 	u-boot,dm-spl;
 };
 
+&main_usbss0_pins_default {
+	u-boot,dm-spl;
+};
 &wkup_pmx0 {
 	u-boot,dm-spl;
 };
@@ -129,6 +140,18 @@
 	u-boot,dm-spl;
 };
 
+&fss {
+	u-boot,dm-spl;
+};
+
+&usbss0 {
+	u-boot,dm-spl;
+};
+
+&usb0 {
+	dr_mode = "peripheral";
+	u-boot,dm-spl;
+};
 &mcu_cpsw {
 	reg = <0x0 0x46000000 0x0 0x200000>,
 	      <0x0 0x40f00200 0x0 0x8>;
@@ -139,6 +162,32 @@
 		compatible = "ti,am654-cpsw-phy-sel";
 		reg= <0x0 0x40f04040 0x0 0x4>;
 		reg-names = "gmii-sel";
+	};
+};
+
+&mcu_fss0_ospi0_pins_default {
+	u-boot,dm-spl;
+};
+
+&serdes_ln_ctrl {
+	u-boot,mux-autoprobe;
+};
+
+&usb_serdes_mux {
+	u-boot,mux-autoprobe;
+};
+&ospi0 {
+	u-boot,dm-spl;
+
+	flash@0 {
+		cdns,phy-mode;
+		u-boot,dm-spl;
+
+		partition@3fc0000 {
+			label = "ospi.phypattern";
+			reg = <0x3fc0000 0x40000>;
+			u-boot,dm-spl;
+		};
 	};
 };
 
