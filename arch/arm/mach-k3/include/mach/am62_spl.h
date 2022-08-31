@@ -29,10 +29,10 @@
 
 /* U-Boot used aliases */
 #define BOOT_DEVICE_ETHERNET		0x04
-#define BOOT_DEVICE_SPINAND		0x07
 #define BOOT_DEVICE_MMC2		0x08
 #define BOOT_DEVICE_MMC1		0x09
 #define BOOT_DEVICE_RAM                 0x0F
+#define BOOT_DEVICE_SPINAND		0x10
 /* Invalid */
 #define BOOT_DEVICE_MMC2_2		0x1F
 
