@@ -109,6 +109,7 @@
 };
 
 &sdhci1 {
+	sdhci-caps-mask = <0x00000007 0x00000000>;
 	u-boot,dm-spl;
 };
 
