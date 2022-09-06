@@ -31,11 +31,15 @@
 	"boot_rprocs_mmc="						\
 		"env set rproc_id;"					\
 		"env set rproc_fw;"					\
-		"for i in ${rproc_fw_binaries} ; do "			\
+		"env set secure_suffix;"				\
+		"if test ${boot_fit} -eq 1; then "			\
+			"env set secure_suffix -sec;"			\
+		"fi;"							\
+		"for i in ${rproc_fw_binaries}; do "			\
 			"if test -z \"${rproc_id}\" ; then "		\
 				"env set rproc_id $i;"			\
 			"else "						\
-				"env set rproc_fw $i;"			\
+				"env set rproc_fw $i${secure_suffix};"	\
 				"run rproc_load_and_boot_one;"		\
 				"env set rproc_id;"			\
 				"env set rproc_fw;"			\
