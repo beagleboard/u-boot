@@ -2,13 +2,14 @@
 /*
  * K3: Architecture common definitions
  *
- * Copyright (C) 2018 Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (C) 2018-2022 Texas Instruments Incorporated - https://www.ti.com/
  *	Lokesh Vutla <lokeshvutla@ti.com>
  */
 
 #include <asm/armv7_mpu.h>
 #include <asm/hardware.h>
 #include <linux/soc/ti/ti_sci_protocol.h>
+#include <mach/security.h>
 
 #define J721E  0xbb64
 #define J7200  0xbb6d
@@ -29,4 +30,3 @@ void k3_sysfw_print_ver(void);
 void spl_enable_dcache(void);
 void mmr_unlock(phys_addr_t base, u32 partition);
 bool is_rom_loaded_sysfw(struct rom_extended_boot_data *data);
-void ti_secure_image_post_process(void **p_image, size_t *p_size);
