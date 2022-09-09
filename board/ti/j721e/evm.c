@@ -267,7 +267,7 @@ static const struct {
 	{
 		0x52,
 		"J7X-INFOTAN-EXP",
-		"",		/* No dtbo for this board */
+		"k3-j721e-common-proc-board-infotainment.dtbo",
 		0,
 	},
 	{
