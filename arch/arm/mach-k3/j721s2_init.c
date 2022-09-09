@@ -22,10 +22,6 @@
 #include <mmc.h>
 #include <remoteproc.h>
 
-#define GPU_HARDWARE_BASE_ADDRESS_READ  0x45DC5100
-#define GPU_HARDWARE_BASE_ADDRESS_WRITE 0x45DC5900
-#define REGISTER_VALUE_DISABLE_SNOOP    0x30000000
-
 #ifdef CONFIG_SPL_BUILD
 
 #ifdef CONFIG_TI_SECURE_DEVICE
@@ -103,20 +99,6 @@ static void ctrl_mmr_unlock(void)
 	mmr_unlock(CTRL_MMR0_BASE, 7);
 }
 
-static inline void _qos_work_around_for_gpu(phys_addr_t base)
-{
-	u32 offset;
-
-	for (offset = 0; offset < 160; offset++)
-		writel(REGISTER_VALUE_DISABLE_SNOOP, base + (offset * 4));
-}
-
-static void qos_work_around_for_gpu(void)
-{
-	_qos_work_around_for_gpu(GPU_HARDWARE_BASE_ADDRESS_READ);
-	_qos_work_around_for_gpu(GPU_HARDWARE_BASE_ADDRESS_WRITE);
-}
-
 void k3_mmc_stop_clock(void)
 {
 	if (IS_ENABLED(CONFIG_K3_LOAD_SYSFW)) {
@@ -177,8 +159,6 @@ void board_init_f(ulong dummy)
 	if (IS_ENABLED(CONFIG_CPU_V7R)) {
 		disable_linefill_optimization();
 		setup_k3_mpu_regions();
-	} else {
-		qos_work_around_for_gpu();
 	}
 
 	/* Init DM early */
