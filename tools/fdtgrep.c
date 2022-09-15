@@ -22,6 +22,8 @@
 #include "fdt_host.h"
 #include "libfdt_internal.h"
 
+#include <linux/kconfig.h>
+
 /* Define DEBUG to get some debugging output on stderr */
 #ifdef DEBUG
 #define debug(a, b...) fprintf(stderr, a, ## b)
