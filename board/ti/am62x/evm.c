@@ -197,6 +197,10 @@ int board_late_init(void)
 		board_ti_am6_set_ethaddr(1, ep->mac_addr_cnt);
 	}
 
+	/* Default FIT boot on non-GP devices */
+	if (get_device_type() != K3_DEVICE_TYPE_GP)
+		env_set("boot_fit", "1");
+
 	return 0;
 }
 #endif
