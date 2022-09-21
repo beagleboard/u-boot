@@ -112,10 +112,10 @@ static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 	 * We must allow for fall through to check the data if 2 byte
 	 * addressing works
 	 */
-	rc = dm_i2c_read(dev, 0, ep, size);
+	(void)dm_i2c_read(dev, 0, ep, size);
 
 	/* Corrupted data??? */
-	if (rc || (*((u32*)ep) != header)) {
+	if (*((u32 *)ep) != header) {
 		/*
 		 * read the eeprom header using i2c again, but use only a
 		 * 2 byte address (some newer boards need this..)
@@ -128,9 +128,8 @@ static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 		if (rc)
 			return rc;
 	}
-	if (*((u32*)ep) != header)
+	if (*((u32 *)ep) != header)
 		return -1;
-
 #else
 	u32 byte;
 
@@ -150,26 +149,21 @@ static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 	 * We must allow for fall through to check the data if 2 byte
 	 * addressing works
 	 */
-	(void)i2c_read(dev_addr, 0x0, byte, (uint8_t *)&hdr_read, 4);
+	(void)i2c_read(dev_addr, 0x0, byte, ep, size);
 
 	/* Corrupted data??? */
-	if (hdr_read != header) {
+	if (*((u32 *)ep) != header) {
 		/*
 		 * read the eeprom header using i2c again, but use only a
 		 * 2 byte address (some newer boards need this..)
 		 */
 		byte = 2;
-		rc = i2c_read(dev_addr, 0x0, byte, (uint8_t *)&hdr_read,
-			      4);
+		rc = i2c_read(dev_addr, 0x0, byte, ep, size);
 		if (rc)
 			return rc;
 	}
-	if (hdr_read != header)
+	if (*((u32 *)ep) != header)
 		return -1;
-
-	rc = i2c_read(dev_addr, 0x0, byte, ep, size);
-	if (rc)
-		return rc;
 #endif
 	return 0;
 }
