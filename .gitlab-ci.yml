@@ -6,4 +6,4 @@ build:
     - ./build.sh
   artifacts:
     paths:
-      - "tispl.bin"
+      - "deploy/*.bin"
