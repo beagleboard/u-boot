@@ -4,3 +4,6 @@ build:
   stage: build
   script:
     - ./build.sh
+  artifacts:
+    paths:
+      - "tispl.bin"
