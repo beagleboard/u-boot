@@ -32,7 +32,9 @@ if [ "x${sys}" = "xaarch64" ] ; then
 	ls -lh /opt/u-boot/bb-u-boot-beagleboneai64/tiboot3.bin
 else
 	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- j721e_evm_r5_defconfig
-	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig
+	if [ -f ./load.menuconfig ] ; then
+		make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig
+	fi
 	make ARCH=arm -j4 CROSS_COMPILE=arm-linux-gnueabihf-
 
 	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- savedefconfig
@@ -61,7 +63,9 @@ if [ "x${sys}" = "xaarch64" ] ; then
 	ls -lh /opt/u-boot/bb-u-boot-beagleboneai64/u-boot.img
 else
 	make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- j721e_evm_a72_defconfig
-	make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- menuconfig
+	if [ -f ./load.menuconfig ] ; then
+		make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- menuconfig
+	fi
 	make ARCH=arm -j4 CROSS_COMPILE=aarch64-linux-gnu- ATF=${DIR}/ti-blobs/bl31.bin TEE=${DIR}/ti-blobs/tee-pager_v2.bin DM=${DIR}/ti-blobs/ipc_echo_testb_mcu1_0_release_strip.xer5f
 
 	make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- savedefconfig
