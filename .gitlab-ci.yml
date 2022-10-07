@@ -1,4 +1,4 @@
-image: robertcnelson/debian-bullseye-slim-linux-compile:latest
+image: robertcnelson/debian-bullseye-slim-u-boot-compile:latest
 
 build:
   stage: build
