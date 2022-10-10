@@ -65,6 +65,7 @@ struct prueth {
 	u32			rx_pend;
 	int			slice;
 	bool			is_sr1;
+	bool			mdio_manual_mode;
 };
 
 /* config helpers */
