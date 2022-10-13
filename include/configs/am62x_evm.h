@@ -33,7 +33,7 @@
  * our memory footprint. The less we use for BSS the more we have available
  * for everything else.
  */
-#define CONFIG_SPL_BSS_MAX_SIZE		0x5000
+#define CONFIG_SPL_BSS_MAX_SIZE		0x3000
 /*
  * Link BSS to be within SPL in a dedicated region located near the top of
  * the MCU SRAM, this way making it available also before relocation. Note
@@ -42,10 +42,10 @@
  * the boot ROM that we want to read out without any interference from the
  * C context.
  */
-#define CONFIG_SPL_BSS_START_ADDR	(0x43c3c800 -\
+#define CONFIG_SPL_BSS_START_ADDR	(0x43c3e000 -\
 					 CONFIG_SPL_BSS_MAX_SIZE)
 /* Set the stack right below the SPL BSS section */
-#define CONFIG_SYS_INIT_SP_ADDR         0x7000ffff
+#define CONFIG_SYS_INIT_SP_ADDR         0x43c3a7f0
 /* Configure R5 SPL post-relocation malloc pool in DDR */
 #define CONFIG_SYS_SPL_MALLOC_START    0x84000000
 #define CONFIG_SYS_SPL_MALLOC_SIZE     SZ_16M
