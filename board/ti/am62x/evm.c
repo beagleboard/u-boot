@@ -211,6 +211,13 @@ int board_late_init(void)
 #define CTRLMMR_USB1_PHY_CTRL	0x43004018
 #define CORE_VOLTAGE		0x80000000
 
+#define WKUP_CTRLMMR_DBOUNCE_CFG1 0x04504084
+#define WKUP_CTRLMMR_DBOUNCE_CFG2 0x04504088
+#define WKUP_CTRLMMR_DBOUNCE_CFG3 0x0450408c
+#define WKUP_CTRLMMR_DBOUNCE_CFG4 0x04504090
+#define WKUP_CTRLMMR_DBOUNCE_CFG5 0x04504094
+#define WKUP_CTRLMMR_DBOUNCE_CFG6 0x04504098
+
 #ifdef CONFIG_SPL_BOARD_INIT
 void spl_board_init(void)
 {
@@ -234,6 +241,20 @@ void spl_board_init(void)
 	/* Make sure to mux up to take the SoC 32k from the crystal */
 	writel(MCU_CTRL_DEVICE_CLKOUT_LFOSC_SELECT_VAL,
 	       MCU_CTRL_DEVICE_CLKOUT_32K_CTRL);
+
+	/* Setup debounce conf registers - arbitrary values. Times are approx */
+	/* 1.9ms debounce @ 32k */
+	writel(WKUP_CTRLMMR_DBOUNCE_CFG1, 0x1);
+	/* 5ms debounce @ 32k */
+	writel(WKUP_CTRLMMR_DBOUNCE_CFG2, 0x5);
+	/* 20ms debounce @ 32k */
+	writel(WKUP_CTRLMMR_DBOUNCE_CFG3, 0x14);
+	/* 46ms debounce @ 32k */
+	writel(WKUP_CTRLMMR_DBOUNCE_CFG4, 0x18);
+	/* 100ms debounce @ 32k */
+	writel(WKUP_CTRLMMR_DBOUNCE_CFG5, 0x1c);
+	/* 156ms debounce @ 32k */
+	writel(WKUP_CTRLMMR_DBOUNCE_CFG6, 0x1f);
 
 	/* Init DRAM size for R5/A53 SPL */
 	dram_init_banksize();
