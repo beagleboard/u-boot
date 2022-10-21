@@ -23,7 +23,6 @@
 #include <regmap.h>
 #include <remoteproc.h>
 #include <syscon.h>
-#include <soc.h>
 #include <linux/pruss_driver.h>
 #include <dm/device_compat.h>
 
@@ -112,8 +111,7 @@ static int icssg_mdio_init(struct udevice *dev)
 
 	prueth->bus = cpsw_mdio_init(dev->name, prueth->mdio_base,
 				     prueth->mdio_freq,
-				     clk_get_rate(&prueth->mdiofck),
-				     false);
+				     clk_get_rate(&prueth->mdiofck));
 	if (!prueth->bus)
 		return -EFAULT;
 
