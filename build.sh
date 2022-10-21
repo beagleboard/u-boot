@@ -12,6 +12,8 @@ if [ ! -f ./load.menuconfig ] ; then
 	echo "Developers: too enable menuconfig run: [touch load.menuconfig]"
 fi
 
+mkdir ./deploy/ || true
+
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean
 
 if [ "x${sys}" = "xaarch64" ] ; then
@@ -39,6 +41,7 @@ else
 	cp -v defconfig ./configs/j721e_evm_r5_defconfig
 
 	ls -lh ./tiboot3.bin
+	cp -v ./tiboot3.bin ./deploy/
 fi
 
 make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- distclean
@@ -71,4 +74,6 @@ else
 
 	ls -lh ./tispl.bin
 	ls -lh ./u-boot.bin
+	cp -v ./tispl.bin ./deploy/
+	cp -v ./u-boot.bin ./deploy/
 fi
