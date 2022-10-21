@@ -33,7 +33,7 @@ else
 	if [ -f ./load.menuconfig ] ; then
 		make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig
 	fi
-	make ARCH=arm -j4 CROSS_COMPILE=arm-linux-gnueabihf-
+	make ARCH=arm -j12 CROSS_COMPILE=arm-linux-gnueabihf-
 
 	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- savedefconfig
 	cp -v defconfig ./configs/j721e_evm_r5_defconfig
@@ -65,7 +65,7 @@ else
 	if [ -f ./load.menuconfig ] ; then
 		make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- menuconfig
 	fi
-	make ARCH=arm -j4 CROSS_COMPILE=aarch64-linux-gnu- ATF=${DIR}/ti-blobs/bl31.bin TEE=${DIR}/ti-blobs/tee-pager_v2.bin DM=${DIR}/ti-blobs/ipc_echo_testb_mcu1_0_release_strip.xer5f
+	make ARCH=arm -j12 CROSS_COMPILE=aarch64-linux-gnu- ATF=${DIR}/ti-blobs/bl31.bin TEE=${DIR}/ti-blobs/tee-pager_v2.bin DM=${DIR}/ti-blobs/ipc_echo_testb_mcu1_0_release_strip.xer5f
 
 	make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- savedefconfig
 	cp -v defconfig ./configs/j721e_evm_a72_defconfig
