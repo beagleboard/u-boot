@@ -23,7 +23,6 @@
 #include <regmap.h>
 #include <remoteproc.h>
 #include <syscon.h>
-#include <soc.h>
 #include <linux/pruss_driver.h>
 #include <dm/device_compat.h>
 
@@ -112,8 +111,7 @@ static int icssg_mdio_init(struct udevice *dev)
 
 	prueth->bus = cpsw_mdio_init(dev->name, prueth->mdio_base,
 				     prueth->mdio_freq,
-				     clk_get_rate(&prueth->mdiofck),
-				     prueth->mdio_manual_mode);
+				     clk_get_rate(&prueth->mdiofck));
 	if (!prueth->bus)
 		return -EFAULT;
 
@@ -487,20 +485,6 @@ static int prueth_config_rgmiidelay(struct prueth *prueth,
 	return 0;
 }
 
-static const struct soc_attr k3_mdio_soc_data[] = {
-	{ .family = "AM62X", .revision = "SR1.0" },
-	{ .family = "AM64X", .revision = "SR1.0" },
-	{ .family = "AM64X", .revision = "SR2.0" },
-	{ .family = "AM65X", .revision = "SR1.0" },
-	{ .family = "AM65X", .revision = "SR2.0" },
-	{ .family = "J7200", .revision = "SR1.0" },
-	{ .family = "J7200", .revision = "SR2.0" },
-	{ .family = "J721E", .revision = "SR1.0" },
-	{ .family = "J721E", .revision = "SR1.1" },
-	{ .family = "J721S2", .revision = "SR1.0" },
-	{ /* sentinel */ },
-};
-
 static int prueth_probe(struct udevice *dev)
 {
 	struct prueth *prueth;
@@ -638,10 +622,6 @@ static int prueth_probe(struct udevice *dev)
 		dev_err(dev, "clk_enable failed %d\n", ret);
 		return ret;
 	}
-
-	prueth->mdio_manual_mode = false;
-	if (soc_device_match(k3_mdio_soc_data))
-		prueth->mdio_manual_mode = true;
 
 	ret = icssg_mdio_init(dev);
 	if (ret)

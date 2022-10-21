@@ -304,7 +304,8 @@ void board_init_f(ulong dummy)
 
 #ifdef CONFIG_ESM_K3
 	if (board_ti_k3_is("J721EX-PM2-SOM") ||
-	    board_ti_k3_is("J7200X-PM2-SOM")) {
+	    board_ti_k3_is("J7200X-PM2-SOM") ||
+	    board_ti_k3_is("BBONEAI-64-B0-")) {
 		ret = uclass_get_device_by_driver(UCLASS_MISC,
 						  DM_GET_DRIVER(k3_esm), &dev);
 		if (ret)
@@ -314,7 +315,8 @@ void board_init_f(ulong dummy)
 
 #ifdef CONFIG_ESM_PMIC
 	if (board_ti_k3_is("J721EX-PM2-SOM") ||
-	    board_ti_k3_is("J7200X-PM2-SOM")) {
+	    board_ti_k3_is("J7200X-PM2-SOM") ||
+	    board_ti_k3_is("BBONEAI-64-B0-")) {
 		ret = uclass_get_device_by_driver(UCLASS_MISC,
 						  DM_GET_DRIVER(pmic_esm),
 						  &dev);
@@ -335,7 +337,7 @@ u32 spl_mmc_boot_mode(const u32 boot_device)
 {
 	switch (boot_device) {
 	case BOOT_DEVICE_MMC1:
-		return MMCSD_MODE_EMMCBOOT;
+		return MMCSD_MODE_FS;
 	case BOOT_DEVICE_MMC2:
 		return MMCSD_MODE_FS;
 	default:
