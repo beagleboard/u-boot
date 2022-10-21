@@ -71,7 +71,7 @@ else
 	cp -v defconfig ./configs/j721e_evm_a72_defconfig
 
 	ls -lh ./tispl.bin
-	ls -lh ./u-boot.bin
+	ls -lh ./u-boot.img
 	cp -v ./tispl.bin ./deploy/
-	cp -v ./u-boot.bin ./deploy/
+	cp -v ./u-boot.img ./deploy/
 fi
