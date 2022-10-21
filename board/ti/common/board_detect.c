@@ -86,7 +86,7 @@ __weak void gpi2c_init(void)
 static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 					    u32 header, u32 size, uint8_t *ep)
 {
-	u32 hdr_read;
+	u32 hdr_read = 0xdeadbeef;
 	int rc;
 
 #if defined(CONFIG_DM_I2C)
@@ -107,9 +107,13 @@ static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 	if (rc)
 		return rc;
 
-	rc = dm_i2c_read(dev, 0, (uint8_t *)&hdr_read, 4);
-	if (rc)
-		return rc;
+	/*
+	 * Skip checking result here since this could be a valid i2c read fail
+	 * on some boards that use 1 byte addressing.
+	 * We must allow for fall through to check the data if 1 byte
+	 * addressing works
+	 */
+	(void)dm_i2c_read(dev, 0, (uint8_t *)&hdr_read, 4);
 
 	/* Corrupted data??? */
 	if (hdr_read != header) {
@@ -144,9 +148,13 @@ static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
 	 */
 	byte = 2;
 
-	rc = i2c_read(dev_addr, 0x0, byte, (uint8_t *)&hdr_read, 4);
-	if (rc)
-		return rc;
+	/*
+	 * Skip checking result here since this could be a valid i2c read fail
+	 * on some boards that use 1 byte addressing.
+	 * We must allow for fall through to check the data if 1 byte
+	 * addressing works
+	 */
+	(void)i2c_read(dev_addr, 0x0, byte, (uint8_t *)&hdr_read, 4);
 
 	/* Corrupted data??? */
 	if (hdr_read != header) {
@@ -434,6 +442,7 @@ int __maybe_unused ti_i2c_eeprom_am6_get(int bus_addr, int dev_addr,
 	struct ti_am6_eeprom_record_board_id board_id;
 	struct ti_am6_eeprom_record record;
 	int rc;
+	int consecutive_bad_records = 0;
 
 	/* Initialize with a known bad marker for i2c fails.. */
 	memset(ep, 0, sizeof(*ep));
@@ -470,7 +479,7 @@ int __maybe_unused ti_i2c_eeprom_am6_get(int bus_addr, int dev_addr,
 	 */
 	eeprom_addr = sizeof(board_id);
 
-	while (true) {
+	while (consecutive_bad_records < 10) {
 		rc = dm_i2c_read(dev, eeprom_addr, (uint8_t *)&record.header,
 				 sizeof(record.header));
 		if (rc)
@@ -506,6 +515,7 @@ int __maybe_unused ti_i2c_eeprom_am6_get(int bus_addr, int dev_addr,
 				pr_err("%s: EEPROM parsing error!\n", __func__);
 				return rc;
 			}
+			consecutive_bad_records = 0;
 		} else {
 			/*
 			 * We may get here in case of larger records which
@@ -513,6 +523,7 @@ int __maybe_unused ti_i2c_eeprom_am6_get(int bus_addr, int dev_addr,
 			 */
 			pr_err("%s: Ignoring record id %u\n", __func__,
 			       record.header.id);
+			consecutive_bad_records++;
 		}
 
 		eeprom_addr += record.header.len;

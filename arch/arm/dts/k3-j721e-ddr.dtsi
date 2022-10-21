@@ -12,6 +12,7 @@
 		power-domains = <&k3_pds 47 TI_SCI_PD_SHARED>,
 			<&k3_pds 90 TI_SCI_PD_SHARED>;
 		clocks = <&k3_clks 47 2>, <&k3_clks 30 9>;
+		ti,ddr-freq0 = <DDRSS_PLL_FREQUENCY_0>;
 		ti,ddr-freq1 = <DDRSS_PLL_FREQUENCY_1>;
 		ti,ddr-freq2 = <DDRSS_PLL_FREQUENCY_2>;
 		ti,ddr-fhs-cnt = <DDRSS_PLL_FHS_CNT>;

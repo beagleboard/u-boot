@@ -6,15 +6,14 @@
 /dts-v1/;
 
 #include "k3-j721e-som-p0.dtsi"
-#include "k3-j721e-ddr-evm-lp4-3733.dtsi"
+#include "k3-j721e-ddr-evm-lp4-4266.dtsi"
 #include "k3-j721e-ddr.dtsi"
+#include <dt-bindings/phy/phy-cadence.h>
 
 / {
 	aliases {
 		remoteproc0 = &sysctrler;
 		remoteproc1 = &a72_0;
-		remoteproc2 = &main_r5fss0_core0;
-		remoteproc3 = &main_r5fss0_core1;
 	};
 
 	chosen {
@@ -28,6 +27,7 @@
 		power-domains = <&k3_pds 61 TI_SCI_PD_EXCLUSIVE>,
 				<&k3_pds 202 TI_SCI_PD_EXCLUSIVE>;
 		resets = <&k3_reset 202 0>;
+		clocks = <&k3_clks 61 1>;
 		assigned-clocks = <&k3_clks 202 2>, <&k3_clks 61 1>;
 		assigned-clock-rates = <2000000000>, <200000000>;
 		ti,sci = <&dmsc>;
@@ -75,6 +75,16 @@
 		power-domains = <&k3_pds 154 TI_SCI_PD_EXCLUSIVE>;
 		#thermal-sensor-cells = <1>;
 	};
+
+	dm_tifs: dm-tifs {
+		compatible = "ti,j721e-dm-sci";
+		ti,host-id = <3>;
+		ti,secure-host;
+		mbox-names = "rx", "tx";
+		mboxes= <&mcu_secproxy 21>,
+			<&mcu_secproxy 23>;
+		u-boot,dm-spl;
+	};
 };
 
 &cbass_main {
@@ -116,6 +126,31 @@
 		pinctrl-single,pins = <
 			J721E_WKUP_IOPAD(0xf8, PIN_INPUT_PULLUP, 0) /* (J25) WKUP_I2C0_SCL */
 			J721E_WKUP_IOPAD(0xfc, PIN_INPUT_PULLUP, 0) /* (H24) WKUP_I2C0_SDA */
+		>;
+	};
+
+	mcu_fss0_hpb0_pins_default: mcu-fss0-hpb0-pins-default {
+		pinctrl-single,pins = <
+			J721E_WKUP_IOPAD(0x0, PIN_OUTPUT, 1) /* (E20) MCU_OSPI0_CLK.MCU_HYPERBUS0_CK */
+			J721E_WKUP_IOPAD(0x4, PIN_OUTPUT, 1) /* (C21) MCU_OSPI0_LBCLKO.MCU_HYPERBUS0_CKn */
+			J721E_WKUP_IOPAD(0x2c, PIN_OUTPUT, 1) /* (F19) MCU_OSPI0_CSn0.MCU_HYPERBUS0_CSn0 */
+			J721E_WKUP_IOPAD(0x54, PIN_OUTPUT, 3) /* (E22) MCU_OSPI1_CSn1.MCU_HYPERBUS0_CSn1 */
+			J721E_WKUP_IOPAD(0x30, PIN_OUTPUT, 1) /* (E19) MCU_OSPI0_CSn1.MCU_HYPERBUS0_RESETn */
+			J721E_WKUP_IOPAD(0x8, PIN_INPUT, 1) /* (D21) MCU_OSPI0_DQS.MCU_HYPERBUS0_RWDS */
+			J721E_WKUP_IOPAD(0xc, PIN_INPUT, 1) /* (D20) MCU_OSPI0_D0.MCU_HYPERBUS0_DQ0 */
+			J721E_WKUP_IOPAD(0x10, PIN_INPUT, 1) /* (G19) MCU_OSPI0_D1.MCU_HYPERBUS0_DQ1 */
+			J721E_WKUP_IOPAD(0x14, PIN_INPUT, 1) /* (G20) MCU_OSPI0_D2.MCU_HYPERBUS0_DQ2 */
+			J721E_WKUP_IOPAD(0x18, PIN_INPUT, 1) /* (F20) MCU_OSPI0_D3.MCU_HYPERBUS0_DQ3 */
+			J721E_WKUP_IOPAD(0x1c, PIN_INPUT, 1) /* (F21) MCU_OSPI0_D4.MCU_HYPERBUS0_DQ4 */
+			J721E_WKUP_IOPAD(0x20, PIN_INPUT, 1) /* (E21) MCU_OSPI0_D5.MCU_HYPERBUS0_DQ5 */
+			J721E_WKUP_IOPAD(0x24, PIN_INPUT, 1) /* (B22) MCU_OSPI0_D6.MCU_HYPERBUS0_DQ6 */
+			J721E_WKUP_IOPAD(0x28, PIN_INPUT, 1) /* (G21) MCU_OSPI0_D7.MCU_HYPERBUS0_DQ7 */
+		>;
+	};
+
+	wkup_gpio_pins_default: wkup-gpio-pins-default {
+		pinctrl-single,pins = <
+			J721E_WKUP_IOPAD(0xd0, PIN_INPUT, 7) /* WKUP_GPIO0_8 */
 		>;
 	};
 
@@ -197,6 +232,11 @@
 	status = "okay";
 };
 
+&wkup_gpio0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_gpio_pins_default>;
+};
+
 &mcu_uart0 {
 	/delete-property/ power-domains;
 	/delete-property/ clocks;
@@ -249,13 +289,121 @@
 		regulators: regulators {
 			u-boot,dm-spl;
 			buck12_reg: buck12 {
-				/*VDD_MPU*/
+				/*VDD_CPU*/
 				regulator-name = "buck12";
-				regulator-min-microvolt = <800000>;
-				regulator-max-microvolt = <1250000>;
+				regulator-min-microvolt = <600000>;
+				regulator-max-microvolt = <900000>;
 				regulator-always-on;
 				regulator-boot-on;
 				u-boot,dm-spl;
+			};
+		};
+	};
+
+	/* PMIC for PM1 SoM, unused on PM2 */
+	tps65917: tps65917@58 {
+		reg = <0x58>;
+		compatible = "ti,tps65917";
+		interrupt-controller;
+		#interrupt-cells = <2>;
+		u-boot,dm-spl;
+
+		ti,system-power-controller;
+
+		tps65917_pmic {
+			compatible = "ti,tps65917-pmic";
+			u-boot,dm-spl;
+
+			tps65917_regulators: regulators {
+				u-boot,dm-spl;
+				smps12_reg: smps12 {
+					/* VDD_CPU_AVS_REG */
+					regulator-name = "smps1";
+					regulator-min-microvolt = <800000>;
+					regulator-max-microvolt = <1250000>;
+					regulator-always-on;
+					regulator-boot-on;
+					u-boot,dm-spl;
+				};
+
+				smps3_reg: smps3 {
+					/* V917_SMPS3_1V1 */
+					regulator-name = "smps3";
+					regulator-min-microvolt = <1100000>;
+					regulator-max-microvolt = <1100000>;
+					regulator-boot-on;
+					regulator-always-on;
+					u-boot,dm-spl;
+				};
+
+				smps4_reg: smps4 {
+					/* VDD_CORE_RAM_0V85_REG */
+					regulator-name = "smps4";
+					regulator-min-microvolt = <850000>;
+					regulator-max-microvolt = <850000>;
+					regulator-always-on;
+					regulator-boot-on;
+					u-boot,dm-spl;
+				};
+
+				smps5_reg: smps5 {
+					/* VDD_CPU_RAM_0V85_REG */
+					regulator-name = "smps5";
+					regulator-min-microvolt = <850000>;
+					regulator-max-microvolt = <850000>;
+					regulator-boot-on;
+					regulator-always-on;
+					u-boot,dm-spl;
+				};
+
+				ldo1_reg: ldo1 {
+					/* LDO1_OUT --> VDD_SD_DV_REG  */
+					regulator-name = "ldo1";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <3300000>;
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-allow-bypass;
+					u-boot,dm-spl;
+				};
+
+				ldo2_reg: ldo2 {
+					/* VDA_USB_3V3_REG */
+					regulator-name = "ldo2";
+					regulator-min-microvolt = <3300000>;
+					regulator-max-microvolt = <3300000>;
+					regulator-allow-bypass;
+					u-boot,dm-spl;
+				};
+
+				ldo3_reg: ldo3 {
+					/* VDA_PLL_1V8_REG */
+					regulator-name = "ldo3";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-boot-on;
+					regulator-always-on;
+					u-boot,dm-spl;
+				};
+
+				ldo4_reg: ldo4 {
+					/* V917_LDO4_1V8 */
+					regulator-name = "ldo4";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-boot-on;
+					u-boot,dm-spl;
+				};
+
+				ldo5_reg: ldo5 {
+					/* VPP_EFUSE_1V8 */
+					regulator-name = "ldo5";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-always-on;
+					regulator-boot-on;
+					u-boot,dm-spl;
+				};
 			};
 		};
 	};
@@ -263,6 +411,7 @@
 
 &wkup_vtm0 {
 	vdd-supply-2 = <&buck12_reg>;
+	som1-supply-2 = <&smps12_reg>;
 	u-boot,dm-spl;
 };
 
@@ -271,7 +420,7 @@
 	/delete-property/ assigned-clocks;
 	/delete-property/ assigned-clock-parents;
 	clocks = <&clk_19_2mhz>;
-	clock-names = "usb2_refclk";
+	clock-names = "ref";
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_usbss0_pins_default>;
 	ti,vbus-divider;
@@ -297,6 +446,21 @@
 	};
 };
 
+&hbmc {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&mcu_fss0_hpb0_pins_default>;
+	reg = <0x0 0x47040000 0x0 0x100>,
+		<0x0 0x50000000 0x0 0x8000000>;
+	ranges = <0x0 0x0 0x0 0x50000000 0x4000000>, /* 64MB Flash on CS0 */
+		 <0x1 0x0 0x0 0x54000000 0x800000>; /* 8MB flash on CS1 */
+
+	flash@0,0 {
+		compatible = "cypress,hyperflash", "cfi-flash";
+		reg = <0x0 0x0 0x4000000>;
+	};
+};
+
 &ospi0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&mcu_fss0_ospi0_pins_default>;
@@ -307,14 +471,15 @@
 	flash@0{
 		compatible = "jedec,spi-nor";
 		reg = <0x0>;
-		spi-tx-bus-width = <1>;
+		spi-tx-bus-width = <8>;
 		spi-rx-bus-width = <8>;
-		spi-max-frequency = <50000000>;
+		spi-max-frequency = <25000000>;
 		cdns,tshsl-ns = <60>;
 		cdns,tsd2d-ns = <60>;
 		cdns,tchsh-ns = <60>;
 		cdns,tslch-ns = <60>;
 		cdns,read-delay = <0>;
+		cdns,phy-mode;
 		#address-cells = <1>;
 		#size-cells = <1>;
 	};
@@ -345,4 +510,46 @@
 	};
 };
 
-#include "k3-j721e-common-proc-board-u-boot.dtsi"
+&mcu_ringacc {
+	ti,sci = <&dm_tifs>;
+};
+
+&mcu_udmap {
+	ti,sci = <&dm_tifs>;
+};
+
+/* EEPROM might be read before SYSFW is available */
+&wkup_i2c0 {
+	/delete-property/ power-domains;
+};
+
+&wiz0_pll1_refclk {
+	assigned-clocks = <&wiz0_pll1_refclk>;
+	assigned-clock-parents = <&dummy_cmn_refclk1>;
+};
+
+&wiz0_refclk_dig {
+	assigned-clocks = <&wiz0_refclk_dig>;
+	assigned-clock-parents = <&dummy_cmn_refclk1>;
+};
+
+&serdes0 {
+	assigned-clocks = <&serdes0 CDNS_SIERRA_PLL_CMNLC>, <&serdes0 CDNS_SIERRA_PLL_CMNLC1>;
+	assigned-clock-parents = <&wiz0_pll1_refclk>, <&wiz0_pll1_refclk>;
+
+	serdes0_pcie_link: link@0 {
+		reg = <0>;
+		cdns,num-lanes = <1>;
+		#phy-cells = <0>;
+		cdns,phy-type = <PHY_TYPE_PCIE>;
+		resets = <&serdes_wiz0 1>;
+	};
+
+	serdes0_qsgmii_link: phy@1 {
+		reg = <1>;
+		cdns,num-lanes = <1>;
+		#phy-cells = <0>;
+		cdns,phy-type = <PHY_TYPE_QSGMII>;
+		resets = <&serdes_wiz0 2>;
+	};
+};

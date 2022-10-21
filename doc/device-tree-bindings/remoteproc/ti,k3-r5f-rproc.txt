@@ -27,6 +27,8 @@ The following are the mandatory properties:
 			                       K3 J721E SoCs
 			    "ti,j7200-r5fss" for R5F clusters/subsystems on
 			                       K3 J7200 SoCs
+			    "ti,j721s2-r5fss" for R5F clusters/subsystems on
+			                       K3 J721S2 SoCs
 - power-domains:	Should contain a phandle to a PM domain provider node
 			and an args specifier containing the R5FSS device id
 			value. This property is as per the binding,
@@ -38,7 +40,7 @@ The following are the mandatory properties:
 
 Optional properties:
 --------------------
-- lockstep-mode:	Configuration Mode for the Dual R5F cores within the R5F
+- ti,cluster-mode:	Configuration Mode for the Dual R5F cores within the R5F
 			cluster. Should be either a value of 1 (LockStep mode) or
 			0 (Split mode), default is LockStep mode if omitted.
 
@@ -59,6 +61,7 @@ The following are the mandatory properties:
 			    "ti,am654-r5f" for the R5F cores in K3 AM65x SoCs
 			    "ti,j721e-r5f" for the R5F cores in K3 J721E SOCs
 			    "ti,j7200-r5f" for the R5F cores in K3 J7200 SOCs
+			    "ti,j721s2-r5f" for the R5F cores in K3 J721S2 SOCs
 - reg:			Should contain an entry for each value in 'reg-names'.
 			Each entry should have the memory region's start address
 			and the size of the region, the representation matching
@@ -82,21 +85,21 @@ The following are the mandatory properties:
 			specifier. Please refer to the following reset bindings
 			for the reset argument specifier,
 			Documentation/devicetree/bindings/reset/ti,sci-reset.txt
-			    for AM65x, J721E and J7200 SoCs
+			    for AM65x, J721E, J7200 and J721S2 SoCs
 
 Optional properties:
 --------------------
 The following properties are optional properties for each of the R5F cores:
 
-- atcm-enable:		R5F core configuration mode dictating if ATCM should be
+- ti,atcm-enable:	R5F core configuration mode dictating if ATCM should be
 			enabled. Should be either a value of 1 (enabled) or
 			0 (disabled), default is disabled if omitted. R5F view
-			of ATCM dictated by loczrama property.
-- btcm-enable:		R5F core configuration mode dictating if BTCM should be
+			of ATCM dictated by ti,loczrama property.
+- ti,btcm-enable:	R5F core configuration mode dictating if BTCM should be
 			enabled. Should be either a value of 1 (enabled) or
 			0 (disabled), default is enabled if omitted. R5F view
-			of BTCM dictated by loczrama property.
-- loczrama:		R5F core configuration mode dictating which TCM should
+			of BTCM dictated by ti,loczrama property.
+- ti,loczrama:		R5F core configuration mode dictating which TCM should
 			appear at address 0 (from core's view). Should be either
 			a value of 1 (ATCM at 0x0) or 0 (BTCM at 0x0), default
 			value is 1 if omitted.
@@ -129,7 +132,7 @@ Example:
 			mcu_r5fss0: r5fss@41000000 {
 				compatible = "ti,am654-r5fss";
 				power-domains = <&k3_pds 129>;
-				lockstep-mode = <1>;
+				ti,cluster-mode = <1>;
 				#address-cells = <1>;
 				#size-cells = <1>;
 				ranges = <0x41000000 0x00 0x41000000 0x20000>,
@@ -144,9 +147,9 @@ Example:
 					ti,sci-dev-id = <159>;
 					ti,sci-proc-ids = <0x01 0xFF>;
 					resets = <&k3_reset 159 1>;
-					atcm-enable = <1>;
-					btcm-enable = <1>;
-					loczrama = <1>;
+					ti,atcm-enable = <1>;
+					ti,btcm-enable = <1>;
+					ti,loczrama = <1>;
 				};
 
 				mcu_r5f1: r5f@41400000 {
@@ -158,9 +161,9 @@ Example:
 					ti,sci-dev-id = <245>;
 					ti,sci-proc-ids = <0x02 0xFF>;
 					resets = <&k3_reset 245 1>;
-					atcm-enable = <1>;
-					btcm-enable = <1>;
-					loczrama = <1>;
+					ti,atcm-enable = <1>;
+					ti,btcm-enable = <1>;
+					ti,loczrama = <1>;
 				};
 			};
 		};

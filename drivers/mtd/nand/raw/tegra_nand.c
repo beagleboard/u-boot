@@ -178,7 +178,7 @@ static uint8_t read_byte(struct mtd_info *mtd)
  *
  * Read function for 8bit bus-width
  */
-static void read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+static void read_buf(struct mtd_info *mtd, uint8_t *buf, int len, bool force_8bit)
 {
 	int i, s;
 	unsigned int reg;

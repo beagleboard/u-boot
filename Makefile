@@ -1326,6 +1326,9 @@ u-boot.ldr:	u-boot
 # binman
 # ---------------------------------------------------------------------------
 # Use 'make BINMAN_DEBUG=1' to enable debugging
+ifneq ($(ATF),)
+BL31 = $(ATF)
+endif
 default_dt := $(if $(DEVICE_TREE),$(DEVICE_TREE),$(CONFIG_DEFAULT_DEVICE_TREE))
 quiet_cmd_binman = BINMAN  $@
 cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
@@ -1335,6 +1338,8 @@ cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
 		-I . -I $(srctree) -I $(srctree)/board/$(BOARDDIR) \
 		-I arch/$(ARCH)/dts -a of-list=$(CONFIG_OF_LIST) \
 		-a atf-bl31-path=${BL31} \
+		-a tee-os-path=${TEE} \
+		-a ti-secure-dev-pkg-path=${TI_SECURE_DEV_PKG} \
 		-a default-dt=$(default_dt) \
 		-a scp-path=$(SCP) \
 		$(BINMAN_$(@F))

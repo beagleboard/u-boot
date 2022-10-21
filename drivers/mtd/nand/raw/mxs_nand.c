@@ -473,7 +473,8 @@ static void mxs_nand_swap_block_mark(struct bch_geometry *geo,
 /*
  * Read data from NAND.
  */
-static void mxs_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int length)
+static void mxs_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int length,
+			      bool force_8bit)
 {
 	struct nand_chip *nand = mtd_to_nand(mtd);
 	struct mxs_nand_info *nand_info = nand_get_controller_data(nand);
@@ -613,7 +614,7 @@ static void mxs_nand_write_buf(struct mtd_info *mtd, const uint8_t *buf,
 static uint8_t mxs_nand_read_byte(struct mtd_info *mtd)
 {
 	uint8_t buf;
-	mxs_nand_read_buf(mtd, &buf, 1);
+	mxs_nand_read_buf(mtd, &buf, 1, false);
 	return buf;
 }
 
@@ -639,7 +640,7 @@ static bool mxs_nand_erased_page(struct mtd_info *mtd, struct nand_chip *nand,
 	}
 
 	nand->cmdfunc(mtd, NAND_CMD_READ0, 0, page);
-	nand->read_buf(mtd, buf, mtd->writesize);
+	nand->read_buf(mtd, buf, mtd->writesize, false);
 
 	for (i = 0; i < mtd->writesize / 4; i++) {
 		flip_bits_noecc += hweight32(~dma_buf[i]);
@@ -1037,7 +1038,7 @@ static int mxs_nand_ecc_read_oob(struct mtd_info *mtd, struct nand_chip *nand,
 		 * command to read the conventional OOB and read it.
 		 */
 		nand->cmdfunc(mtd, NAND_CMD_READ0, mtd->writesize, page);
-		nand->read_buf(mtd, nand->oob_poi, mtd->oobsize);
+		nand->read_buf(mtd, nand->oob_poi, mtd->oobsize, false);
 	} else {
 		/*
 		 * If control arrives here, we're not doing a "raw" read. Fill
@@ -1046,7 +1047,7 @@ static int mxs_nand_ecc_read_oob(struct mtd_info *mtd, struct nand_chip *nand,
 		memset(nand->oob_poi, 0xff, mtd->oobsize);
 
 		nand->cmdfunc(mtd, NAND_CMD_READ0, mtd->writesize, page);
-		mxs_nand_read_buf(mtd, nand->oob_poi, 1);
+		mxs_nand_read_buf(mtd, nand->oob_poi, 1, false);
 	}
 
 	return 0;

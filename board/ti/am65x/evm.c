@@ -20,11 +20,14 @@
 #include <asm/omap_common.h>
 #include <env.h>
 #include <spl.h>
+#include <soc.h>
+#include <sysinfo.h>
 #include <asm/arch/sys_proto.h>
 
 #include "../common/board_detect.h"
 
 #define board_is_am65x_base_board()	board_ti_is("AM6-COMPROCEVM")
+#define MAX_DAUGHTER_CARDS	8
 
 /* Daughter card presence detection signals */
 enum {
@@ -37,6 +40,10 @@ enum {
 
 /* Max number of MAC addresses that are parsed/processed per daughter card */
 #define DAUGHTER_CARD_NO_OF_MAC_ADDR	8
+
+/* Regiter that controls the SERDES0 lane and clock assignment */
+#define CTRLMMR_SERDES0_CTRL    0x00104080
+#define PCIE_LANE0              0x1
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -110,19 +117,11 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 		return ret;
 	}
 
-#if defined(CONFIG_TI_SECURE_DEVICE)
-	/* Make Crypto HW reserved for secure world use */
-	ret = fdt_disable_node(blob, "/bus@100000/crypto@4e00000");
-	if (ret < 0)
-		ret = fdt_disable_node(blob,
-				       "/interconnect@100000/crypto@4E00000");
-	if (ret)
-		printf("%s: disabling SA2UL failed %d\n", __func__, ret);
-#endif
-
 	return 0;
 }
 #endif
+
+const char *k3_dtbo_list[MAX_DAUGHTER_CARDS] = {NULL};
 
 int do_board_detect(void)
 {
@@ -192,8 +191,12 @@ static int probe_daughtercards(void)
 	char mac_addr[DAUGHTER_CARD_NO_OF_MAC_ADDR][TI_EEPROM_HDR_ETH_ALEN];
 	u8 mac_addr_cnt;
 	char name_overlays[1024] = { 0 };
-	int i, j;
+	int i, nb_dtbos = 0;
 	int ret;
+	struct udevice *soc;
+	char str[SOC_MAX_STR_SIZE];
+	const char *am65x_sr1_dtboname = "k3-am654-base-board-sr1.dtbo";
+	const char *am65x_idk_sr1_dtboname = "k3-am654-idk-sr1.dtbo";
 
 	/*
 	 * Daughter card presence detection signal name to GPIO (via I2C I/O
@@ -248,6 +251,25 @@ static int probe_daughtercards(void)
 		},
 	};
 
+	ret = soc_get(&soc);
+	if (ret) {
+		pr_err("soc_get failed %d\n", ret);
+		return ret;
+	}
+
+	ret = soc_get_revision(soc, str, sizeof(str));
+	if (ret) {
+		pr_err("Unable to get silicon revision %d\n", ret);
+		return ret;
+	}
+
+	/* Apply overlay for boards using SR1.0 */
+	printf("Detected: Silicon %s\n", str);
+	if (!strncmp(str, "SR1.0", 5)) {
+		strcat(name_overlays, am65x_sr1_dtboname);
+		strcat(name_overlays, " ");
+	}
+
 	/*
 	 * Initialize GPIO used for daughtercard slot presence detection and
 	 * keep the resulting handles in local array for easier access.
@@ -259,10 +281,14 @@ static int probe_daughtercards(void)
 			return ret;
 	}
 
+	memset(k3_dtbo_list, 0, sizeof(k3_dtbo_list));
+	if (!strncmp(str, "SR1.0", 5))
+		k3_dtbo_list[nb_dtbos++] = am65x_sr1_dtboname;
 	for (i = 0; i < ARRAY_SIZE(cards); i++) {
 		/* Obtain card-specific slot index and associated I2C address */
 		u8 slot_index = cards[i].slot_index;
 		u8 i2c_addr = slot_map[slot_index].i2c_addr;
+		const char *dtboname;
 
 		/*
 		 * The presence detection signal is active-low, hence skip
@@ -297,6 +323,8 @@ static int probe_daughtercards(void)
 
 		printf("Detected: %s rev %s\n", ep.name, ep.version);
 
+#ifndef CONFIG_SPL_BUILD
+		int j;
 		/*
 		 * Populate any MAC addresses from daughtercard into the U-Boot
 		 * environment, starting with a card-specific offset so we can
@@ -311,28 +339,52 @@ static int probe_daughtercards(void)
 						      cards[i].eth_offset + j,
 						      (uchar *)mac_addr[j]);
 		}
+#endif
+
+		/*
+		 * It has been observed that setting SERDES0 lane mux to USB prevents USB
+		 * 2.0 operation on USB0. Setting SERDES0 lane mux to non-USB when USB0 is
+		 * used in USB 2.0 only mode solves this issue. For USB3.0+2.0 operation
+		 * this issue is not present.
+		 *
+		 * Implement this workaround by writing 1 to LANE_FUNC_SEL field in
+		 * CTRLMMR_SERDES0_CTRL register.
+		 */
+		if (!strncmp(ep.name, "SER-PCIE2LEVM", sizeof(ep.name)))
+			writel(PCIE_LANE0, CTRLMMR_SERDES0_CTRL);
 
 		/* Skip if no overlays are to be added */
 		if (!strlen(cards[i].dtbo_name))
 			continue;
+
+		dtboname = cards[i].dtbo_name;
+
+		/* Fix up IDK overlay for SR1.0 */
+		if (!strncmp(ep.name, "AM6-IDKAPPEVM", sizeof(ep.name)) &&
+		    !strncmp(str, "SR1.0", 5))
+			dtboname = am65x_idk_sr1_dtboname;
+
+		k3_dtbo_list[nb_dtbos++] = dtboname;
 
 		/*
 		 * Make sure we are not running out of buffer space by checking
 		 * if we can fit the new overlay, a trailing space to be used
 		 * as a separator, plus the terminating zero.
 		 */
-		if (strlen(name_overlays) + strlen(cards[i].dtbo_name) + 2 >
+		if (strlen(name_overlays) + strlen(dtboname) + 2 >
 		    sizeof(name_overlays))
 			return -ENOMEM;
 
 		/* Append to our list of overlays */
-		strcat(name_overlays, cards[i].dtbo_name);
+		strcat(name_overlays, dtboname);
 		strcat(name_overlays, " ");
 	}
 
+#ifndef CONFIG_SPL_BUILD
 	/* Apply device tree overlay(s) to the U-Boot environment, if any */
 	if (strlen(name_overlays))
 		return env_set("name_overlays", name_overlays);
+#endif
 
 	return 0;
 }
@@ -356,3 +408,17 @@ int board_late_init(void)
 
 	return 0;
 }
+
+#ifdef CONFIG_SPL_BOARD_INIT
+void spl_board_init(void)
+{
+	struct udevice *board;
+
+	/* Check for and probe any plugged-in daughtercards */
+	probe_daughtercards();
+
+	/* Probe the board driver and call its detection method*/
+	if (!sysinfo_get(&board))
+		sysinfo_detect(board);
+}
+#endif

@@ -1,0 +1,129 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2020-2021 Texas Instruments Incorporated - https://www.ti.com/
+ */
+
+#include "k3-j721e-common-proc-board.dts"
+#include "k3-j721e-common-proc-board-u-boot.dtsi"
+
+&wkup_i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_i2c0_pins_default>;
+	clock-frequency = <400000>;
+	u-boot,dm-spl;
+
+	tps65917: tps65917@58 {
+		reg = <0x58>;
+		compatible = "ti,tps65917";
+		interrupt-controller;
+		#interrupt-cells = <2>;
+		u-boot,dm-spl;
+
+		ti,system-power-controller;
+
+		tps65917_pmic {
+			compatible = "ti,tps65917-pmic";
+			u-boot,dm-spl;
+
+			tps65917_regulators: regulators {
+				u-boot,dm-spl;
+				smps12_reg: smps12 {
+					/* VDD_CPU_AVS_REG */
+					regulator-name = "smps1";
+					regulator-min-microvolt = <800000>;
+					regulator-max-microvolt = <1250000>;
+					regulator-always-on;
+					regulator-boot-on;
+					u-boot,dm-spl;
+				};
+
+				smps3_reg: smps3 {
+					/* V917_SMPS3_1V1 */
+					regulator-name = "smps3";
+					regulator-min-microvolt = <1100000>;
+					regulator-max-microvolt = <1100000>;
+					regulator-boot-on;
+					regulator-always-on;
+					u-boot,dm-spl;
+				};
+
+				smps4_reg: smps4 {
+					/* VDD_CORE_RAM_0V85_REG */
+					regulator-name = "smps4";
+					regulator-min-microvolt = <850000>;
+					regulator-max-microvolt = <850000>;
+					regulator-always-on;
+					regulator-boot-on;
+					u-boot,dm-spl;
+				};
+
+				smps5_reg: smps5 {
+					/* VDD_CPU_RAM_0V85_REG */
+					regulator-name = "smps5";
+					regulator-min-microvolt = <850000>;
+					regulator-max-microvolt = <850000>;
+					regulator-boot-on;
+					regulator-always-on;
+					u-boot,dm-spl;
+				};
+
+				ldo1_reg: ldo1 {
+					/* LDO1_OUT --> VDD_SD_DV_REG  */
+					regulator-name = "ldo1";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <3300000>;
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-allow-bypass;
+					u-boot,dm-spl;
+				};
+
+				ldo2_reg: ldo2 {
+					/* VDA_USB_3V3_REG */
+					regulator-name = "ldo2";
+					regulator-min-microvolt = <3300000>;
+					regulator-max-microvolt = <3300000>;
+					regulator-allow-bypass;
+					u-boot,dm-spl;
+				};
+
+				ldo3_reg: ldo3 {
+					/* VDA_PLL_1V8_REG */
+					regulator-name = "ldo3";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-boot-on;
+					regulator-always-on;
+					u-boot,dm-spl;
+				};
+
+				ldo4_reg: ldo4 {
+					/* V917_LDO4_1V8 */
+					regulator-name = "ldo4";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-boot-on;
+					u-boot,dm-spl;
+				};
+
+				ldo5_reg: ldo5 {
+					/* VPP_EFUSE_1V8 */
+					regulator-name = "ldo5";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-always-on;
+					regulator-boot-on;
+					u-boot,dm-spl;
+				};
+			};
+		};
+	};
+};
+
+&vdd_sd_dv_alt {
+	status = "disabled";
+};
+
+&main_sdhci1 {
+	vqmmc-supply = <&ldo1_reg>;
+};

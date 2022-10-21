@@ -22,6 +22,8 @@
 #include "fdt_host.h"
 #include "libfdt_internal.h"
 
+#include <linux/kconfig.h>
+
 /* Define DEBUG to get some debugging output on stderr */
 #ifdef DEBUG
 #define debug(a, b...) fprintf(stderr, a, ## b)
@@ -1230,6 +1232,12 @@ int main(int argc, char *argv[])
 	} else {
 		disp.fout = stdout;
 	}
+
+#ifdef CONFIG_SPL_LOAD_FIT_APPLY_OVERLAY
+	/* include symbol table */
+	if (value_add(&disp, &disp.value_head, FDT_IS_NODE, 1, "/__symbols__"))
+		usage("Cannot add __symbols__ value");
+#endif
 
 	/* Run the grep and output the results */
 	ret = do_fdtgrep(&disp, filename);

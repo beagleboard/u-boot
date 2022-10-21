@@ -399,7 +399,8 @@ int lpc32xx_correct_data(struct mtd_info *mtd, u_char *dat,
 	return ret2;
 }
 
-static void lpc32xx_dma_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+static void lpc32xx_dma_read_buf(struct mtd_info *mtd, uint8_t *buf, int len,
+				 bool force_8bit)
 {
 	lpc32xx_nand_xfer(mtd, buf, len, 1);
 }
@@ -430,9 +431,9 @@ static int lpc32xx_read_page_hwecc(struct mtd_info *mtd, struct nand_chip *chip,
 	 */
 
 	lpc32xx_hwecc_enable(mtd, NAND_ECC_READ);
-	lpc32xx_dma_read_buf(mtd, p, chip->ecc.size * chip->ecc.steps);
+	lpc32xx_dma_read_buf(mtd, p, chip->ecc.size * chip->ecc.steps, false);
 	lpc32xx_ecc_calculate(mtd, p, &ecc_calc[0]);
-	lpc32xx_dma_read_buf(mtd, chip->oob_poi, mtd->oobsize);
+	lpc32xx_dma_read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 
 	for (i = 0; i < chip->ecc.total; i++)
 		ecc_code[i] = chip->oob_poi[eccpos[i]];
@@ -478,7 +479,8 @@ static int lpc32xx_write_page_hwecc(struct mtd_info *mtd,
 	return 0;
 }
 #else
-static void lpc32xx_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+static void lpc32xx_read_buf(struct mtd_info *mtd, uint8_t *buf, int len,
+			     bool force_8bit)
 {
 	while (len-- > 0)
 		*buf++ = readl(&lpc32xx_nand_slc_regs->data);

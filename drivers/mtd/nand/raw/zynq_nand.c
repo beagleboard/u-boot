@@ -448,13 +448,13 @@ static int zynq_nand_read_oob(struct mtd_info *mtd, struct nand_chip *chip,
 	chip->cmdfunc(mtd, NAND_CMD_READOOB, 0, page);
 
 	p = chip->oob_poi;
-	chip->read_buf(mtd, p, (mtd->oobsize - data_width));
+	chip->read_buf(mtd, p, (mtd->oobsize - data_width), false);
 	p += mtd->oobsize - data_width;
 
 	data_phase_addr = (unsigned long)chip->IO_ADDR_R;
 	data_phase_addr |= ZYNQ_NAND_CLEAR_CS;
 	chip->IO_ADDR_R = (void __iomem *)data_phase_addr;
-	chip->read_buf(mtd, p, data_width);
+	chip->read_buf(mtd, p, data_width, false);
 
 	return 0;
 }
@@ -505,24 +505,24 @@ static int zynq_nand_read_page_raw(struct mtd_info *mtd, struct nand_chip *chip,
 	unsigned long data_phase_addr = 0;
 	u8 *p;
 
-	chip->read_buf(mtd, buf, mtd->writesize);
+	chip->read_buf(mtd, buf, mtd->writesize, false);
 
 	p = chip->oob_poi;
-	chip->read_buf(mtd, p, (mtd->oobsize - data_width));
+	chip->read_buf(mtd, p, (mtd->oobsize - data_width), false);
 	p += (mtd->oobsize - data_width);
 
 	data_phase_addr = (unsigned long)chip->IO_ADDR_R;
 	data_phase_addr |= ZYNQ_NAND_CLEAR_CS;
 	chip->IO_ADDR_R = (void __iomem *)data_phase_addr;
 
-	chip->read_buf(mtd, p, data_width);
+	chip->read_buf(mtd, p, data_width, false);
 	return 0;
 }
 
 static int zynq_nand_read_page_raw_nooob(struct mtd_info *mtd,
 		struct nand_chip *chip, u8 *buf, int oob_required, int page)
 {
-	chip->read_buf(mtd, buf, mtd->writesize);
+	chip->read_buf(mtd, buf, mtd->writesize, false);
 	return 0;
 }
 
@@ -534,7 +534,7 @@ static int zynq_nand_read_subpage_raw(struct mtd_info *mtd,
 		chip->cmdfunc(mtd, NAND_CMD_RNDOUT, data_offs, -1);
 		buf += data_offs;
 	}
-	chip->read_buf(mtd, buf, readlen);
+	chip->read_buf(mtd, buf, readlen, false);
 
 	return 0;
 }
@@ -683,17 +683,17 @@ static int zynq_nand_read_page_hwecc(struct mtd_info *mtd,
 	u8 *oob_ptr;
 
 	for (eccsteps = chip->ecc.steps; (eccsteps - 1); eccsteps--) {
-		chip->read_buf(mtd, p, eccsize);
+		chip->read_buf(mtd, p, eccsize, false);
 		p += eccsize;
 	}
-	chip->read_buf(mtd, p, (eccsize - data_width));
+	chip->read_buf(mtd, p, (eccsize - data_width), false);
 	p += eccsize - data_width;
 
 	/* Set ECC Last bit to 1 */
 	data_phase_addr = (unsigned long)chip->IO_ADDR_R;
 	data_phase_addr |= ZYNQ_NAND_ECC_LAST;
 	chip->IO_ADDR_R = (void __iomem *)data_phase_addr;
-	chip->read_buf(mtd, p, data_width);
+	chip->read_buf(mtd, p, data_width, false);
 
 	/* Read the calculated ECC value */
 	p = buf;
@@ -706,7 +706,7 @@ static int zynq_nand_read_page_hwecc(struct mtd_info *mtd,
 
 	/* Read the stored ECC value */
 	oob_ptr = chip->oob_poi;
-	chip->read_buf(mtd, oob_ptr, (mtd->oobsize - data_width));
+	chip->read_buf(mtd, oob_ptr, (mtd->oobsize - data_width), false);
 
 	/* de-assert chip select */
 	data_phase_addr = (unsigned long)chip->IO_ADDR_R;
@@ -714,7 +714,7 @@ static int zynq_nand_read_page_hwecc(struct mtd_info *mtd,
 	chip->IO_ADDR_R = (void __iomem *)data_phase_addr;
 
 	oob_ptr += (mtd->oobsize - data_width);
-	chip->read_buf(mtd, oob_ptr, data_width);
+	chip->read_buf(mtd, oob_ptr, data_width, false);
 
 	for (i = 0; i < chip->ecc.total; i++)
 		ecc_code[i] = ~(chip->oob_poi[eccpos[i]]);
@@ -935,10 +935,15 @@ static void zynq_nand_cmd_function(struct mtd_info *mtd, unsigned int command,
  * @mtd:        MTD device structure
  * @buf:        buffer to store date
  * @len:        number of bytes to read
+ * @force_8bit: force 8-bit reads
  */
-static void zynq_nand_read_buf(struct mtd_info *mtd, u8 *buf, int len)
+static void zynq_nand_read_buf(struct mtd_info *mtd, u8 *buf, int len,
+			       bool force_8bit)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
+
+	if (force_8bit)
+		readsb(chip->IO_ADDR_R, buf, len);
 
 	/* Make sure that buf is 32 bit aligned */
 	if (((unsigned long)buf & 0x3) != 0) {
@@ -1171,7 +1176,7 @@ static int zynq_nand_probe(struct udevice *dev)
 
 		nand_chip->cmdfunc(mtd, NAND_CMD_GET_FEATURES,
 						ONDIE_ECC_FEATURE_ADDR, -1);
-		nand_chip->read_buf(mtd, get_feature, 4);
+		nand_chip->read_buf(mtd, get_feature, 4, true);
 
 		if (get_feature[0] & ONDIE_ECC_FEATURE_ENABLE) {
 			debug("%s: OnDie ECC flash\n", __func__);

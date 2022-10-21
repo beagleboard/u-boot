@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright (C) 2020 Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (C) 2020-2022 Texas Instruments Incorporated - http://www.ti.com/
  *	Dave Gerlach <d-gerlach@ti.com>
  */
 
@@ -13,9 +13,10 @@
 #define AM65X			0xbb5a
 #define J721E			0xbb64
 #define J7200			0xbb6d
-
-#define REV_SR1_0		0
-#define REV_SR2_0		1
+#define AM64X			0xbb38
+#define J721S2			0xbb75
+#define J784S4			0xbb80
+#define AM62X			0xbb7e
 
 #define JTAG_ID_VARIANT_SHIFT	28
 #define JTAG_ID_VARIANT_MASK	(0xf << 28)
@@ -44,6 +45,18 @@ static const char *get_family_string(u32 idreg)
 	case J7200:
 		family = "J7200";
 		break;
+	case AM64X:
+		family = "AM64X";
+		break;
+	case J721S2:
+		family = "J721S2";
+		break;
+	case AM62X:
+		family = "AM62X";
+		break;
+	case J784S4:
+		family = "J784S4";
+		break;
 	default:
 		family = "Unknown Silicon";
 	};
@@ -51,25 +64,36 @@ static const char *get_family_string(u32 idreg)
 	return family;
 }
 
+static char *typical_rev_string_map[] = {
+	"1.0", "2.0", "3.0",
+};
+
+static char *j721e_rev_string_map[] = {
+	"1.0", "1.1",
+};
+
 static const char *get_rev_string(u32 idreg)
 {
-	const char *revision;
 	u32 rev;
+	u32 soc;
 
 	rev = (idreg & JTAG_ID_VARIANT_MASK) >> JTAG_ID_VARIANT_SHIFT;
+	soc = (idreg & JTAG_ID_PARTNO_MASK) >> JTAG_ID_PARTNO_SHIFT;
 
-	switch (rev) {
-	case REV_SR1_0:
-		revision = "1.0";
-		break;
-	case REV_SR2_0:
-		revision = "2.0";
-		break;
+	switch (soc) {
+	case J721E:
+		if (rev > ARRAY_SIZE(j721e_rev_string_map))
+			goto bail;
+		return j721e_rev_string_map[rev];
+
 	default:
-		revision = "Unknown Revision";
+		if (rev > ARRAY_SIZE(typical_rev_string_map))
+			goto bail;
+		return typical_rev_string_map[rev];
 	};
 
-	return revision;
+bail:
+	return "Unknown Revision";
 }
 
 static int soc_ti_k3_get_family(struct udevice *dev, char *buf, int size)

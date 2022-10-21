@@ -397,6 +397,9 @@ static int bootm_load_os(bootm_headers_t *images, int boot_progress)
 
 	flush_cache(flush_start, ALIGN(load_end, ARCH_DMA_MINALIGN) - flush_start);
 
+	images->os.start = load;
+	images->os.end = load_end;
+
 	debug("   kernel loaded at 0x%08lx, end = 0x%08lx\n", load, load_end);
 	bootstage_mark(BOOTSTAGE_ID_KERNEL_LOADED);
 

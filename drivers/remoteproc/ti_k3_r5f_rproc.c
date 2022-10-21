@@ -21,6 +21,7 @@
 #include <linux/kernel.h>
 #include <linux/soc/ti/ti_sci_protocol.h>
 #include "ti_sci_proc.h"
+#include <mach/security.h>
 
 /*
  * R5F's view of this address can either be for ATCM or BTCM with the other
@@ -302,6 +303,7 @@ static int k3_r5f_load(struct udevice *dev, ulong addr, ulong size)
 	u64 boot_vector;
 	u32 ctrl, sts, cfg = 0;
 	bool mem_auto_init;
+	void *image_addr = (void *)addr;
 	int ret;
 
 	dev_dbg(dev, "%s addr = 0x%lx, size = 0x%lx\n", __func__, addr, size);
@@ -328,6 +330,8 @@ static int k3_r5f_load(struct udevice *dev, ulong addr, ulong size)
 	}
 
 	k3_r5f_init_tcm_memories(core, mem_auto_init);
+
+	ti_secure_image_post_process(&image_addr, &size);
 
 	ret = rproc_elf_load_image(dev, addr, size);
 	if (ret < 0) {
@@ -678,9 +682,9 @@ static int k3_r5f_of_to_priv(struct k3_r5f_core *core)
 
 	dev_dbg(core->dev, "%s\n", __func__);
 
-	core->atcm_enable = dev_read_u32_default(core->dev, "atcm-enable", 0);
-	core->btcm_enable = dev_read_u32_default(core->dev, "btcm-enable", 1);
-	core->loczrama = dev_read_u32_default(core->dev, "loczrama", 1);
+	core->atcm_enable = dev_read_u32_default(core->dev, "ti,atcm-enable", 0);
+	core->btcm_enable = dev_read_u32_default(core->dev, "ti,btcm-enable", 1);
+	core->loczrama = dev_read_u32_default(core->dev, "ti,loczrama", 1);
 
 	ret = ti_sci_proc_of_to_priv(core->dev, &core->tsp);
 	if (ret)
@@ -781,7 +785,9 @@ static int k3_r5f_probe(struct udevice *dev)
 {
 	struct k3_r5f_cluster *cluster = dev_get_priv(dev->parent);
 	struct k3_r5f_core *core = dev_get_priv(dev);
+#ifndef CONFIG_K3_DM_FW
 	bool r_state;
+#endif
 	int ret;
 
 	dev_dbg(dev, "%s\n", __func__);
@@ -804,6 +810,12 @@ static int k3_r5f_probe(struct udevice *dev)
 		return ret;
 	}
 
+	/*
+	 * The PM functionality is not supported by the firmware during
+	 * SPL execution with the separated DM firmware image. The following
+	 * piece of code is not compiled in that case.
+	 */
+#ifndef CONFIG_K3_DM_FW
 	ret = core->tsp.sci->ops.dev_ops.is_on(core->tsp.sci, core->tsp.dev_id,
 					       &r_state, &core->in_use);
 	if (ret)
@@ -817,6 +829,7 @@ static int k3_r5f_probe(struct udevice *dev)
 
 	/* Make sure Local reset is asserted. Redundant? */
 	reset_assert(&core->reset);
+#endif
 
 	ret = k3_r5f_rproc_configure(core);
 	if (ret) {
@@ -847,7 +860,7 @@ static const struct k3_r5f_ip_data k3_data = {
 	.tcm_ecc_autoinit = false,
 };
 
-static const struct k3_r5f_ip_data j7200_data = {
+static const struct k3_r5f_ip_data j7200_j721s2_data = {
 	.tcm_is_double = true,
 	.tcm_ecc_autoinit = true,
 };
@@ -855,7 +868,8 @@ static const struct k3_r5f_ip_data j7200_data = {
 static const struct udevice_id k3_r5f_rproc_ids[] = {
 	{ .compatible = "ti,am654-r5f", .data = (ulong)&k3_data, },
 	{ .compatible = "ti,j721e-r5f", .data = (ulong)&k3_data, },
-	{ .compatible = "ti,j7200-r5f", .data = (ulong)&j7200_data, },
+	{ .compatible = "ti,j7200-r5f", .data = (ulong)&j7200_j721s2_data, },
+	{ .compatible = "ti,j721s2-r5f", .data = (ulong)&j7200_j721s2_data, },
 	{}
 };
 
@@ -875,7 +889,7 @@ static int k3_r5f_cluster_probe(struct udevice *dev)
 
 	dev_dbg(dev, "%s\n", __func__);
 
-	cluster->mode = dev_read_u32_default(dev, "lockstep-mode",
+	cluster->mode = dev_read_u32_default(dev, "ti,cluster-mode",
 					     CLUSTER_MODE_LOCKSTEP);
 
 	if (device_get_child_count(dev) != 2) {
@@ -893,6 +907,7 @@ static const struct udevice_id k3_r5fss_ids[] = {
 	{ .compatible = "ti,am654-r5fss"},
 	{ .compatible = "ti,j721e-r5fss"},
 	{ .compatible = "ti,j7200-r5fss"},
+	{ .compatible = "ti,j721s2-r5fss"},
 	{}
 };
 

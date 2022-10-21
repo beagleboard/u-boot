@@ -54,9 +54,22 @@ config K3_AM654_DDRSS
 	  config add support for the initialization of the external
 	  SDRAM devices connected to DDR subsystem.
 
+config K3_DDRSS
+	bool "Enable K3 DDRSS support"
+	depends on RAM
+
+choice
+	depends on K3_DDRSS
+	prompt "K3 DDRSS Arch Support"
+
+	default K3_J721E_DDRSS if SOC_K3_J721E
+	default K3_J721S2_DDRSS if SOC_K3_J721S2
+	default K3_J784S4_DDRSS if SOC_K3_J784S4
+	default K3_AM64_DDRSS if SOC_K3_AM642
+	default K3_AM64_DDRSS if SOC_K3_AM625
+
 config K3_J721E_DDRSS
 	bool "Enable J721E DDRSS support"
-	depends on RAM
 	help
 	  The J721E DDR subsystem comprises DDR controller, DDR PHY and
 	  wrapper logic to integrate these blocks in the device. The DDR
@@ -64,6 +77,38 @@ config K3_J721E_DDRSS
 	  devices which can be utilized for storing program or data.
 	  Enabling this config adds support for the DDR memory controller
 	  on J721E family of SoCs.
+
+config K3_J721S2_DDRSS
+	bool "Enable J721S2 DRSS support"
+	help
+	  The J721S2 DDR subsystem comprises DDR controller, DDR PHY and
+	  wrapper logic to integrate these blocks in the device. The DDR
+	  subsystem is used to provide an interface to external SDRAM
+	  devices which can be utilized for storing program or data.
+	  Enabling this config adds support for the DDR memory controller
+	  on J721S2 family of SoCs.
+
+config K3_J784S4_DDRSS
+	bool "Enable J784S4 DRSS support"
+	help
+	  The J784S4 DDR subsystem comprises DDR controller, DDR PHY and
+	  wrapper logic to integrate these blocks in the device. The DDR
+	  subsystem is used to provide an interface to external SDRAM
+	  devices which can be utilized for storing program or data.
+	  Enabling this config adds support for the DDR memory controller
+	  on J784S4 family of SoCs.
+
+config K3_AM64_DDRSS
+	bool "Enable AM64 DDRSS support"
+	help
+	  The AM64 DDR subsystem comprises DDR controller, DDR PHY and
+	  wrapper logic to integrate these blocks in the device. The DDR
+	  subsystem is used to provide an interface to external SDRAM
+	  devices which can be utilized for storing program or data.
+	  Enabling this config adds support for the DDR memory controller
+	  on AM642 family of SoCs.
+
+endchoice
 
 config IMXRT_SDRAM
 	bool "Enable i.MXRT SDRAM support"

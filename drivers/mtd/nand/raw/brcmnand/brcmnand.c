@@ -1470,7 +1470,8 @@ static uint8_t brcmnand_read_byte(struct mtd_info *mtd)
 	return ret;
 }
 
-static void brcmnand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+static void brcmnand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len,
+			      bool force_8bit)
 {
 	int i;
 
