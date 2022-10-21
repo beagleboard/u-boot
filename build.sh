@@ -8,10 +8,8 @@ sys=$(uname -m)
 
 DIR="$PWD"
 
-if [ "x${sys}" = "xaarch64" ] ; then
-	if [ ! -f ./load.menuconfig ] ; then
-		echo "Developers: too make changes: [touch load.menuconfig]"
-	fi
+if [ ! -f ./load.menuconfig ] ; then
+	echo "Developers: too enable menuconfig run: [touch load.menuconfig]"
 fi
 
 mkdir ./deploy/ || true
