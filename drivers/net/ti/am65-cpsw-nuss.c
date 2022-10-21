@@ -21,7 +21,6 @@
 #include <net.h>
 #include <phy.h>
 #include <power-domain.h>
-#include <soc.h>
 #include <linux/bitops.h>
 #include <linux/soc/ti/ti-udma.h>
 
@@ -128,8 +127,6 @@ struct am65_cpsw_priv {
 	bool			has_phy;
 	ofnode			phy_node;
 	u32			phy_addr;
-
-	bool			mdio_manual_mode;
 };
 
 #ifdef PKTSIZE_ALIGN
@@ -544,20 +541,6 @@ static const struct eth_ops am65_cpsw_ops = {
 	.read_rom_hwaddr = am65_cpsw_read_rom_hwaddr,
 };
 
-static const struct soc_attr k3_mdio_soc_data[] = {
-	{ .family = "AM62X", .revision = "SR1.0" },
-	{ .family = "AM64X", .revision = "SR1.0" },
-	{ .family = "AM64X", .revision = "SR2.0" },
-	{ .family = "AM65X", .revision = "SR1.0" },
-	{ .family = "AM65X", .revision = "SR2.0" },
-	{ .family = "J7200", .revision = "SR1.0" },
-	{ .family = "J7200", .revision = "SR2.0" },
-	{ .family = "J721E", .revision = "SR1.0" },
-	{ .family = "J721E", .revision = "SR1.1" },
-	{ .family = "J721S2", .revision = "SR1.0" },
-	{ /* sentinel */ },
-};
-
 static int am65_cpsw_mdio_init(struct udevice *dev)
 {
 	struct am65_cpsw_priv *priv = dev_get_priv(dev);
@@ -570,7 +553,7 @@ static int am65_cpsw_mdio_init(struct udevice *dev)
 					  cpsw_common->mdio_base,
 					  cpsw_common->bus_freq,
 					  clk_get_rate(&cpsw_common->fclk),
-					  priv->mdio_manual_mode);
+					  false);
 	if (!cpsw_common->bus)
 		return -EFAULT;
 
@@ -681,10 +664,6 @@ static int am65_cpsw_port_probe(struct udevice *dev)
 
 	sprintf(portname, "%s%s", dev->parent->name, dev->name);
 	device_set_name(dev, portname);
-
-	priv->mdio_manual_mode = false;
-	if (soc_device_match(k3_mdio_soc_data))
-		priv->mdio_manual_mode = true;
 
 	ret = am65_cpsw_ofdata_parse_phy(dev);
 	if (ret)
