@@ -12,8 +12,6 @@ if [ ! -f ./load.menuconfig ] ; then
 	echo "Developers: too enable menuconfig run: [touch load.menuconfig]"
 fi
 
-mkdir ./deploy/ || true
-
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean
 
 if [ "x${sys}" = "xaarch64" ] ; then
