@@ -874,17 +874,22 @@
 };
 
 &serdes0 {
-	serdes0_usb_link: phy@2 {
-		reg = <2>;
-		cdns,num-lanes = <2>;
+	serdes0_usb_link: link@3 {
+		reg = <3>;
+		cdns,num-lanes = <1>;
 		#phy-cells = <0>;
 		cdns,phy-type = <PHY_TYPE_USB3>;
-		resets = <&serdes_wiz0 3>, <&serdes_wiz0 4>;
+		resets = <&serdes_wiz0 4>;
 	};
 };
 
+&serdes_wiz0 {
+	typec-dir-gpios = <&wkup_gpio0 28 GPIO_ACTIVE_HIGH>;
+	typec-dir-debounce-ms = <700>;  /* TUSB321, tCCB_DEFAULT 133 ms */
+};
+
 &usb_serdes_mux {
-	idle-states = <1>; /* USB0 to SERDES lane 1 */
+	idle-states = <0>; /* USB0 to SERDES lane 3 */
 };
 
 &usbss0 {
