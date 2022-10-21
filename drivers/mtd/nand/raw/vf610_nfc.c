@@ -446,7 +446,8 @@ static void vf610_nfc_command(struct mtd_info *mtd, unsigned command,
 }
 
 /* Read data from NFC buffers */
-static void vf610_nfc_read_buf(struct mtd_info *mtd, u_char *buf, int len)
+static void vf610_nfc_read_buf(struct mtd_info *mtd, u_char *buf, int len,
+			       bool force_8bit)
 {
 	struct vf610_nfc *nfc = mtd_to_nfc(mtd);
 	uint c = nfc->buf_offset;
@@ -508,7 +509,7 @@ static u16 vf610_nfc_read_word(struct mtd_info *mtd)
 {
 	u16 tmp;
 
-	vf610_nfc_read_buf(mtd, (u_char *)&tmp, sizeof(tmp));
+	vf610_nfc_read_buf(mtd, (u_char *)&tmp, sizeof(tmp), false);
 	return tmp;
 }
 
@@ -570,7 +571,7 @@ static inline int vf610_nfc_correct_data(struct mtd_info *mtd, uint8_t *dat,
 
 	/* Read OOB without ECC unit enabled */
 	vf610_nfc_command(mtd, NAND_CMD_READOOB, 0, page);
-	vf610_nfc_read_buf(mtd, oob, mtd->oobsize);
+	vf610_nfc_read_buf(mtd, oob, mtd->oobsize, false);
 
 	/*
 	 * On an erased page, bit count (including OOB) should be zero or
@@ -594,9 +595,9 @@ static int vf610_nfc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 	int eccsize = chip->ecc.size;
 	int stat;
 
-	vf610_nfc_read_buf(mtd, buf, eccsize);
+	vf610_nfc_read_buf(mtd, buf, eccsize, false);
 	if (oob_required)
-		vf610_nfc_read_buf(mtd, chip->oob_poi, mtd->oobsize);
+		vf610_nfc_read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 
 	stat = vf610_nfc_correct_data(mtd, buf, chip->oob_poi, page);
 

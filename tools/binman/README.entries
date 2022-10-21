@@ -25,6 +25,19 @@ about ATF.
 
 
 
+Entry: tee-os: Entry containing an OP-TEE Trusted OS (TEE) blob
+---------------------------------------------------------------
+
+Properties / Entry arguments:
+    - tee-os-path: Filename of file to read into entry. This is typically
+        called tee-pager.bin
+
+This entry holds the run-time firmware, typically started by U-Boot SPL.
+See the U-Boot README for your architecture or board for how to use it. See
+https://github.com/OP-TEE/optee_os for more information about OP-TEE.
+
+
+
 Entry: blob: Entry containing an arbitrary binary blob
 ------------------------------------------------------
 
@@ -1274,6 +1287,21 @@ U-Boot).
 
 If TPL is not being used, the 'x86-start16-spl or 'x86-start16' entry types
 may be used instead.
+
+
+
+Entry: ti-secure: Entry containing a Secured binary blob
+--------------------------------------------------------
+
+Properties / Entry arguments:
+    - filename: Filename of file to sign and read into entry
+
+Texas Instruments High-Security (HS) devices need secure binaries to be
+provided. This entry uses an external tool to append a x509 certificate
+to the file provided in the filename property and places it in the entry.
+
+The path for the external tool is fetched from TI_SECURE_DEV_PKG
+environment variable.
 
 
 

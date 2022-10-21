@@ -646,7 +646,8 @@ static uint8_t fsl_ifc_read_byte16(struct mtd_info *mtd)
 /*
  * Read from the IFC Controller Data Buffer
  */
-static void fsl_ifc_read_buf(struct mtd_info *mtd, u8 *buf, int len)
+static void fsl_ifc_read_buf(struct mtd_info *mtd, u8 *buf, int len,
+			     bool force_8bit)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct fsl_ifc_mtd *priv = nand_get_controller_data(chip);
@@ -741,8 +742,8 @@ static int fsl_ifc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 	struct fsl_ifc_mtd *priv = nand_get_controller_data(chip);
 	struct fsl_ifc_ctrl *ctrl = priv->ctrl;
 
-	fsl_ifc_read_buf(mtd, buf, mtd->writesize);
-	fsl_ifc_read_buf(mtd, chip->oob_poi, mtd->oobsize);
+	fsl_ifc_read_buf(mtd, buf, mtd->writesize, false);
+	fsl_ifc_read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 
 	if (ctrl->status & IFC_NAND_EVTER_STAT_ECCER)
 		return check_erased_page(chip, buf, mtd);

@@ -76,6 +76,15 @@ int misc_call(struct udevice *dev, int msgid, void *tx_msg, int tx_size,
  */
 int misc_set_enabled(struct udevice *dev, bool val);
 
+/**
+ * misc_init_by_ofnode() - Probe a misc device by using ofnode.
+ * @node: ofnode of the misc device.
+ *
+ * A misc device is probed using ofnode.
+ *
+ * Return: -ve on error, 0 on success
+ */
+int misc_init_by_ofnode(ofnode node);
 /*
  * struct misc_ops - Driver model Misc operations
  *

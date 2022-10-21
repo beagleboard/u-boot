@@ -488,6 +488,10 @@ F:	arch/arm/mach-keystone/
 F:	arch/arm/mach-omap2/
 F:	arch/arm/include/asm/arch-omap*/
 F:	arch/arm/include/asm/ti-common/
+F:	arch/arm/dts/dra7*
+F:	arch/arm/dts/am57xx*
+F:	arch/arm/dts/am335x*
+F:	arch/arm/dts/am437x*
 F:	board/ti/
 F:	drivers/dma/ti*
 F:	drivers/firmware/ti_sci.*
@@ -503,7 +507,9 @@ F:	drivers/phy/ti-pipe3-phy.c
 F:	drivers/ram/k3*
 F:	drivers/remoteproc/k3_system_controller.c
 F:	drivers/remoteproc/ti*
+F:	drivers/remoteproc/ipu_rproc.c
 F:	drivers/reset/reset-ti-sci.c
+F:	drivers/reset/reset-dra7.c
 F:	drivers/rtc/davinci.c
 F:	drivers/serial/serial_omap.c
 F:	drivers/soc/ti/
@@ -512,6 +518,7 @@ F:	drivers/thermal/ti-bandgap.c
 F:	drivers/timer/omap-timer.c
 F:	drivers/watchdog/omap_wdt.c
 F:	include/linux/soc/ti/
+F:	include/configs/am43xx_evm_mini.h
 
 ARM U8500
 M:	Stephan Gerhold <stephan@gerhold.net>
@@ -1047,7 +1054,7 @@ S:	Maintained
 F:	drivers/video/tda19988.c
 
 TI SYSTEM SECURITY
-M:	Andrew F. Davis <afd@ti.com>
+M:	Yogesh Siraswar <yogeshs@ti.com>
 S:	Supported
 F:	arch/arm/mach-omap2/omap5/sec_entry_cpu1.S
 F:	arch/arm/mach-omap2/sec-common.c
@@ -1057,6 +1064,8 @@ F:	arch/arm/mach-k3/config_secure.mk
 F:	configs/am335x_hs_evm_defconfig
 F:	configs/am335x_hs_evm_uart_defconfig
 F:	configs/am43xx_hs_evm_defconfig
+F:	configs/am43xx_evm_mini_defconfig
+F:	configs/am43xx_hs_evm_mini_defconfig
 F:	configs/am57xx_hs_evm_defconfig
 F:	configs/am57xx_hs_evm_usb_defconfig
 F:	configs/dra7xx_hs_evm_defconfig
@@ -1069,6 +1078,10 @@ F:	configs/am65x_hs_evm_r5_defconfig
 F:	configs/am65x_hs_evm_a53_defconfig
 F:	configs/j721e_hs_evm_r5_defconfig
 F:	configs/j721e_hs_evm_a72_defconfig
+F:	configs/j721s2_hs_evm_r5_defconfig
+F:	configs/j721s2_hs_evm_a72_defconfig
+F:	configs/j7200_hs_evm_r5_defconfig
+F:	configs/j7200_hs_evm_a72_defconfig
 
 TQ GROUP
 #M:	Martin Krause <martin.krause@tq-systems.de>

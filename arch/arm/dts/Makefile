@@ -337,6 +337,7 @@ dtb-$(CONFIG_AM33XX) += \
 	am335x-brsmarc1.dtb \
 	am335x-draco.dtb \
 	am335x-evm.dtb \
+	am335x-evm-mini.dtb \
 	am335x-evmsk.dtb \
 	am335x-bonegreen.dtb \
 	am335x-icev2.dtb \
@@ -351,7 +352,10 @@ dtb-$(CONFIG_AM33XX) += \
 	am335x-guardian.dtb \
 	am335x-wega-rdk.dtb \
 	am335x-regor-rdk.dtb
-dtb-$(CONFIG_AM43XX) += am437x-gp-evm.dtb am437x-sk-evm.dtb	\
+dtb-$(CONFIG_AM43XX) += \
+	am437x-gp-evm.dtb \
+	am437x-gp-evm-mini.dtb \
+	am437x-sk-evm.dtb \
 	am43x-epos-evm.dtb \
 	am437x-idk-evm.dtb \
 	am4372-generic.dtb \
@@ -966,11 +970,32 @@ dtb-$(CONFIG_STM32MP15x) += \
 	stm32mp15xx-dhcom-picoitx.dtb \
 	stm32mp15xx-dhcor-avenger96.dtb
 
-dtb-$(CONFIG_SOC_K3_AM6) += k3-am654-base-board.dtb k3-am654-r5-base-board.dtb
+dtb-$(CONFIG_SOC_K3_AM6) += k3-am654-base-board.dtb k3-am654-r5-base-board.dtb \
+			    k3-am654-pcie-usb2.dtbo k3-am654-pcie-usb3.dtbo \
+			    k3-am654-idk.dtbo \
+			    k3-am654-base-board-sr1.dtbo \
+			    k3-am654-idk-sr1.dtbo
 dtb-$(CONFIG_SOC_K3_J721E) += k3-j721e-common-proc-board.dtb \
 			      k3-j721e-r5-common-proc-board.dtb \
+			      k3-j721e-tps65917-proc-board.dtb \
 			      k3-j7200-common-proc-board.dtb \
-			      k3-j7200-r5-common-proc-board.dtb
+			      k3-j7200-r5-common-proc-board.dtb \
+			      k3-j721e-sk.dtb \
+			      k3-j721e-r5-sk.dtb
+dtb-$(CONFIG_SOC_K3_J721S2) += k3-j721s2-common-proc-board.dtb\
+			       k3-j721s2-r5-common-proc-board.dtb
+dtb-$(CONFIG_SOC_K3_J784S4) += k3-j784s4-evm.dtb\
+			       k3-j784s4-r5-evm.dtb
+dtb-$(CONFIG_SOC_K3_AM642) += k3-am642-evm.dtb \
+			      k3-am642-r5-evm.dtb \
+			      k3-am642-sk.dtb \
+			      k3-am642-r5-sk.dtb \
+			      k3-am642-evm-nand.dtbo
+
+dtb-$(CONFIG_SOC_K3_AM625) += k3-am625-sk.dtb \
+			      k3-am625-r5-sk.dtb \
+			      k3-am62x-lp-sk.dtb \
+			      k3-am62x-r5-lp-sk.dtb
 
 dtb-$(CONFIG_ARCH_MEDIATEK) += \
 	mt7622-rfb.dtb \

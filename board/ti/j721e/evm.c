@@ -10,6 +10,7 @@
 #include <common.h>
 #include <env.h>
 #include <fdt_support.h>
+#include <generic-phy.h>
 #include <image.h>
 #include <init.h>
 #include <log.h>
@@ -28,7 +29,14 @@
 #define board_is_j721e_som()	(board_ti_k3_is("J721EX-PM1-SOM") || \
 				 board_ti_k3_is("J721EX-PM2-SOM"))
 
-#define board_is_j7200_som()	board_ti_k3_is("J7200X-PM1-SOM")
+#define board_is_j721e_sk()	 (board_ti_k3_is("J721EX-EAIK") || \
+				  board_ti_k3_is("J721EX-SK"))
+
+#define board_is_j721e_pm1_som() board_ti_k3_is("J721EX-PM1-SOM")
+#define board_is_j721e_pm2_som() board_ti_k3_is("J721EX-PM2-SOM")
+
+#define board_is_j7200_som()	(board_ti_k3_is("J7200X-PM1-SOM") || \
+				 board_ti_k3_is("J7200X-PM2-SOM"))
 
 /* Max number of MAC addresses that are parsed/processed per daughter card */
 #define DAUGHTER_CARD_NO_OF_MAC_ADDR	8
@@ -82,8 +90,22 @@ int dram_init_banksize(void)
 #ifdef CONFIG_SPL_LOAD_FIT
 int board_fit_config_name_match(const char *name)
 {
-	if (!strcmp(name, "k3-j721e-common-proc-board"))
-		return 0;
+	bool eeprom_read = board_ti_was_eeprom_read();
+
+	if (board_is_j721e_pm1_som()) {
+		/* Loading for pm1 board a72 spl/u-boot */
+		if (!strcmp(name, "k3-j721e-tps65917-proc-board"))
+			return 0;
+	} else if (!eeprom_read || board_is_j721e_pm2_som()) {
+		/* Loading for pm2 board a72 spl/u-boot */
+		if (!strcmp(name, "k3-j721e-common-proc-board") ||
+		    !strcmp(name, "k3-j721e-r5-common-proc-board"))
+			return 0;
+	} else if (board_is_j721e_sk()) {
+		if (!strcmp(name, "k3-j721e-sk") ||
+		    !strcmp(name, "k3-j721e-r5-sk"))
+			return 0;
+	}
 
 	return -1;
 }
@@ -94,11 +116,12 @@ int board_fit_config_name_match(const char *name)
 static void __maybe_unused detect_enable_hyperflash(void *blob)
 {
 	struct gpio_desc desc = {0};
+	char *hypermux_sel_gpio = (board_is_j721e_som()) ? "8" : "6";
 
-	if (dm_gpio_lookup_name("6", &desc))
+	if (dm_gpio_lookup_name(hypermux_sel_gpio, &desc))
 		return;
 
-	if (dm_gpio_request(&desc, "6"))
+	if (dm_gpio_request(&desc, hypermux_sel_gpio))
 		return;
 
 	if (dm_gpio_set_dir_flags(&desc, GPIOD_IS_IN))
@@ -117,7 +140,8 @@ static void __maybe_unused detect_enable_hyperflash(void *blob)
 }
 #endif
 
-#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_TARGET_J7200_A72_EVM)
+#if defined(CONFIG_SPL_BUILD) && (defined(CONFIG_TARGET_J7200_A72_EVM) || defined(CONFIG_TARGET_J7200_R5_EVM) || \
+					defined(CONFIG_TARGET_J721E_A72_EVM) || defined(CONFIG_TARGET_J721E_R5_EVM))
 void spl_perform_fixups(struct spl_image_info *spl_image)
 {
 	detect_enable_hyperflash(spl_image->fdt_addr);
@@ -147,11 +171,20 @@ int do_board_detect(void)
 {
 	int ret;
 
+	if (board_ti_was_eeprom_read())
+		return 0;
+
 	ret = ti_i2c_eeprom_am6_get_base(CONFIG_EEPROM_BUS_ADDRESS,
 					 CONFIG_EEPROM_CHIP_ADDRESS);
-	if (ret)
-		pr_err("Reading on-board EEPROM at 0x%02x failed %d\n",
-		       CONFIG_EEPROM_CHIP_ADDRESS, ret);
+	if (ret) {
+		printf("EEPROM not available at 0x%02x, trying to read at 0x%02x\n",
+		       CONFIG_EEPROM_CHIP_ADDRESS, CONFIG_EEPROM_CHIP_ADDRESS + 1);
+		ret = ti_i2c_eeprom_am6_get_base(CONFIG_EEPROM_BUS_ADDRESS,
+						 CONFIG_EEPROM_CHIP_ADDRESS + 1);
+		if (ret)
+			pr_err("Reading on-board EEPROM at 0x%02x failed %d\n",
+			       CONFIG_EEPROM_CHIP_ADDRESS + 1, ret);
+	}
 
 	return ret;
 }
@@ -169,15 +202,20 @@ int checkboard(void)
 	return 0;
 }
 
+#ifdef CONFIG_BOARD_LATE_INIT
 static void setup_board_eeprom_env(void)
 {
-	char *name = "j721e";
+	char *name = "J721EX-PM2-SOM";
 
 	if (do_board_detect())
 		goto invalid_eeprom;
 
-	if (board_is_j721e_som())
-		name = "j721e";
+	if (board_ti_k3_is("J721EX-PM1-SOM"))
+		name = "J721EX-PM1-SOM";
+	else if (board_ti_k3_is("J721EX-PM2-SOM"))
+		name = "J721EX-PM2-SOM";
+	else if (board_is_j721e_sk())
+		name = "j721e-sk";
 	else if (board_is_j7200_som())
 		name = "j7200";
 	else
@@ -207,6 +245,7 @@ static void setup_serial(void)
 	snprintf(serial_string, sizeof(serial_string), "%016lx", board_serial);
 	env_set("serial#", serial_string);
 }
+#endif
 
 /*
  * Declaration of daughtercards to probe. Note that when adding more
@@ -383,6 +422,78 @@ static int probe_daughtercards(void)
 }
 #endif
 
+void configure_serdes_torrent(void)
+{
+	struct udevice *dev;
+	struct phy serdes;
+	int ret;
+
+	if (!IS_ENABLED(CONFIG_PHY_CADENCE_TORRENT))
+		return;
+
+	ret = uclass_get_device_by_driver(UCLASS_PHY,
+					  DM_GET_DRIVER(torrent_phy_provider),
+					  &dev);
+	if (ret) {
+		printf("Torrent init failed:%d\n", ret);
+		return;
+	}
+
+	serdes.dev = dev;
+	serdes.id = 0;
+
+	ret = generic_phy_init(&serdes);
+	if (ret) {
+		printf("phy_init failed!!: %d\n", ret);
+		return;
+	}
+
+	ret = generic_phy_power_on(&serdes);
+	if (ret) {
+		printf("phy_power_on failed!!: %d\n", ret);
+		return;
+	}
+}
+
+void configure_serdes_sierra(void)
+{
+	struct udevice *dev, *link_dev;
+	struct phy link;
+	int ret, count, i;
+	int link_count = 0;
+
+	if (!IS_ENABLED(CONFIG_PHY_CADENCE_SIERRA))
+		return;
+
+	ret = uclass_get_device_by_driver(UCLASS_MISC,
+					  DM_GET_DRIVER(sierra_phy_provider),
+					  &dev);
+	if (ret) {
+		printf("Sierra init failed:%d\n", ret);
+		return;
+	}
+
+	count = device_get_child_count(dev);
+	for (i = 0; i < count; i++) {
+		ret = device_get_child(dev, i, &link_dev);
+		if (ret) {
+			printf("probe of sierra child node %d failed: %d\n", i, ret);
+			return;
+		}
+		if (link_dev->driver->id == UCLASS_PHY) {
+			link.dev = link_dev;
+			link.id = link_count++;
+
+			ret = generic_phy_power_on(&link);
+			if (ret) {
+				printf("phy_power_on failed!!: %d\n", ret);
+				return;
+			}
+		}
+	}
+}
+
+#ifdef CONFIG_BOARD_LATE_INIT
 int board_late_init(void)
 {
 	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
@@ -390,10 +501,52 @@ int board_late_init(void)
 		setup_serial();
 
 		/* Check for and probe any plugged-in daughtercards */
-		probe_daughtercards();
+		if (!board_is_j721e_sk())
+			probe_daughtercards();
 	}
 
+	if (board_is_j7200_som())
+		configure_serdes_torrent();
+
+	if (board_is_j721e_som())
+		configure_serdes_sierra();
+
 	return 0;
+}
+#endif
+
+static int __maybe_unused detect_SW3_1_state(void)
+{
+	if (IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM)) {
+		struct gpio_desc desc = {0};
+		int ret;
+
+		ret = dm_gpio_lookup_name("6", &desc);
+		if (ret) {
+			printf("error getting GPIO lookup name: %d\n", ret);
+			return ret;
+		}
+
+		ret = dm_gpio_request(&desc, "6");
+		if (ret) {
+			printf("error requesting GPIO: %d\n", ret);
+			goto err_free_gpio;
+		}
+
+		ret = dm_gpio_set_dir_flags(&desc, GPIOD_IS_IN);
+		if (ret) {
+			printf("error setting direction flag of GPIO: %d\n", ret);
+			goto err_free_gpio;
+		}
+
+		ret = dm_gpio_get_value(&desc);
+		if (ret < 0)
+			printf("error getting value of GPIO: %d\n", ret);
+
+err_free_gpio:
+		dm_gpio_free(desc.dev, &desc);
+		return ret;
+	}
 }
 
 void spl_board_init(void)
@@ -405,8 +558,11 @@ void spl_board_init(void)
 
 	if ((IS_ENABLED(CONFIG_TARGET_J721E_A72_EVM) ||
 	     IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM)) &&
-	    IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT))
-		probe_daughtercards();
+	    IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
+		if (!board_is_j721e_sk())
+			probe_daughtercards();
+	}
+
 
 #ifdef CONFIG_ESM_K3
 	if (board_ti_k3_is("J721EX-PM2-SOM")) {
@@ -426,4 +582,19 @@ void spl_board_init(void)
 			printf("ESM PMIC init failed: %d\n", ret);
 	}
 #endif
+
+	if (IS_ENABLED(CONFIG_TARGET_J7200_A72_EVM) &&
+	    IS_ENABLED(CONFIG_HBMC_AM654)) {
+		struct udevice *dev;
+		int ret;
+
+		ret = detect_SW3_1_state();
+		if (ret == 1) {
+			ret = uclass_get_device_by_driver(UCLASS_MTD,
+							  DM_GET_DRIVER(hbmc_am654),
+							  &dev);
+			if (ret)
+				debug("Failed to probe hyperflash\n");
+		}
+	}
 }

@@ -661,6 +661,13 @@ config GENERATE_SMBIOS_TABLE
 	  See also SMBIOS_SYSINFO which allows SMBIOS values to be provided in
 	  the devicetree.
 
+config LIB_RATIONAL
+	bool "enable continued fraction calculation routines"
+
+config SPL_LIB_RATIONAL
+	bool "enable continued fraction calculation routines for SPL"
+	depends on SPL
+
 endmenu
 
 config ASN1_COMPILER
@@ -699,3 +706,11 @@ config LIB_ELF
 	  This supports fir 32 bit and 64 bit versions.
 
 endmenu
+
+config PHANDLE_CHECK_SEQ
+	bool "Enable phandle check while getting sequence number"
+	default n
+	help
+	  When there are multiple device tree nodes with same name,
+          enable this config option to distinguish them using
+	  phandles in fdtdec_get_alias_seq() function.

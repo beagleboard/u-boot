@@ -7,6 +7,17 @@
 #ifndef _SYS_PROTO_H_
 #define _SYS_PROTO_H_
 
+enum k3_device_type {
+	K3_DEVICE_TYPE_BAD,
+	K3_DEVICE_TYPE_GP,
+	K3_DEVICE_TYPE_TEST,
+	K3_DEVICE_TYPE_EMU,
+	K3_DEVICE_TYPE_HS_FS,
+	K3_DEVICE_TYPE_HS_SE,
+};
+
+enum k3_device_type get_device_type(void);
+
 void sdelay(unsigned long loops);
 u32 wait_on_value(u32 read_bit_mask, u32 match_value, void *read_addr,
 		  u32 bound);

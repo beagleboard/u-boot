@@ -121,7 +121,7 @@ static int mxs_flash_onfi_ident(struct mtd_info *mtd)
 
 	/* we have ONFI, probe it */
 	chip->cmdfunc(mtd, NAND_CMD_PARAM, 0, -1);
-	chip->read_buf(mtd, (uint8_t *)p, sizeof(*p));
+	chip->read_buf(mtd, (uint8_t *)p, sizeof(*p), true);
 	mtd->name = p->model;
 	mtd->writesize = le32_to_cpu(p->byte_per_page);
 	mtd->erasesize = le32_to_cpu(p->pages_per_block) * mtd->writesize;
@@ -180,7 +180,7 @@ static int is_badblock(struct mtd_info *mtd, loff_t offs, int allowbbt)
 	      page);
 	chip->cmdfunc(mtd, NAND_CMD_READ0, mtd->writesize, page);
 	memset(chip->oob_poi, 0, mtd->oobsize);
-	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
+	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 
 	return chip->oob_poi[0] != 0xff;
 }

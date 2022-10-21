@@ -78,9 +78,14 @@ struct udevice *eth_get_dev(void)
 	if (!uc_priv)
 		return NULL;
 
-	if (!uc_priv->current)
-		eth_errno = uclass_first_device(UCLASS_ETH,
-				    &uc_priv->current);
+	if (!uc_priv->current) {
+		eth_errno = uclass_get_device_by_seq(UCLASS_ETH, 0,
+						     &uc_priv->current);
+		if (eth_errno || !uc_priv->current)
+			 eth_errno = uclass_first_device(UCLASS_ETH,
+							 &uc_priv->current);
+	}
+
 	return uc_priv->current;
 }
 
@@ -585,7 +590,8 @@ static int eth_pre_remove(struct udevice *dev)
 {
 	struct eth_pdata *pdata = dev->platdata;
 
-	eth_get_ops(dev)->stop(dev);
+	if (eth_is_active(dev))
+		eth_get_ops(dev)->stop(dev);
 
 	/* clear the MAC address */
 	memset(pdata->enetaddr, 0, ARP_HLEN);
