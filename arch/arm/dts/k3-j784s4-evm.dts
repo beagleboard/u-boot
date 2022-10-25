@@ -906,7 +906,6 @@
 };
 
 &ospi1 {
-	status = "disabled";
 	pinctrl-names = "default";
 	pinctrl-0 = <&mcu_fss0_ospi1_pins_default>;
 

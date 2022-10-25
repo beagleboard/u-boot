@@ -169,6 +169,10 @@
 	u-boot,dm-spl;
 };
 
+&mcu_fss0_ospi1_pins_default {
+	u-boot,dm-spl;
+};
+
 &serdes_ln_ctrl {
 	u-boot,mux-autoprobe;
 };
@@ -176,6 +180,7 @@
 &usb_serdes_mux {
 	u-boot,mux-autoprobe;
 };
+
 &ospi0 {
 	u-boot,dm-spl;
 
@@ -188,6 +193,14 @@
 			reg = <0x3fc0000 0x40000>;
 			u-boot,dm-spl;
 		};
+	};
+};
+
+&ospi1 {
+	u-boot,dm-spl;
+
+	flash@0 {
+		u-boot,dm-spl;
 	};
 };
 
