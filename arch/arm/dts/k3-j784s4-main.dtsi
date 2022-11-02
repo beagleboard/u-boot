@@ -117,6 +117,8 @@
 			reg = <0x0 0x3d000 0x0 0x400>;
 			clocks = <&k3_clks 62 3>;
 			clock-names = "cpts";
+			assigned-clocks = <&k3_clks 62 3>; /* CPTS_RFT_CLK */
+			assigned-clock-parents = <&k3_clks 62 5>; /* MAIN_0_HSDIV6_CLK */
 			interrupts-extended = <&gic500 GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
 			interrupt-names = "cpts";
 			ti,cpts-ext-ts-inputs = <4>;
@@ -775,6 +777,8 @@
 			reg = <0x0 0x310d0000 0x0 0x400>;
 			reg-names = "cpts";
 			clocks = <&k3_clks 282 0>;
+			assigned-clocks = <&k3_clks 282 0>; /* CPTS_0_RCLK */
+			assigned-clock-parents = <&k3_clks 282 2>; /* MAIN_0_HSDIV6_CLK */
 			clock-names = "cpts";
 			interrupts-extended = <&main_navss_intr 391>;
 			interrupt-names = "cpts";
