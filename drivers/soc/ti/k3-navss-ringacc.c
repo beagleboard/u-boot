@@ -966,9 +966,12 @@ static int k3_nav_ringacc_probe_dt(struct k3_nav_ringacc *ringacc)
 					ringacc->tisci, dev,
 					ringacc->tisci_dev_id,
 					"ti,sci-rm-range-gp-rings");
-	if (IS_ERR(ringacc->rm_gp_range))
+	if (IS_ERR(ringacc->rm_gp_range)) {
+		dev_err(dev, "TISCI get resource ti,sci-rm-range-gp-rings failed %ld\n",
+			PTR_ERR(ringacc->rm_gp_range));
 		ret = PTR_ERR(ringacc->rm_gp_range);
-
+		return ret;
+	}
 	return 0;
 }
 
