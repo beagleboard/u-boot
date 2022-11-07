@@ -23,8 +23,6 @@
 #include <remoteproc.h>
 
 #ifdef CONFIG_SPL_BUILD
-
-#ifdef CONFIG_TI_SECURE_DEVICE
 struct fwl_data cbass_hc_cfg0_fwls[] = {
 	{ "PCIE0_CFG", 2577, 7 },
 	{ "EMMC8SS0_CFG", 2579, 4 },
@@ -70,7 +68,6 @@ struct fwl_data cbass_hc_cfg0_fwls[] = {
 }, navss_cbass0_fwls[] = {
 	{ "NACSS_VIRT0", 6253, 1 },
 };
-#endif
 
 static void ctrl_mmr_unlock(void)
 {
@@ -202,7 +199,6 @@ void board_init_f(ulong dummy)
 		}
 	}
 
-#ifdef CONFIG_TI_SECURE_DEVICE
 	remove_fwl_configs(cbass_hc_cfg0_fwls, ARRAY_SIZE(cbass_hc_cfg0_fwls));
 	remove_fwl_configs(cbass_hc2_fwls, ARRAY_SIZE(cbass_hc2_fwls));
 	remove_fwl_configs(cbass_rc_cfg0_fwls, ARRAY_SIZE(cbass_rc_cfg0_fwls));
@@ -210,7 +206,6 @@ void board_init_f(ulong dummy)
 	remove_fwl_configs(mcu_cbass0_fwls, ARRAY_SIZE(mcu_cbass0_fwls));
 	remove_fwl_configs(wkup_cbass0_fwls, ARRAY_SIZE(wkup_cbass0_fwls));
 	remove_fwl_configs(navss_cbass0_fwls, ARRAY_SIZE(navss_cbass0_fwls));
-#endif
 
 	/* Output System Firmware version info */
 	k3_sysfw_print_ver();
