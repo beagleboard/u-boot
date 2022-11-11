@@ -29,3 +29,43 @@
 		};
 	};
 };
+
+&main_gpio0 {
+	u-boot,dm-spl;
+};
+
+&main_i2c1 {
+	u-boot,dm-spl;
+};
+
+&main_i2c1_pins_default {
+	u-boot,dm-spl;
+};
+
+&exp1 {
+	u-boot,dm-spl;
+};
+
+&vmain_pd {
+	u-boot,dm-spl;
+};
+
+&vcc_5v0 {
+	u-boot,dm-spl;
+};
+
+&vcc_3v3_sys {
+	u-boot,dm-spl;
+};
+
+&vdd_mmc1 {
+	u-boot,dm-spl;
+};
+
+&vdd_sd_dv {
+	u-boot,dm-spl;
+};
+
+&vdd_sd_dv_pins_default {
+	u-boot,dm-spl;
+};
