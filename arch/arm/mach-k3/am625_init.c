@@ -38,8 +38,11 @@ static struct rom_extended_boot_data bootdata __section(".data");
 static void store_boot_info_from_rom(void)
 {
 	bootindex = *(u32 *)(CONFIG_SYS_K3_BOOT_PARAM_TABLE_INDEX);
-	memcpy(&bootdata, (uintptr_t *)ROM_ENTENDED_BOOT_DATA_INFO,
-	       sizeof(struct rom_extended_boot_data));
+
+	if (IS_ENABLED(CONFIG_CPU_V7R)) {
+		memcpy(&bootdata, (uintptr_t *)ROM_ENTENDED_BOOT_DATA_INFO,
+		       sizeof(struct rom_extended_boot_data));
+	}
 }
 
 static void ctrl_mmr_unlock(void)
@@ -180,6 +183,13 @@ void board_init_f(ulong dummy)
 
 	k3_sysfw_loader(true, NULL, NULL);
 #endif
+
+	/*
+	 * Relocate boot information to OCRAM for enable next stages to
+	 * know about primary vs backup bootmode
+	 */
+	if (IS_ENABLED(CONFIG_CPU_V7R))
+		writel(bootindex, K3_BOOT_PARAM_TABLE_INDEX_OCRAM);
 
 	/*
 	 * Force probe of clk_k3 driver here to ensure basic default clock
