@@ -375,7 +375,9 @@ void k3_sysfw_loader(bool rom_loaded_sysfw,
 	struct spl_image_info spl_image = { 0 };
 	struct spl_boot_device bootdev = { 0 };
 	struct ti_sci_handle *ti_sci;
+#if CONFIG_IS_ENABLED(SPI_LOAD) || CONFIG_IS_ENABLED(NOR_SUPPORT)
 	void *sysfw_spi_base;
+#endif
 	int ret = 0;
 
 	if (rom_loaded_sysfw) {
