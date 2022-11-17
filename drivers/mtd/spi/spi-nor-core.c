@@ -333,6 +333,31 @@ static struct spi_mem_op spi_nor_read_op(struct spi_nor *nor)
 	return op;
 }
 
+#ifdef CONFIG_SPI_FLASH_SPANSION
+static int spansion_read_any_reg(struct spi_nor *nor, u32 addr, u8 dummy,
+				 u8 *val)
+{
+	struct spi_mem_op op =
+			SPI_MEM_OP(SPI_MEM_OP_CMD(SPINOR_OP_RDAR, 1),
+				   SPI_MEM_OP_ADDR(nor->addr_width, addr, 1),
+				   SPI_MEM_OP_DUMMY(dummy / 8, 1),
+				   SPI_MEM_OP_DATA_IN(1, NULL, 1));
+
+	return spi_nor_read_write_reg(nor, &op, val);
+}
+
+static int spansion_write_any_reg(struct spi_nor *nor, u32 addr, u8 val)
+{
+	struct spi_mem_op op =
+			SPI_MEM_OP(SPI_MEM_OP_CMD(SPINOR_OP_WRAR, 1),
+				   SPI_MEM_OP_ADDR(nor->addr_width, addr, 1),
+				   SPI_MEM_OP_NO_DUMMY,
+				   SPI_MEM_OP_DATA_OUT(1, NULL, 1));
+
+	return spi_nor_read_write_reg(nor, &op, &val);
+}
+#endif
+
 static ssize_t spi_nor_read_data(struct spi_nor *nor, loff_t from, size_t len,
 				 u_char *buf)
 {
