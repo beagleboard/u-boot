@@ -149,7 +149,7 @@
 #define	CQSPI_REG_CMDCTRL_WR_BYTES_LSB		12
 #define	CQSPI_REG_CMDCTRL_WR_EN_LSB		15
 #define	CQSPI_REG_CMDCTRL_ADD_BYTES_LSB		16
-#define	CQSPI_REG_CMDCTRL_ADDR_EN_LSB		19
+#define	CQSPI_REG_CMDCTRL_ADDR_EN		BIT(19)
 #define	CQSPI_REG_CMDCTRL_RD_BYTES_LSB		20
 #define	CQSPI_REG_CMDCTRL_RD_EN_LSB		23
 #define	CQSPI_REG_CMDCTRL_OPCODE_LSB		24
@@ -744,6 +744,19 @@ int cadence_qspi_apb_command_read(struct cadence_spi_platdata *plat,
 	/* 0 means 1 byte. */
 	reg |= (((rxlen - 1) & CQSPI_REG_CMDCTRL_RD_BYTES_MASK)
 		<< CQSPI_REG_CMDCTRL_RD_BYTES_LSB);
+
+	/* setup ADDR BIT field */
+	if (op->addr.nbytes) {
+		writel(op->addr.val, plat->regbase + CQSPI_REG_CMDADDRESS);
+		/*
+		 * address bytes are zero indexed
+		 */
+		reg |= (((op->addr.nbytes - 1) &
+			  CQSPI_REG_CMDCTRL_ADD_BYTES_MASK) <<
+			  CQSPI_REG_CMDCTRL_ADD_BYTES_LSB);
+		reg |= CQSPI_REG_CMDCTRL_ADDR_EN;
+	}
+
 	status = cadence_qspi_apb_exec_flash_cmd(reg_base, reg);
 	if (status != 0)
 		return status;
