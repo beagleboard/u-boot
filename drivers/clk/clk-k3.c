@@ -281,7 +281,7 @@ static ulong ti_clk_set_rate(struct clk *clk, ulong rate)
 	 * following directly a PLL
 	 */
 
-	if (diff > rate / div / 2) {
+	if (diff > rate / div / 8) {
 		ulong pll_tgt;
 		int pll_div = 0;
 
