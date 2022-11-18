@@ -15,6 +15,8 @@
 #define CQSPI_DECODER_MAX_CS		16
 #define CQSPI_READ_CAPTURE_MAX_DELAY	16
 
+#define CQSPI_STIG_DATA_LEN_MAX	8
+
 struct cadence_spi_platdata {
 	struct udevice	*dev;
 	unsigned int	ref_clk_hz;
