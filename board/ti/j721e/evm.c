@@ -505,11 +505,13 @@ int board_late_init(void)
 			probe_daughtercards();
 	}
 
-	if (board_is_j7200_som())
-		configure_serdes_torrent();
+#if defined(CONFIG_TARGET_J7200_A72_EVM) || defined(CONFIG_TARGET_J7200_R5_EVM)
+	configure_serdes_torrent();
+#endif
 
-	if (board_is_j721e_som())
-		configure_serdes_sierra();
+#if defined(CONFIG_TARGET_J721E_A72_EVM) || defined(CONFIG_TARGET_J721E_R5_EVM)
+	configure_serdes_sierra();
+#endif
 
 	return 0;
 }
