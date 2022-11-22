@@ -350,8 +350,11 @@
 	"bootcmd_linux=" \
 		"if test \"${android_boot}\" -eq 0; then;" \
 			"run findfdt; run envboot;" \
-			"run init_${boot}; run get_kern_${boot}; "\
-			"run get_fdt_${boot}; run get_overlay_${boot}; run run_kern;" \
+			"if test ${boot_fit} -eq 1; then;" \
+				"run get_fit_${boot}; run get_fit_${boot}; run get_overlaystring; run run_fit;"\
+			"else;" \
+				"run get_kern_${boot}; run get_fdt_${boot}; run get_overlay_${boot}; run run_kern;" \
+			"fi;" \
 		"fi\0"
 
 #define BOOTENV_DEV_NAME_LINUX(devtypeu, devtypel, instance)	\
