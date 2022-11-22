@@ -70,6 +70,7 @@
 	"name=vbmeta_b,size=64K,uuid=${uuid_gpt_vbmeta_b};" \
 	"name=super,size=4608M,uuid=${uuid_gpt_super};" \
 	"name=metadata,size=16M,uuid=${uuid_gpt_metadata};" \
+	"name=persist,size=32M,uuid=${uuid_gpt_persist};" \
 	"name=userdata,size=-,uuid=${uuid_gpt_userdata}\0"
 
 /* ANDROID BOOT */
