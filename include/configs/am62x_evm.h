@@ -244,7 +244,25 @@
 	"fi; " \
 	"abootimg get dtb --index=$dtb_index dtb_start dtb_size; " \
 	"cp.b $dtb_start $fdt_addr_r $dtb_size; " \
-	"fdt addr $fdt_addr_r  0x80000; " \
+	"fdt addr $fdt_addr_r $fdt_size; " \
+	"part start mmc ${mmcdev} dtbo${slot_suffix} dtbo_start; " \
+	"part size mmc ${mmcdev} dtbo${slot_suffix} dtbo_size; " \
+	"mmc read ${dtboaddr} ${dtbo_start} ${dtbo_size}; " \
+	"echo \"  Applying DTBOs...\"; " \
+	"adtimg addr $dtboaddr; " \
+	"dtbo_idx=''; " \
+	"for index in $dtbo_index; do " \
+		"adtimg get dt --index=$index dtbo_addr; " \
+		"fdt resize; " \
+		"fdt apply $dtbo_addr; " \
+		"if test $dtbo_idx = ''; then " \
+			"dtbo_idx=${index}; " \
+		"else " \
+			"dtbo_idx=${dtbo_idx},${index}; " \
+		"fi; " \
+	"done; " \
+	"setenv bootargs \"$bootargs androidboot.dtbo_idx=$dtbo_idx \"; "
+
 
 #define BOOT_CMD "bootm ${loadaddr} ${loadaddr} ${fdt_addr_r};"
 
