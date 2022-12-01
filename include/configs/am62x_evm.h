@@ -140,7 +140,7 @@
 #define BOOTENV_DEV_LINUX(devtypeu, devtypel, instance) \
 	"bootcmd_linux=" \
 		"if test \"${android_boot}\" -eq 0; then;" \
-			"run findfdt; run envboot;" \
+			"run findfdt; run envboot; run init_${boot};" \
 			"if test ${boot_fit} -eq 1; then;" \
 				"run get_fit_${boot}; run get_fit_${boot}; run get_overlaystring; run run_fit;"\
 			"else;" \
