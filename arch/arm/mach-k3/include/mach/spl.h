@@ -26,6 +26,10 @@
 #include "am62_spl.h"
 #endif
 
+#ifdef CONFIG_SOC_K3_AM62A7
+#include "am62a_spl.h"
+#endif
+
 #ifdef CONFIG_SOC_K3_J784S4
 #include "j784s4_spl.h"
 #endif

@@ -118,7 +118,8 @@ static struct ti_sci_resource_static_data rm_static_data[] = {
 };
 #endif /* CONFIG_TARGET_J784S4_R5_EVM */
 
-#if IS_ENABLED(CONFIG_SOC_K3_AM625)
+#if IS_ENABLED(CONFIG_SOC_K3_AM625) || IS_ENABLED(CONFIG_SOC_K3_AM62A7)
+
 static struct ti_sci_resource_static_data rm_static_data[] = {
 	/* BC channels */
 	{
@@ -129,8 +130,8 @@ static struct ti_sci_resource_static_data rm_static_data[] = {
 	},
 	{ },
 };
-
-#endif /* CONFIG_SOC_K3_AM625 */
+ 
+#endif /* CONFIG_SOC_K3_AM625 || CONFIG_SOC_K3_AM62A7 */
 
 #else
 static struct ti_sci_resource_static_data rm_static_data[] = {
