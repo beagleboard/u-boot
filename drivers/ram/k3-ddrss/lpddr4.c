@@ -1,942 +1,929 @@
-/* SPDX-License-Identifier: BSD-3-Clause */
+// SPDX-License-Identifier: BSD-3-Clause
 /*
  * Cadence DDR Driver
  *
- * Copyright (C) 2012-2021 Cadence Design Systems, Inc.
- * Copyright (C) 2018-2021 Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (C) 2012-2022 Cadence Design Systems, Inc.
+ * Copyright (C) 2018-2022 Texas Instruments Incorporated - https://www.ti.com/
  */
 
-#include <cdn_errno.h>
+#include <errno.h>
 
 #include "cps_drv_lpddr4.h"
 #include "lpddr4_if.h"
 #include "lpddr4.h"
 #include "lpddr4_structs_if.h"
 
-#ifndef LPDDR4_CUSTOM_TIMEOUT_DELAY
-#define LPDDR4_CUSTOM_TIMEOUT_DELAY 100000000U
-#endif
+static u32 lpddr4_pollphyindepirq(const lpddr4_privatedata *pd, lpddr4_intr_phyindepinterrupt irqbit, u32 delay);
+static u32 lpddr4_pollandackirq(const lpddr4_privatedata *pd);
+static u32 lpddr4_startsequencecontroller(const lpddr4_privatedata *pd);
+static u32 lpddr4_writemmrregister(const lpddr4_privatedata *pd, u32 writemoderegval);
+static void lpddr4_checkcatrainingerror(lpddr4_ctlregs *ctlregbase, lpddr4_debuginfo *debuginfo, bool *errfoundptr);
+static void lpddr4_checkgatelvlerror(lpddr4_ctlregs *ctlregbase, lpddr4_debuginfo *debuginfo, bool *errfoundptr);
+static void lpddr4_checkreadlvlerror(lpddr4_ctlregs *ctlregbase, lpddr4_debuginfo *debuginfo, bool *errfoundptr);
+static void lpddr4_checkdqtrainingerror(lpddr4_ctlregs *ctlregbase, lpddr4_debuginfo *debuginfo, bool *errfoundptr);
+static u8 lpddr4_seterror(volatile u32 *reg, u32 errbitmask, u8 *errfoundptr, const u32 errorinfobits);
+static void lpddr4_setphysnapsettings(lpddr4_ctlregs *ctlregbase, const bool errorfound);
+static void lpddr4_setphyadrsnapsettings(lpddr4_ctlregs *ctlregbase, const bool errorfound);
+static void readpdwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles);
+static void readsrshortwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles);
+static void readsrlongwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles);
+static void readsrlonggatewakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles);
+static void readsrdpshortwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles);
+static void readsrdplongwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles);
+static void readsrdplonggatewakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles);
+static void lpddr4_readlpiwakeuptime(lpddr4_ctlregs *ctlregbase, const lpddr4_lpiwakeupparam *lpiwakeupparam, const lpddr4_ctlfspnum *fspnum, u32 *cycles);
+static void writepdwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles);
+static void writesrshortwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles);
+static void writesrlongwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles);
+static void writesrlonggatewakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles);
+static void writesrdpshortwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles);
+static void writesrdplongwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles);
+static void writesrdplonggatewakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles);
+static void lpddr4_writelpiwakeuptime(lpddr4_ctlregs *ctlregbase, const lpddr4_lpiwakeupparam *lpiwakeupparam, const lpddr4_ctlfspnum *fspnum, const u32 *cycles);
+static void lpddr4_updatefsp2refrateparams(const lpddr4_privatedata *pd, const u32 *tref, const u32 *tras_max);
+static void lpddr4_updatefsp1refrateparams(const lpddr4_privatedata *pd, const u32 *tref, const u32 *tras_max);
+static void lpddr4_updatefsp0refrateparams(const lpddr4_privatedata *pd, const u32 *tref, const u32 *tras_max);
+static u32 lpddr4_getphyrwmask(u32 regoffset);
 
-#ifndef LPDDR4_CPS_NS_DELAY_TIME
-#define LPDDR4_CPS_NS_DELAY_TIME 10000000U
-#endif
-
-static uint32_t lpddr4_pollphyindepirq(const lpddr4_privatedata *pD, lpddr4_intr_phyindepinterrupt irqBit, uint32_t delay);
-static uint32_t lpddr4_pollandackirq(const lpddr4_privatedata *pD);
-static uint32_t lpddr4_startsequencecontroller(const lpddr4_privatedata *pD);
-static uint32_t lpddr4_writemmrregister(const lpddr4_privatedata *pD, uint32_t writeModeRegVal);
-static void lpddr4_checkcatrainingerror(lpddr4_ctlregs *ctlRegBase, lpddr4_debuginfo *debugInfo, bool *errFoundPtr);
-static void lpddr4_checkgatelvlerror(lpddr4_ctlregs *ctlRegBase, lpddr4_debuginfo *debugInfo, bool *errFoundPtr);
-static void lpddr4_checkreadlvlerror(lpddr4_ctlregs *ctlRegBase, lpddr4_debuginfo *debugInfo, bool *errFoundPtr);
-static void lpddr4_checkdqtrainingerror(lpddr4_ctlregs *ctlRegBase, lpddr4_debuginfo *debugInfo, bool *errFoundPtr);
-static uint8_t lpddr4_seterror(volatile uint32_t *reg, uint32_t errBitMask, uint8_t *errFoundPtr, const uint32_t errorInfoBits);
-static void lpddr4_setphysnapsettings(lpddr4_ctlregs *ctlRegBase, const bool errorFound);
-static void lpddr4_setphyadrsnapsettings(lpddr4_ctlregs *ctlRegBase, const bool errorFound);
-static void readpdwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles);
-static void readsrshortwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles);
-static void readsrlongwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles);
-static void readsrlonggatewakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles);
-static void readsrdpshortwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles);
-static void readsrdplongwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles);
-static void readsrdplonggatewakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles);
-static void lpddr4_readlpiwakeuptime(lpddr4_ctlregs *ctlRegBase, const lpddr4_lpiwakeupparam *lpiWakeUpParam, const lpddr4_ctlfspnum *fspNum, uint32_t *cycles);
-static void writepdwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles);
-static void writesrshortwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles);
-static void writesrlongwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles);
-static void writesrlonggatewakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles);
-static void writesrdpshortwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles);
-static void writesrdplongwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles);
-static void writesrdplonggatewakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles);
-static void lpddr4_writelpiwakeuptime(lpddr4_ctlregs *ctlRegBase, const lpddr4_lpiwakeupparam *lpiWakeUpParam, const lpddr4_ctlfspnum *fspNum, const uint32_t *cycles);
-static void lpddr4_updatefsp2refrateparams(const lpddr4_privatedata *pD, const uint32_t *tref, const uint32_t *tras_max);
-static void lpddr4_updatefsp1refrateparams(const lpddr4_privatedata *pD, const uint32_t *tref, const uint32_t *tras_max);
-static void lpddr4_updatefsp0refrateparams(const lpddr4_privatedata *pD, const uint32_t *tref, const uint32_t *tras_max);
-#ifdef REG_WRITE_VERIF
-static uint32_t lpddr4_getphyrwmask(uint32_t regOffset);
-static uint32_t lpddr4_verifyregwrite(const lpddr4_privatedata *pD, lpddr4_regblock cpp, uint32_t regOffset, uint32_t regValue);
-#endif
-
-uint32_t lpddr4_pollctlirq(const lpddr4_privatedata *pD, lpddr4_intr_ctlinterrupt irqBit, uint32_t delay)
+u32 lpddr4_pollctlirq(const lpddr4_privatedata *pd, lpddr4_intr_ctlinterrupt irqbit, u32 delay)
 {
-	uint32_t result = 0U;
-	uint32_t timeout = 0U;
-	bool irqStatus = false;
+	u32 result = 0U;
+	u32 timeout = 0U;
+	bool irqstatus = false;
 
 	do {
 		if (++timeout == delay) {
-			result = (uint32_t)CDN_EIO;
+			result = (u32)EIO;
 			break;
 		}
-		cps_delayns(LPDDR4_CPS_NS_DELAY_TIME);
-		result = lpddr4_checkctlinterrupt(pD, irqBit, &irqStatus);
-	} while ((irqStatus == (bool)false) && (result == (uint32_t)CDN_EOK));
+		result = lpddr4_checkctlinterrupt(pd, irqbit, &irqstatus);
+	} while ((irqstatus == (bool)false) && (result == (u32)0));
 
 	return result;
 }
 
-static uint32_t lpddr4_pollphyindepirq(const lpddr4_privatedata *pD, lpddr4_intr_phyindepinterrupt irqBit, uint32_t delay)
+static u32 lpddr4_pollphyindepirq(const lpddr4_privatedata *pd, lpddr4_intr_phyindepinterrupt irqbit, u32 delay)
 {
-	uint32_t result = 0U;
-	uint32_t timeout = 0U;
-	bool irqStatus = false;
+	u32 result = 0U;
+	u32 timeout = 0U;
+	bool irqstatus = false;
 
 	do {
 		if (++timeout == delay) {
-			result = (uint32_t)CDN_EIO;
+			result = (u32)EIO;
 			break;
 		}
-		cps_delayns(LPDDR4_CPS_NS_DELAY_TIME);
-		result = lpddr4_checkphyindepinterrupt(pD, irqBit, &irqStatus);
-	} while ((irqStatus == (bool)false) && (result == (uint32_t)CDN_EOK));
+		result = lpddr4_checkphyindepinterrupt(pd, irqbit, &irqstatus);
+	} while ((irqstatus == (bool)false) && (result == (u32)0));
 
 	return result;
 }
 
-static uint32_t lpddr4_pollandackirq(const lpddr4_privatedata *pD)
+static u32 lpddr4_pollandackirq(const lpddr4_privatedata *pd)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_pollphyindepirq(pD, LPDDR4_INTR_PHY_INDEP_INIT_DONE_BIT, LPDDR4_CUSTOM_TIMEOUT_DELAY);
+	result = lpddr4_pollphyindepirq(pd, LPDDR4_INTR_PHY_INDEP_INIT_DONE_BIT, LPDDR4_CUSTOM_TIMEOUT_DELAY);
 
-	if (result == (uint32_t)CDN_EOK)
-		result = lpddr4_ackphyindepinterrupt(pD, LPDDR4_INTR_PHY_INDEP_INIT_DONE_BIT);
-	if (result == (uint32_t)CDN_EOK)
-		result = lpddr4_pollctlirq(pD, LPDDR4_INTR_MC_INIT_DONE, LPDDR4_CUSTOM_TIMEOUT_DELAY);
-	if (result == (uint32_t)CDN_EOK)
-		result = lpddr4_ackctlinterrupt(pD, LPDDR4_INTR_MC_INIT_DONE);
+	if (result == (u32)0)
+		result = lpddr4_ackphyindepinterrupt(pd, LPDDR4_INTR_PHY_INDEP_INIT_DONE_BIT);
+	if (result == (u32)0)
+		result = lpddr4_pollctlirq(pd, LPDDR4_INTR_MC_INIT_DONE, LPDDR4_CUSTOM_TIMEOUT_DELAY);
+	if (result == (u32)0)
+		result = lpddr4_ackctlinterrupt(pd, LPDDR4_INTR_MC_INIT_DONE);
 	return result;
 }
 
-static uint32_t lpddr4_startsequencecontroller(const lpddr4_privatedata *pD)
+static u32 lpddr4_startsequencecontroller(const lpddr4_privatedata *pd)
 {
-	uint32_t result = 0U;
-	uint32_t regVal = 0U;
-	lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-	lpddr4_infotype infoType;
+	u32 result = 0U;
+	u32 regval = 0U;
+	lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+	lpddr4_infotype infotype;
 
-	regVal = CPS_FLD_SET(LPDDR4__PI_START__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__PI_START__REG)));
-	CPS_REG_WRITE((&(ctlRegBase->LPDDR4__PI_START__REG)), regVal);
+	regval = CPS_FLD_SET(LPDDR4__PI_START__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__PI_START__REG)));
+	CPS_REG_WRITE((&(ctlregbase->LPDDR4__PI_START__REG)), regval);
 
-	regVal = CPS_FLD_SET(LPDDR4__START__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__START__REG)));
-	CPS_REG_WRITE(&(ctlRegBase->LPDDR4__START__REG), regVal);
+	regval = CPS_FLD_SET(LPDDR4__START__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__START__REG)));
+	CPS_REG_WRITE(&(ctlregbase->LPDDR4__START__REG), regval);
 
-	if (pD->infohandler != (lpddr4_infocallback)NULL) {
-		infoType = LPDDR4_DRV_SOC_PLL_UPDATE;
-		pD->infohandler(pD, infoType);
+	if (pd->infohandler != (lpddr4_infocallback)NULL) {
+		infotype = LPDDR4_DRV_SOC_PLL_UPDATE;
+		pd->infohandler(pd, infotype);
 	}
 
-	result = lpddr4_pollandackirq(pD);
+	result = lpddr4_pollandackirq(pd);
 
 	return result;
 }
 
-volatile uint32_t *lpddr4_addoffset(volatile uint32_t *addr, uint32_t regOffset)
+volatile u32 *lpddr4_addoffset(volatile u32 *addr, u32 regoffset)
 {
-	volatile uint32_t *local_addr = addr;
-	volatile uint32_t *regAddr = &local_addr[regOffset];
+	volatile u32 *local_addr = addr;
+	volatile u32 *regaddr = &local_addr[regoffset];
 
-	return regAddr;
+	return regaddr;
 }
 
-uint32_t lpddr4_probe(const lpddr4_config *config, uint16_t *configSize)
+u32 lpddr4_probe(const lpddr4_config *config, u16 *configsize)
 {
-	uint32_t result;
+	u32 result;
 
-	result = (uint32_t)(lpddr4_probeSF(config, configSize));
-	if (result == (uint32_t)CDN_EOK)
-		*configSize = (uint16_t)(sizeof(lpddr4_privatedata));
+	result = (u32)(lpddr4_probesf(config, configsize));
+	if (result == (u32)0)
+		*configsize = (u16)(sizeof(lpddr4_privatedata));
 	return result;
 }
 
-uint32_t lpddr4_init(lpddr4_privatedata *pD, const lpddr4_config *cfg)
+u32 lpddr4_init(lpddr4_privatedata *pd, const lpddr4_config *cfg)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_initSF(pD, cfg);
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)cfg->ctlbase;
-		pD->ctlbase = ctlRegBase;
-		pD->infohandler = (lpddr4_infocallback)cfg->infohandler;
-		pD->ctlinterrupthandler = (lpddr4_ctlcallback)cfg->ctlinterrupthandler;
-		pD->phyindepinterrupthandler = (lpddr4_phyindepcallback)cfg->phyindepinterrupthandler;
-	}
-	return result;
-}
-
-uint32_t lpddr4_start(const lpddr4_privatedata *pD)
-{
-	uint32_t result = 0U;
-
-	result = lpddr4_startSF(pD);
-	if (result == (uint32_t)CDN_EOK) {
-		result = lpddr4_enablepiinitiator(pD);
-		result = lpddr4_startsequencecontroller(pD);
+	result = lpddr4_initsf(pd, cfg);
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)cfg->ctlbase;
+		pd->ctlbase = ctlregbase;
+		pd->infohandler = (lpddr4_infocallback)cfg->infohandler;
+		pd->ctlinterrupthandler = (lpddr4_ctlcallback)cfg->ctlinterrupthandler;
+		pd->phyindepinterrupthandler = (lpddr4_phyindepcallback)cfg->phyindepinterrupthandler;
 	}
 	return result;
 }
 
-uint32_t lpddr4_readreg(const lpddr4_privatedata *pD, lpddr4_regblock cpp, uint32_t regOffset, uint32_t *regValue)
+u32 lpddr4_start(const lpddr4_privatedata *pd)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_readregSF(pD, cpp, regValue);
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
+	result = lpddr4_startsf(pd);
+	if (result == (u32)0) {
+		result = lpddr4_enablepiinitiator(pd);
+		result = lpddr4_startsequencecontroller(pd);
+	}
+	return result;
+}
+
+u32 lpddr4_readreg(const lpddr4_privatedata *pd, lpddr4_regblock cpp, u32 regoffset, u32 *regvalue)
+{
+	u32 result = 0U;
+
+	result = lpddr4_readregsf(pd, cpp, regvalue);
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
 
 		if (cpp == LPDDR4_CTL_REGS) {
-			if (regOffset >= LPDDR4_INTR_CTL_REG_COUNT)
-				result = (uint32_t)CDN_EINVAL;
+			if (regoffset >= LPDDR4_INTR_CTL_REG_COUNT)
+				result = (u32)EINVAL;
 			else
-				*regValue = CPS_REG_READ(lpddr4_addoffset(&(ctlRegBase->DENALI_CTL_0), regOffset));
+				*regvalue = CPS_REG_READ(lpddr4_addoffset(&(ctlregbase->DENALI_CTL_0), regoffset));
 		} else if (cpp == LPDDR4_PHY_REGS) {
-			if (regOffset >= LPDDR4_INTR_PHY_REG_COUNT)
-				result = (uint32_t)CDN_EINVAL;
+			if (regoffset >= LPDDR4_INTR_PHY_REG_COUNT)
+				result = (u32)EINVAL;
 			else
-				*regValue = CPS_REG_READ(lpddr4_addoffset(&(ctlRegBase->DENALI_PHY_0), regOffset));
+				*regvalue = CPS_REG_READ(lpddr4_addoffset(&(ctlregbase->DENALI_PHY_0), regoffset));
 
 		} else {
-			if (regOffset >= LPDDR4_INTR_PHY_INDEP_REG_COUNT)
-				result = (uint32_t)CDN_EINVAL;
+			if (regoffset >= LPDDR4_INTR_PHY_INDEP_REG_COUNT)
+				result = (u32)EINVAL;
 			else
-				*regValue = CPS_REG_READ(lpddr4_addoffset(&(ctlRegBase->DENALI_PI_0), regOffset));
+				*regvalue = CPS_REG_READ(lpddr4_addoffset(&(ctlregbase->DENALI_PI_0), regoffset));
 		}
 	}
 	return result;
 }
 
-#ifdef REG_WRITE_VERIF
-
-static uint32_t lpddr4_getphyrwmask(uint32_t regOffset)
+static u32 lpddr4_getphyrwmask(u32 regoffset)
 {
-	uint32_t rwMask = 0U;
-	uint32_t arrayOffset = 0U;
-	uint32_t sliceNum, sliceOffset = 0U;
+	u32 rwmask = 0U;
+	u32 arrayoffset = 0U;
+	u32 slicenum, sliceoffset = 0U;
 
-	for (sliceNum = (uint32_t)0U; sliceNum <= (DSLICE_NUM + ASLICE_NUM); sliceNum++) {
-		sliceOffset = sliceOffset + (uint32_t)SLICE_WIDTH;
-		if (regOffset < sliceOffset)
+	for (slicenum = (u32)0U; slicenum <= (DSLICE_NUM + ASLICE_NUM); slicenum++) {
+		sliceoffset = sliceoffset + (u32)SLICE_WIDTH;
+		if (regoffset < sliceoffset)
 			break;
 	}
-	arrayOffset = regOffset - (sliceOffset - (uint32_t)SLICE_WIDTH);
+	arrayoffset = regoffset - (sliceoffset - (u32)SLICE_WIDTH);
 
-	if (sliceNum < DSLICE_NUM) {
-		rwMask = lpddr4_getdslicemask(sliceNum, arrayOffset);
+	if (slicenum < DSLICE_NUM) {
+		rwmask = lpddr4_getdslicemask(slicenum, arrayoffset);
 	} else {
-		if (sliceNum == DSLICE_NUM) {
-			if (arrayOffset < ASLICE0_REG_COUNT)
-				rwMask = g_lpddr4_address_slice_0_rw_mask[arrayOffset];
+		if (slicenum == DSLICE_NUM) {
+			if (arrayoffset < ASLICE0_REG_COUNT)
+				rwmask = g_lpddr4_address_slice_0_rw_mask[arrayoffset];
 		} else {
-			if (arrayOffset < PHY_CORE_REG_COUNT)
-				rwMask = g_lpddr4_phy_core_rw_mask[arrayOffset];
+			if (arrayoffset < PHY_CORE_REG_COUNT)
+				rwmask = g_lpddr4_phy_core_rw_mask[arrayoffset];
 		}
 	}
-	return rwMask;
+	return rwmask;
 }
 
-static uint32_t lpddr4_verifyregwrite(const lpddr4_privatedata *pD, lpddr4_regblock cpp, uint32_t regOffset, uint32_t regValue)
+u32 lpddr4_deferredregverify(const lpddr4_privatedata *pd, lpddr4_regblock cpp, u32 regvalues[], u16 regnum[], u16 regcount)
 {
-	uint32_t result = (uint32_t)CDN_EOK;
-	uint32_t regReadVal = 0U;
-	uint32_t rwMask = 0U;
+	u32 result = (u32)0;
+	u32 aindex;
+	u32 regreadval = 0U;
+	u32 rwmask = 0U;
 
-	result = lpddr4_readreg(pD, cpp, regOffset, &regReadVal);
+	result = lpddr4_deferredregverifysf(pd, cpp);
 
-	if (result == (uint32_t)CDN_EOK) {
-		switch (cpp) {
-		case LPDDR4_PHY_INDEP_REGS:
-			rwMask = g_lpddr4_pi_rw_mask[regOffset];
-			break;
-		case LPDDR4_PHY_REGS:
-			rwMask = lpddr4_getphyrwmask(regOffset);
-			break;
-		default:
-			rwMask = g_lpddr4_ddr_controller_rw_mask[regOffset];
-			break;
+	if ((regvalues == (u32 *)NULL) || (regnum == (u16 *)NULL))
+		result = EINVAL;
+	if (result == (u32)0) {
+		for (aindex = 0; aindex < regcount; aindex++) {
+			result = lpddr4_readreg(pd, cpp, (u32)regnum[aindex], &regreadval);
+
+			if (result == (u32)0) {
+				switch (cpp) {
+				case LPDDR4_PHY_INDEP_REGS:
+					rwmask = g_lpddr4_pi_rw_mask[(u32)regnum[aindex]];
+					break;
+				case LPDDR4_PHY_REGS:
+					rwmask = lpddr4_getphyrwmask((u32)regnum[aindex]);
+					break;
+				default:
+					rwmask = g_lpddr4_ddr_controller_rw_mask[(u32)regnum[aindex]];
+					break;
+				}
+
+				if ((rwmask & regreadval) != ((u32)(regvalues[aindex]) & rwmask)) {
+					result = EIO;
+					break;
+				}
+			}
 		}
-
-		if ((rwMask & regReadVal) != (regValue & rwMask))
-			result = CDN_EIO;
 	}
 	return result;
 }
-#endif
 
-uint32_t lpddr4_writereg(const lpddr4_privatedata *pD, lpddr4_regblock cpp, uint32_t regOffset, uint32_t regValue)
+u32 lpddr4_writereg(const lpddr4_privatedata *pd, lpddr4_regblock cpp, u32 regoffset, u32 regvalue)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_writeregSF(pD, cpp);
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
+	result = lpddr4_writeregsf(pd, cpp);
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
 
 		if (cpp == LPDDR4_CTL_REGS) {
-			if (regOffset >= LPDDR4_INTR_CTL_REG_COUNT)
-				result = (uint32_t)CDN_EINVAL;
+			if (regoffset >= LPDDR4_INTR_CTL_REG_COUNT)
+				result = (u32)EINVAL;
 			else
-				CPS_REG_WRITE(lpddr4_addoffset(&(ctlRegBase->DENALI_CTL_0), regOffset), regValue);
+				CPS_REG_WRITE(lpddr4_addoffset(&(ctlregbase->DENALI_CTL_0), regoffset), regvalue);
 		} else if (cpp == LPDDR4_PHY_REGS) {
-			if (regOffset >= LPDDR4_INTR_PHY_REG_COUNT)
-				result = (uint32_t)CDN_EINVAL;
+			if (regoffset >= LPDDR4_INTR_PHY_REG_COUNT)
+				result = (u32)EINVAL;
 			else
-				CPS_REG_WRITE(lpddr4_addoffset(&(ctlRegBase->DENALI_PHY_0), regOffset), regValue);
+				CPS_REG_WRITE(lpddr4_addoffset(&(ctlregbase->DENALI_PHY_0), regoffset), regvalue);
 		} else {
-			if (regOffset >= LPDDR4_INTR_PHY_INDEP_REG_COUNT)
-				result = (uint32_t)CDN_EINVAL;
+			if (regoffset >= LPDDR4_INTR_PHY_INDEP_REG_COUNT)
+				result = (u32)EINVAL;
 			else
-				CPS_REG_WRITE(lpddr4_addoffset(&(ctlRegBase->DENALI_PI_0), regOffset), regValue);
-		}
-	}
-#ifdef REG_WRITE_VERIF
-	if (result == (uint32_t)CDN_EOK)
-		result = lpddr4_verifyregwrite(pD, cpp, regOffset, regValue);
-
-#endif
-
-	return result;
-}
-
-uint32_t lpddr4_getmmrregister(const lpddr4_privatedata *pD, uint32_t readModeRegVal, uint64_t *mmrValue, uint8_t *mmrStatus)
-{
-	uint32_t result = 0U;
-	uint32_t tDelay = 1000U;
-	uint32_t regVal = 0U;
-
-	result = lpddr4_getmmrregisterSF(pD, mmrValue, mmrStatus);
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-
-		regVal = CPS_FLD_WRITE(LPDDR4__READ_MODEREG__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__READ_MODEREG__REG)), readModeRegVal);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__READ_MODEREG__REG), regVal);
-
-		result = lpddr4_pollctlirq(pD, LPDDR4_INTR_MR_READ_DONE, tDelay);
-	}
-	if (result == (uint32_t)CDN_EOK)
-		result = lpddr4_checkmmrreaderror(pD, mmrValue, mmrStatus);
-	return result;
-}
-
-static uint32_t lpddr4_writemmrregister(const lpddr4_privatedata *pD, uint32_t writeModeRegVal)
-{
-	uint32_t result = (uint32_t)CDN_EOK;
-	uint32_t tDelay = 1000U;
-	uint32_t regVal = 0U;
-	lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-
-	regVal = CPS_FLD_WRITE(LPDDR4__WRITE_MODEREG__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__WRITE_MODEREG__REG)), writeModeRegVal);
-	CPS_REG_WRITE(&(ctlRegBase->LPDDR4__WRITE_MODEREG__REG), regVal);
-
-	result = lpddr4_pollctlirq(pD, LPDDR4_INTR_MR_WRITE_DONE, tDelay);
-
-	return result;
-}
-
-uint32_t lpddr4_setmmrregister(const lpddr4_privatedata *pD, uint32_t writeModeRegVal, uint8_t *mrwStatus)
-{
-	uint32_t result = 0U;
-
-	result = lpddr4_setmmrregisterSF(pD, mrwStatus);
-	if (result == (uint32_t)CDN_EOK) {
-		result = lpddr4_writemmrregister(pD, writeModeRegVal);
-
-		if (result == (uint32_t)CDN_EOK)
-			result = lpddr4_ackctlinterrupt(pD, LPDDR4_INTR_MR_WRITE_DONE);
-		if (result == (uint32_t)CDN_EOK) {
-			lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-			*mrwStatus = (uint8_t)CPS_FLD_READ(LPDDR4__MRW_STATUS__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__MRW_STATUS__REG)));
-			if ((*mrwStatus) != 0U)
-				result = (uint32_t)CDN_EIO;
+				CPS_REG_WRITE(lpddr4_addoffset(&(ctlregbase->DENALI_PI_0), regoffset), regvalue);
 		}
 	}
 
-#ifdef ASILC
-#endif
+	return result;
+}
+
+u32 lpddr4_getmmrregister(const lpddr4_privatedata *pd, u32 readmoderegval, u64 *mmrvalue, u8 *mmrstatus)
+{
+	u32 result = 0U;
+	u32 tdelay = 1000U;
+	u32 regval = 0U;
+
+	result = lpddr4_getmmrregistersf(pd, mmrvalue, mmrstatus);
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+
+		regval = CPS_FLD_WRITE(LPDDR4__READ_MODEREG__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__READ_MODEREG__REG)), readmoderegval);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__READ_MODEREG__REG), regval);
+
+		result = lpddr4_pollctlirq(pd, LPDDR4_INTR_MR_READ_DONE, tdelay);
+	}
+	if (result == (u32)0)
+		result = lpddr4_checkmmrreaderror(pd, mmrvalue, mmrstatus);
+	return result;
+}
+
+static u32 lpddr4_writemmrregister(const lpddr4_privatedata *pd, u32 writemoderegval)
+{
+	u32 result = (u32)0;
+	u32 tdelay = 1000U;
+	u32 regval = 0U;
+	lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+
+	regval = CPS_FLD_WRITE(LPDDR4__WRITE_MODEREG__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__WRITE_MODEREG__REG)), writemoderegval);
+	CPS_REG_WRITE(&(ctlregbase->LPDDR4__WRITE_MODEREG__REG), regval);
+
+	result = lpddr4_pollctlirq(pd, LPDDR4_INTR_MR_WRITE_DONE, tdelay);
 
 	return result;
 }
 
-uint32_t lpddr4_writectlconfig(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount)
+u32 lpddr4_setmmrregister(const lpddr4_privatedata *pd, u32 writemoderegval, u8 *mrwstatus)
 {
-	uint32_t result;
-	uint32_t aIndex;
+	u32 result = 0U;
 
-	result = lpddr4_writectlconfigSF(pD);
-	if ((regValues == (uint32_t *)NULL) || (regNum == (uint16_t *)NULL))
-		result = CDN_EINVAL;
+	result = lpddr4_setmmrregistersf(pd, mrwstatus);
+	if (result == (u32)0) {
+		result = lpddr4_writemmrregister(pd, writemoderegval);
 
-	if (result == (uint32_t)CDN_EOK) {
-		for (aIndex = 0; aIndex < regCount; aIndex++)
-			result = (uint32_t)lpddr4_writereg(pD, LPDDR4_CTL_REGS, (uint32_t)regNum[aIndex],
-							   (uint32_t)regValues[aIndex]);
-	}
-	return result;
-}
-
-uint32_t lpddr4_writephyindepconfig(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount)
-{
-	uint32_t result;
-	uint32_t aIndex;
-
-	result = lpddr4_writephyindepconfigSF(pD);
-	if ((regValues == (uint32_t *)NULL) || (regNum == (uint16_t *)NULL))
-		result = CDN_EINVAL;
-	if (result == (uint32_t)CDN_EOK) {
-		for (aIndex = 0; aIndex < regCount; aIndex++)
-			result = (uint32_t)lpddr4_writereg(pD, LPDDR4_PHY_INDEP_REGS, (uint32_t)regNum[aIndex],
-							   (uint32_t)regValues[aIndex]);
-	}
-	return result;
-}
-
-uint32_t lpddr4_writephyconfig(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount)
-{
-	uint32_t result;
-	uint32_t aIndex;
-
-	result = lpddr4_writephyconfigSF(pD);
-	if ((regValues == (uint32_t *)NULL) || (regNum == (uint16_t *)NULL))
-		result = CDN_EINVAL;
-	if (result == (uint32_t)CDN_EOK) {
-		for (aIndex = 0; aIndex < regCount; aIndex++)
-			result = (uint32_t)lpddr4_writereg(pD, LPDDR4_PHY_REGS, (uint32_t)regNum[aIndex],
-							   (uint32_t)regValues[aIndex]);
-	}
-	return result;
-}
-
-uint32_t lpddr4_readctlconfig(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount)
-{
-	uint32_t result;
-	uint32_t aIndex;
-
-	result = lpddr4_readctlconfigSF(pD);
-	if ((regValues == (uint32_t *)NULL) || (regNum == (uint16_t *)NULL))
-		result = CDN_EINVAL;
-	if (result == (uint32_t)CDN_EOK) {
-		for (aIndex = 0; aIndex < regCount; aIndex++)
-			result = (uint32_t)lpddr4_readreg(pD, LPDDR4_CTL_REGS, (uint32_t)regNum[aIndex],
-							  (uint32_t *)(&regValues[aIndex]));
-	}
-	return result;
-}
-
-uint32_t lpddr4_readphyindepconfig(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount)
-{
-	uint32_t result;
-	uint32_t aIndex;
-
-	result = lpddr4_readphyindepconfigSF(pD);
-	if ((regValues == (uint32_t *)NULL) || (regNum == (uint16_t *)NULL))
-		result = CDN_EINVAL;
-	if (result == (uint32_t)CDN_EOK) {
-		for (aIndex = 0; aIndex < regCount; aIndex++)
-			result = (uint32_t)lpddr4_readreg(pD, LPDDR4_PHY_INDEP_REGS, (uint32_t)regNum[aIndex],
-							  (uint32_t *)(&regValues[aIndex]));
-	}
-	return result;
-}
-
-uint32_t lpddr4_readphyconfig(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount)
-{
-	uint32_t result;
-	uint32_t aIndex;
-
-	result = lpddr4_readphyconfigSF(pD);
-	if ((regValues == (uint32_t *)NULL) || (regNum == (uint16_t *)NULL))
-		result = CDN_EINVAL;
-	if (result == (uint32_t)CDN_EOK) {
-		for (aIndex = 0; aIndex < regCount; aIndex++)
-			result = (uint32_t)lpddr4_readreg(pD, LPDDR4_PHY_REGS, (uint32_t)regNum[aIndex],
-							  (uint32_t *)(&regValues[aIndex]));
-	}
-	return result;
-}
-
-uint32_t lpddr4_getphyindepinterruptmask(const lpddr4_privatedata *pD, uint32_t *mask)
-{
-	uint32_t result;
-
-	result = LPDDR4_GetPhyIndepInterruptMSF(pD, mask);
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-		*mask = CPS_FLD_READ(LPDDR4__PI_INT_MASK__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__PI_INT_MASK__REG)));
-	}
-	return result;
-}
-
-uint32_t lpddr4_setphyindepinterruptmask(const lpddr4_privatedata *pD, const uint32_t *mask)
-{
-	uint32_t result;
-	uint32_t regVal = 0;
-	const uint32_t ui32IrqCount = (uint32_t)LPDDR4_INTR_PHY_INDEP_DLL_LOCK_STATE_CHANGE_BIT + 1U;
-
-	result = LPDDR4_SetPhyIndepInterruptMSF(pD, mask);
-	if ((result == (uint32_t)CDN_EOK) && (ui32IrqCount < WORD_SHIFT)) {
-		if (*mask >= (1U << ui32IrqCount))
-			result = (uint32_t)CDN_EINVAL;
-	}
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-
-		regVal = CPS_FLD_WRITE(LPDDR4__PI_INT_MASK__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__PI_INT_MASK__REG)), *mask);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__PI_INT_MASK__REG), regVal);
-	}
-	return result;
-}
-
-uint32_t lpddr4_checkphyindepinterrupt(const lpddr4_privatedata *pD, lpddr4_intr_phyindepinterrupt intr, bool *irqStatus)
-{
-	uint32_t result = 0;
-	uint32_t phyIndepIrqStatus = 0;
-
-	result = LPDDR4_INTR_CheckPhyIndepIntSF(pD, intr, irqStatus);
-	if ((result == (uint32_t)CDN_EOK) && ((uint32_t)intr < WORD_SHIFT)) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-
-		phyIndepIrqStatus = CPS_REG_READ(&(ctlRegBase->LPDDR4__PI_INT_STATUS__REG));
-		*irqStatus = (bool)(((phyIndepIrqStatus >> (uint32_t)intr) & BIT_MASK) > 0U);
-	}
-	return result;
-}
-
-uint32_t lpddr4_ackphyindepinterrupt(const lpddr4_privatedata *pD, lpddr4_intr_phyindepinterrupt intr)
-{
-	uint32_t result = 0U;
-	uint32_t regVal = 0U;
-
-	result = LPDDR4_INTR_AckPhyIndepIntSF(pD, intr);
-	if ((result == (uint32_t)CDN_EOK) && ((uint32_t)intr < WORD_SHIFT)) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-
-		regVal = ((uint32_t)BIT_MASK << (uint32_t)intr);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__PI_INT_ACK__REG), regVal);
+		if (result == (u32)0)
+			result = lpddr4_ackctlinterrupt(pd, LPDDR4_INTR_MR_WRITE_DONE);
+		if (result == (u32)0) {
+			lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+			*mrwstatus = (u8)CPS_FLD_READ(LPDDR4__MRW_STATUS__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__MRW_STATUS__REG)));
+			if ((*mrwstatus) != 0U)
+				result = (u32)EIO;
+		}
 	}
 
 	return result;
 }
 
-static void lpddr4_checkcatrainingerror(lpddr4_ctlregs *ctlRegBase, lpddr4_debuginfo *debugInfo, bool *errFoundPtr)
+u32 lpddr4_writectlconfig(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount)
 {
-	uint32_t regVal;
-	uint32_t errBitMask = 0U;
-	uint32_t snum;
-	volatile uint32_t *regAddress;
+	u32 result;
+	u32 aindex;
 
-	regAddress = (volatile uint32_t *)(&(ctlRegBase->LPDDR4__PHY_ADR_CALVL_OBS1_0__REG));
-	errBitMask = (CA_TRAIN_RL) | (NIBBLE_MASK);
+	result = lpddr4_writectlconfigsf(pd);
+	if ((regvalues == (u32 *)NULL) || (regnum == (u16 *)NULL))
+		result = EINVAL;
+
+	if (result == (u32)0) {
+		for (aindex = 0; aindex < regcount; aindex++)
+			result = (u32)lpddr4_writereg(pd, LPDDR4_CTL_REGS, (u32)regnum[aindex],
+							   (u32)regvalues[aindex]);
+	}
+	return result;
+}
+
+u32 lpddr4_writephyindepconfig(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount)
+{
+	u32 result;
+	u32 aindex;
+
+	result = lpddr4_writephyindepconfigsf(pd);
+	if ((regvalues == (u32 *)NULL) || (regnum == (u16 *)NULL))
+		result = EINVAL;
+	if (result == (u32)0) {
+		for (aindex = 0; aindex < regcount; aindex++)
+			result = (u32)lpddr4_writereg(pd, LPDDR4_PHY_INDEP_REGS, (u32)regnum[aindex],
+							   (u32)regvalues[aindex]);
+	}
+	return result;
+}
+
+u32 lpddr4_writephyconfig(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount)
+{
+	u32 result;
+	u32 aindex;
+
+	result = lpddr4_writephyconfigsf(pd);
+	if ((regvalues == (u32 *)NULL) || (regnum == (u16 *)NULL))
+		result = EINVAL;
+	if (result == (u32)0) {
+		for (aindex = 0; aindex < regcount; aindex++)
+			result = (u32)lpddr4_writereg(pd, LPDDR4_PHY_REGS, (u32)regnum[aindex],
+							   (u32)regvalues[aindex]);
+	}
+	return result;
+}
+
+u32 lpddr4_readctlconfig(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount)
+{
+	u32 result;
+	u32 aindex;
+
+	result = lpddr4_readctlconfigsf(pd);
+	if ((regvalues == (u32 *)NULL) || (regnum == (u16 *)NULL))
+		result = EINVAL;
+	if (result == (u32)0) {
+		for (aindex = 0; aindex < regcount; aindex++)
+			result = (u32)lpddr4_readreg(pd, LPDDR4_CTL_REGS, (u32)regnum[aindex],
+							  (u32 *)(&regvalues[aindex]));
+	}
+	return result;
+}
+
+u32 lpddr4_readphyindepconfig(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount)
+{
+	u32 result;
+	u32 aindex;
+
+	result = lpddr4_readphyindepconfigsf(pd);
+	if ((regvalues == (u32 *)NULL) || (regnum == (u16 *)NULL))
+		result = EINVAL;
+	if (result == (u32)0) {
+		for (aindex = 0; aindex < regcount; aindex++)
+			result = (u32)lpddr4_readreg(pd, LPDDR4_PHY_INDEP_REGS, (u32)regnum[aindex],
+							  (u32 *)(&regvalues[aindex]));
+	}
+	return result;
+}
+
+u32 lpddr4_readphyconfig(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount)
+{
+	u32 result;
+	u32 aindex;
+
+	result = lpddr4_readphyconfigsf(pd);
+	if ((regvalues == (u32 *)NULL) || (regnum == (u16 *)NULL))
+		result = EINVAL;
+	if (result == (u32)0) {
+		for (aindex = 0; aindex < regcount; aindex++)
+			result = (u32)lpddr4_readreg(pd, LPDDR4_PHY_REGS, (u32)regnum[aindex],
+							  (u32 *)(&regvalues[aindex]));
+	}
+	return result;
+}
+
+u32 lpddr4_getphyindepinterruptmask(const lpddr4_privatedata *pd, u32 *mask)
+{
+	u32 result;
+
+	result = lpddr4_getphyindepinterruptmsf(pd, mask);
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+		*mask = CPS_FLD_READ(LPDDR4__PI_INT_MASK__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__PI_INT_MASK__REG)));
+	}
+	return result;
+}
+
+u32 lpddr4_setphyindepinterruptmask(const lpddr4_privatedata *pd, const u32 *mask)
+{
+	u32 result;
+	u32 regval = 0;
+	const u32 ui32irqcount = (u32)LPDDR4_INTR_PHY_INDEP_DLL_LOCK_STATE_CHANGE_BIT + 1U;
+
+	result = lpddr4_setphyindepinterruptmsf(pd, mask);
+	if ((result == (u32)0) && (ui32irqcount < WORD_SHIFT)) {
+		if (*mask >= (1U << ui32irqcount))
+			result = (u32)EINVAL;
+	}
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+
+		regval = CPS_FLD_WRITE(LPDDR4__PI_INT_MASK__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__PI_INT_MASK__REG)), *mask);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__PI_INT_MASK__REG), regval);
+	}
+	return result;
+}
+
+u32 lpddr4_checkphyindepinterrupt(const lpddr4_privatedata *pd, lpddr4_intr_phyindepinterrupt intr, bool *irqstatus)
+{
+	u32 result = 0;
+	u32 phyindepirqstatus = 0;
+
+	result = LPDDR4_INTR_CheckPhyIndepIntSF(pd, intr, irqstatus);
+	if ((result == (u32)0) && ((u32)intr < WORD_SHIFT)) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+
+		phyindepirqstatus = CPS_REG_READ(&(ctlregbase->LPDDR4__PI_INT_STATUS__REG));
+		*irqstatus = (bool)(((phyindepirqstatus >> (u32)intr) & LPDDR4_BIT_MASK) > 0U);
+	}
+	return result;
+}
+
+u32 lpddr4_ackphyindepinterrupt(const lpddr4_privatedata *pd, lpddr4_intr_phyindepinterrupt intr)
+{
+	u32 result = 0U;
+	u32 regval = 0U;
+
+	result = LPDDR4_INTR_AckPhyIndepIntSF(pd, intr);
+	if ((result == (u32)0) && ((u32)intr < WORD_SHIFT)) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+
+		regval = ((u32)LPDDR4_BIT_MASK << (u32)intr);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__PI_INT_ACK__REG), regval);
+	}
+
+	return result;
+}
+
+static void lpddr4_checkcatrainingerror(lpddr4_ctlregs *ctlregbase, lpddr4_debuginfo *debuginfo, bool *errfoundptr)
+{
+	u32 regval;
+	u32 errbitmask = 0U;
+	u32 snum;
+	volatile u32 *regaddress;
+
+	regaddress = (volatile u32 *)(&(ctlregbase->LPDDR4__PHY_ADR_CALVL_OBS1_0__REG));
+	errbitmask = (CA_TRAIN_RL) | (NIBBLE_MASK);
 	for (snum = 0U; snum < ASLICE_NUM; snum++) {
-		regVal = CPS_REG_READ(regAddress);
-		if ((regVal & errBitMask) != CA_TRAIN_RL) {
-			debugInfo->catraingerror = CDN_TRUE;
-			*errFoundPtr = true;
+		regval = CPS_REG_READ(regaddress);
+		if ((regval & errbitmask) != CA_TRAIN_RL) {
+			debuginfo->catraingerror = CDN_TRUE;
+			*errfoundptr = true;
 		}
-		regAddress = lpddr4_addoffset(regAddress, (uint32_t)SLICE_WIDTH);
+		regaddress = lpddr4_addoffset(regaddress, (u32)SLICE_WIDTH);
 	}
 }
 
-static void lpddr4_checkgatelvlerror(lpddr4_ctlregs *ctlRegBase, lpddr4_debuginfo *debugInfo, bool *errFoundPtr)
+static void lpddr4_checkgatelvlerror(lpddr4_ctlregs *ctlregbase, lpddr4_debuginfo *debuginfo, bool *errfoundptr)
 {
-	uint32_t regVal;
-	uint32_t errBitMask = 0U;
-	uint32_t snum;
-	volatile uint32_t *regAddress;
+	u32 regval;
+	u32 errbitmask = 0U;
+	u32 snum;
+	volatile u32 *regaddress;
 
-	regAddress = (volatile uint32_t *)(&(ctlRegBase->LPDDR4__PHY_GTLVL_STATUS_OBS_0__REG));
-	errBitMask = GATE_LVL_ERROR_FIELDS;
-	for (snum = (uint32_t)0U; snum < DSLICE_NUM; snum++) {
-		regVal = CPS_REG_READ(regAddress);
-		if ((regVal & errBitMask) != 0U) {
-			debugInfo->gatelvlerror = CDN_TRUE;
-			*errFoundPtr = true;
+	regaddress = (volatile u32 *)(&(ctlregbase->LPDDR4__PHY_GTLVL_STATUS_OBS_0__REG));
+	errbitmask = GATE_LVL_ERROR_FIELDS;
+	for (snum = (u32)0U; snum < DSLICE_NUM; snum++) {
+		regval = CPS_REG_READ(regaddress);
+		if ((regval & errbitmask) != 0U) {
+			debuginfo->gatelvlerror = CDN_TRUE;
+			*errfoundptr = true;
 		}
-		regAddress = lpddr4_addoffset(regAddress, (uint32_t)SLICE_WIDTH);
+		regaddress = lpddr4_addoffset(regaddress, (u32)SLICE_WIDTH);
 	}
 }
 
-static void lpddr4_checkreadlvlerror(lpddr4_ctlregs *ctlRegBase, lpddr4_debuginfo *debugInfo, bool *errFoundPtr)
+static void lpddr4_checkreadlvlerror(lpddr4_ctlregs *ctlregbase, lpddr4_debuginfo *debuginfo, bool *errfoundptr)
 {
-	uint32_t regVal;
-	uint32_t errBitMask = 0U;
-	uint32_t snum;
-	volatile uint32_t *regAddress;
+	u32 regval;
+	u32 errbitmask = 0U;
+	u32 snum;
+	volatile u32 *regaddress;
 
-	regAddress = (volatile uint32_t *)(&(ctlRegBase->LPDDR4__PHY_RDLVL_STATUS_OBS_0__REG));
-	errBitMask = READ_LVL_ERROR_FIELDS;
-	for (snum = (uint32_t)0U; snum < DSLICE_NUM; snum++) {
-		regVal = CPS_REG_READ(regAddress);
-		if ((regVal & errBitMask) != 0U) {
-			debugInfo->readlvlerror = CDN_TRUE;
-			*errFoundPtr = true;
+	regaddress = (volatile u32 *)(&(ctlregbase->LPDDR4__PHY_RDLVL_STATUS_OBS_0__REG));
+	errbitmask = READ_LVL_ERROR_FIELDS;
+	for (snum = (u32)0U; snum < DSLICE_NUM; snum++) {
+		regval = CPS_REG_READ(regaddress);
+		if ((regval & errbitmask) != 0U) {
+			debuginfo->readlvlerror = CDN_TRUE;
+			*errfoundptr = true;
 		}
-		regAddress = lpddr4_addoffset(regAddress, (uint32_t)SLICE_WIDTH);
+		regaddress = lpddr4_addoffset(regaddress, (u32)SLICE_WIDTH);
 	}
 }
 
-static void lpddr4_checkdqtrainingerror(lpddr4_ctlregs *ctlRegBase, lpddr4_debuginfo *debugInfo, bool *errFoundPtr)
+static void lpddr4_checkdqtrainingerror(lpddr4_ctlregs *ctlregbase, lpddr4_debuginfo *debuginfo, bool *errfoundptr)
 {
-	uint32_t regVal;
-	uint32_t errBitMask = 0U;
-	uint32_t snum;
-	volatile uint32_t *regAddress;
+	u32 regval;
+	u32 errbitmask = 0U;
+	u32 snum;
+	volatile u32 *regaddress;
 
-	regAddress = (volatile uint32_t *)(&(ctlRegBase->LPDDR4__PHY_WDQLVL_STATUS_OBS_0__REG));
-	errBitMask = DQ_LVL_STATUS;
-	for (snum = (uint32_t)0U; snum < DSLICE_NUM; snum++) {
-		regVal = CPS_REG_READ(regAddress);
-		if ((regVal & errBitMask) != 0U) {
-			debugInfo->dqtrainingerror = CDN_TRUE;
-			*errFoundPtr = true;
+	regaddress = (volatile u32 *)(&(ctlregbase->LPDDR4__PHY_WDQLVL_STATUS_OBS_0__REG));
+	errbitmask = DQ_LVL_STATUS;
+	for (snum = (u32)0U; snum < DSLICE_NUM; snum++) {
+		regval = CPS_REG_READ(regaddress);
+		if ((regval & errbitmask) != 0U) {
+			debuginfo->dqtrainingerror = CDN_TRUE;
+			*errfoundptr = true;
 		}
-		regAddress = lpddr4_addoffset(regAddress, (uint32_t)SLICE_WIDTH);
+		regaddress = lpddr4_addoffset(regaddress, (u32)SLICE_WIDTH);
 	}
 }
 
-bool lpddr4_checklvlerrors(const lpddr4_privatedata *pD, lpddr4_debuginfo *debugInfo, bool errFound)
+bool lpddr4_checklvlerrors(const lpddr4_privatedata *pd, lpddr4_debuginfo *debuginfo, bool errfound)
 {
-	bool localErrFound = errFound;
+	bool localerrfound = errfound;
 
-	lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
+	lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
 
-	if (localErrFound == (bool)false)
-		lpddr4_checkcatrainingerror(ctlRegBase, debugInfo, &localErrFound);
+	if (localerrfound == (bool)false)
+		lpddr4_checkcatrainingerror(ctlregbase, debuginfo, &localerrfound);
 
-	if (localErrFound == (bool)false)
-		lpddr4_checkwrlvlerror(ctlRegBase, debugInfo, &localErrFound);
+	if (localerrfound == (bool)false)
+		lpddr4_checkwrlvlerror(ctlregbase, debuginfo, &localerrfound);
 
-	if (localErrFound == (bool)false)
-		lpddr4_checkgatelvlerror(ctlRegBase, debugInfo, &localErrFound);
+	if (localerrfound == (bool)false)
+		lpddr4_checkgatelvlerror(ctlregbase, debuginfo, &localerrfound);
 
-	if (localErrFound == (bool)false)
-		lpddr4_checkreadlvlerror(ctlRegBase, debugInfo, &localErrFound);
+	if (localerrfound == (bool)false)
+		lpddr4_checkreadlvlerror(ctlregbase, debuginfo, &localerrfound);
 
-	if (localErrFound == (bool)false)
-		lpddr4_checkdqtrainingerror(ctlRegBase, debugInfo, &localErrFound);
-	return localErrFound;
+	if (localerrfound == (bool)false)
+		lpddr4_checkdqtrainingerror(ctlregbase, debuginfo, &localerrfound);
+	return localerrfound;
 }
 
-static uint8_t lpddr4_seterror(volatile uint32_t *reg, uint32_t errBitMask, uint8_t *errFoundPtr, const uint32_t errorInfoBits)
+static u8 lpddr4_seterror(volatile u32 *reg, u32 errbitmask, u8 *errfoundptr, const u32 errorinfobits)
 {
-	uint32_t regVal = 0U;
+	u32 regval = 0U;
 
-	regVal = CPS_REG_READ(reg);
-	if ((regVal & errBitMask) != errorInfoBits)
-		*errFoundPtr = CDN_TRUE;
-	return *errFoundPtr;
+	regval = CPS_REG_READ(reg);
+	if ((regval & errbitmask) != errorinfobits)
+		*errfoundptr = CDN_TRUE;
+	return *errfoundptr;
 }
 
-void lpddr4_seterrors(lpddr4_ctlregs *ctlRegBase, lpddr4_debuginfo *debugInfo, uint8_t *errFoundPtr)
+void lpddr4_seterrors(lpddr4_ctlregs *ctlregbase, lpddr4_debuginfo *debuginfo, u8 *errfoundptr)
 {
-	uint32_t errBitMask = (BIT_MASK << 0x1U) | (BIT_MASK);
+	u32 errbitmask = (LPDDR4_BIT_MASK << 0x1U) | (LPDDR4_BIT_MASK);
 
-	debugInfo->pllerror = lpddr4_seterror(&(ctlRegBase->LPDDR4__PHY_PLL_OBS_0__REG),
-					      errBitMask, errFoundPtr, PLL_READY);
-	if (*errFoundPtr == CDN_FALSE)
-		debugInfo->pllerror = lpddr4_seterror(&(ctlRegBase->LPDDR4__PHY_PLL_OBS_1__REG),
-						      errBitMask, errFoundPtr, PLL_READY);
+	debuginfo->pllerror = lpddr4_seterror(&(ctlregbase->LPDDR4__PHY_PLL_OBS_0__REG),
+					      errbitmask, errfoundptr, PLL_READY);
+	if (*errfoundptr == CDN_FALSE)
+		debuginfo->pllerror = lpddr4_seterror(&(ctlregbase->LPDDR4__PHY_PLL_OBS_1__REG),
+						      errbitmask, errfoundptr, PLL_READY);
 
-	if (*errFoundPtr == CDN_FALSE)
-		debugInfo->iocaliberror = lpddr4_seterror(&(ctlRegBase->LPDDR4__PHY_CAL_RESULT_OBS_0__REG),
-							  IO_CALIB_DONE, errFoundPtr, IO_CALIB_DONE);
-	if (*errFoundPtr == CDN_FALSE)
-		debugInfo->iocaliberror = lpddr4_seterror(&(ctlRegBase->LPDDR4__PHY_CAL_RESULT2_OBS_0__REG),
-							  IO_CALIB_DONE, errFoundPtr, IO_CALIB_DONE);
-	if (*errFoundPtr == CDN_FALSE)
-		debugInfo->iocaliberror = lpddr4_seterror(&(ctlRegBase->LPDDR4__PHY_CAL_RESULT3_OBS_0__REG),
-							  IO_CALIB_FIELD, errFoundPtr, IO_CALIB_STATE);
+	if (*errfoundptr == CDN_FALSE)
+		debuginfo->iocaliberror = lpddr4_seterror(&(ctlregbase->LPDDR4__PHY_CAL_RESULT_OBS_0__REG),
+							  IO_CALIB_DONE, errfoundptr, IO_CALIB_DONE);
+	if (*errfoundptr == CDN_FALSE)
+		debuginfo->iocaliberror = lpddr4_seterror(&(ctlregbase->LPDDR4__PHY_CAL_RESULT2_OBS_0__REG),
+							  IO_CALIB_DONE, errfoundptr, IO_CALIB_DONE);
+	if (*errfoundptr == CDN_FALSE)
+		debuginfo->iocaliberror = lpddr4_seterror(&(ctlregbase->LPDDR4__PHY_CAL_RESULT3_OBS_0__REG),
+							  IO_CALIB_FIELD, errfoundptr, IO_CALIB_STATE);
 }
 
-static void lpddr4_setphysnapsettings(lpddr4_ctlregs *ctlRegBase, const bool errorFound)
+static void lpddr4_setphysnapsettings(lpddr4_ctlregs *ctlregbase, const bool errorfound)
 {
-	uint32_t snum = 0U;
-	volatile uint32_t *regAddress;
-	uint32_t regVal = 0U;
+	u32 snum = 0U;
+	volatile u32 *regaddress;
+	u32 regval = 0U;
 
-	if (errorFound == (bool)false) {
-		regAddress = (volatile uint32_t *)(&(ctlRegBase->LPDDR4__SC_PHY_SNAP_OBS_REGS_0__REG));
-		for (snum = (uint32_t)0U; snum < DSLICE_NUM; snum++) {
-			regVal = CPS_FLD_SET(LPDDR4__SC_PHY_SNAP_OBS_REGS_0__FLD, CPS_REG_READ(regAddress));
-			CPS_REG_WRITE(regAddress, regVal);
-			regAddress = lpddr4_addoffset(regAddress, (uint32_t)SLICE_WIDTH);
-		}
-	}
-}
-
-static void lpddr4_setphyadrsnapsettings(lpddr4_ctlregs *ctlRegBase, const bool errorFound)
-{
-	uint32_t snum = 0U;
-	volatile uint32_t *regAddress;
-	uint32_t regVal = 0U;
-
-	if (errorFound == (bool)false) {
-		regAddress = (volatile uint32_t *)(&(ctlRegBase->LPDDR4__SC_PHY_ADR_SNAP_OBS_REGS_0__REG));
-		for (snum = (uint32_t)0U; snum < ASLICE_NUM; snum++) {
-			regVal = CPS_FLD_SET(LPDDR4__SC_PHY_ADR_SNAP_OBS_REGS_0__FLD, CPS_REG_READ(regAddress));
-			CPS_REG_WRITE(regAddress, regVal);
-			regAddress = lpddr4_addoffset(regAddress, (uint32_t)SLICE_WIDTH);
+	if (errorfound == (bool)false) {
+		regaddress = (volatile u32 *)(&(ctlregbase->LPDDR4__SC_PHY_SNAP_OBS_REGS_0__REG));
+		for (snum = (u32)0U; snum < DSLICE_NUM; snum++) {
+			regval = CPS_FLD_SET(LPDDR4__SC_PHY_SNAP_OBS_REGS_0__FLD, CPS_REG_READ(regaddress));
+			CPS_REG_WRITE(regaddress, regval);
+			regaddress = lpddr4_addoffset(regaddress, (u32)SLICE_WIDTH);
 		}
 	}
 }
 
-void lpddr4_setsettings(lpddr4_ctlregs *ctlRegBase, const bool errorFound)
+static void lpddr4_setphyadrsnapsettings(lpddr4_ctlregs *ctlregbase, const bool errorfound)
 {
-	lpddr4_setphysnapsettings(ctlRegBase, errorFound);
-	lpddr4_setphyadrsnapsettings(ctlRegBase, errorFound);
+	u32 snum = 0U;
+	volatile u32 *regaddress;
+	u32 regval = 0U;
+
+	if (errorfound == (bool)false) {
+		regaddress = (volatile u32 *)(&(ctlregbase->LPDDR4__SC_PHY_ADR_SNAP_OBS_REGS_0__REG));
+		for (snum = (u32)0U; snum < ASLICE_NUM; snum++) {
+			regval = CPS_FLD_SET(LPDDR4__SC_PHY_ADR_SNAP_OBS_REGS_0__FLD, CPS_REG_READ(regaddress));
+			CPS_REG_WRITE(regaddress, regval);
+			regaddress = lpddr4_addoffset(regaddress, (u32)SLICE_WIDTH);
+		}
+	}
 }
 
-static void readpdwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles)
+void lpddr4_setsettings(lpddr4_ctlregs *ctlregbase, const bool errorfound)
 {
-	if (*fspNum == LPDDR4_FSP_0)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_PD_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_PD_WAKEUP_F0__REG)));
-	else if (*fspNum == LPDDR4_FSP_1)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_PD_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_PD_WAKEUP_F1__REG)));
+	lpddr4_setphysnapsettings(ctlregbase, errorfound);
+	lpddr4_setphyadrsnapsettings(ctlregbase, errorfound);
+}
+
+static void readpdwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles)
+{
+	if (*fspnum == LPDDR4_FSP_0)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_PD_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_PD_WAKEUP_F0__REG)));
+	else if (*fspnum == LPDDR4_FSP_1)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_PD_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_PD_WAKEUP_F1__REG)));
 	else
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_PD_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_PD_WAKEUP_F2__REG)));
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_PD_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_PD_WAKEUP_F2__REG)));
 }
 
-static void readsrshortwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles)
+static void readsrshortwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles)
 {
-	if (*fspNum == LPDDR4_FSP_0)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_SHORT_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_SHORT_WAKEUP_F0__REG)));
-	else if (*fspNum == LPDDR4_FSP_1)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_SHORT_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_SHORT_WAKEUP_F1__REG)));
+	if (*fspnum == LPDDR4_FSP_0)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_SHORT_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_SHORT_WAKEUP_F0__REG)));
+	else if (*fspnum == LPDDR4_FSP_1)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_SHORT_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_SHORT_WAKEUP_F1__REG)));
 	else
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_SHORT_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_SHORT_WAKEUP_F2__REG)));
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_SHORT_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_SHORT_WAKEUP_F2__REG)));
 }
 
-static void readsrlongwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles)
+static void readsrlongwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles)
 {
-	if (*fspNum == LPDDR4_FSP_0)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_WAKEUP_F0__REG)));
-	else if (*fspNum == LPDDR4_FSP_1)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_WAKEUP_F1__REG)));
+	if (*fspnum == LPDDR4_FSP_0)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_WAKEUP_F0__REG)));
+	else if (*fspnum == LPDDR4_FSP_1)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_WAKEUP_F1__REG)));
 	else
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_WAKEUP_F2__REG)));
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_WAKEUP_F2__REG)));
 }
 
-static void readsrlonggatewakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles)
+static void readsrlonggatewakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles)
 {
-	if (*fspNum == LPDDR4_FSP_0)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__REG)));
-	else if (*fspNum == LPDDR4_FSP_1)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__REG)));
+	if (*fspnum == LPDDR4_FSP_0)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__REG)));
+	else if (*fspnum == LPDDR4_FSP_1)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__REG)));
 	else
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__REG)));
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__REG)));
 }
 
-static void readsrdpshortwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles)
+static void readsrdpshortwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles)
 {
-	if (*fspNum == LPDDR4_FSP_0)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__REG)));
-	else if (*fspNum == LPDDR4_FSP_1)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__REG)));
+	if (*fspnum == LPDDR4_FSP_0)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__REG)));
+	else if (*fspnum == LPDDR4_FSP_1)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__REG)));
 	else
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__REG)));
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__REG)));
 }
 
-static void readsrdplongwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles)
+static void readsrdplongwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles)
 {
-	if (*fspNum == LPDDR4_FSP_0)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__REG)));
-	else if (*fspNum == LPDDR4_FSP_1)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__REG)));
+	if (*fspnum == LPDDR4_FSP_0)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__REG)));
+	else if (*fspnum == LPDDR4_FSP_1)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__REG)));
 	else
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__REG)));
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__REG)));
 }
 
-static void readsrdplonggatewakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, uint32_t *cycles)
+static void readsrdplonggatewakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, u32 *cycles)
 {
-	if (*fspNum == LPDDR4_FSP_0)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__REG)));
-	else if (*fspNum == LPDDR4_FSP_1)
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__REG)));
+	if (*fspnum == LPDDR4_FSP_0)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__REG)));
+	else if (*fspnum == LPDDR4_FSP_1)
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__REG)));
 	else
-		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__REG)));
+		*cycles = CPS_FLD_READ(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__REG)));
 
 }
 
-static void lpddr4_readlpiwakeuptime(lpddr4_ctlregs *ctlRegBase, const lpddr4_lpiwakeupparam *lpiWakeUpParam, const lpddr4_ctlfspnum *fspNum, uint32_t *cycles)
+static void lpddr4_readlpiwakeuptime(lpddr4_ctlregs *ctlregbase, const lpddr4_lpiwakeupparam *lpiwakeupparam, const lpddr4_ctlfspnum *fspnum, u32 *cycles)
 {
-	if (*lpiWakeUpParam == LPDDR4_LPI_PD_WAKEUP_FN)
-		readpdwakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SR_SHORT_WAKEUP_FN)
-		readsrshortwakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SR_LONG_WAKEUP_FN)
-		readsrlongwakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SR_LONG_MCCLK_GATE_WAKEUP_FN)
-		readsrlonggatewakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SRPD_SHORT_WAKEUP_FN)
-		readsrdpshortwakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SRPD_LONG_WAKEUP_FN)
-		readsrdplongwakeup(fspNum, ctlRegBase, cycles);
+	if (*lpiwakeupparam == LPDDR4_LPI_PD_WAKEUP_FN)
+		readpdwakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SR_SHORT_WAKEUP_FN)
+		readsrshortwakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SR_LONG_WAKEUP_FN)
+		readsrlongwakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SR_LONG_MCCLK_GATE_WAKEUP_FN)
+		readsrlonggatewakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SRPD_SHORT_WAKEUP_FN)
+		readsrdpshortwakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SRPD_LONG_WAKEUP_FN)
+		readsrdplongwakeup(fspnum, ctlregbase, cycles);
 	else
-		readsrdplonggatewakeup(fspNum, ctlRegBase, cycles);
+		readsrdplonggatewakeup(fspnum, ctlregbase, cycles);
 }
 
-uint32_t lpddr4_getlpiwakeuptime(const lpddr4_privatedata *pD, const lpddr4_lpiwakeupparam *lpiWakeUpParam, const lpddr4_ctlfspnum *fspNum, uint32_t *cycles)
+u32 lpddr4_getlpiwakeuptime(const lpddr4_privatedata *pd, const lpddr4_lpiwakeupparam *lpiwakeupparam, const lpddr4_ctlfspnum *fspnum, u32 *cycles)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_getlpiwakeuptimeSF(pD, lpiWakeUpParam, fspNum, cycles);
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-		lpddr4_readlpiwakeuptime(ctlRegBase, lpiWakeUpParam, fspNum, cycles);
+	result = lpddr4_getlpiwakeuptimesf(pd, lpiwakeupparam, fspnum, cycles);
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+		lpddr4_readlpiwakeuptime(ctlregbase, lpiwakeupparam, fspnum, cycles);
 	}
 	return result;
 }
 
-static void writepdwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles)
+static void writepdwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles)
 {
-	uint32_t regVal = 0U;
+	u32 regval = 0U;
 
-	if (*fspNum == LPDDR4_FSP_0) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_PD_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_PD_WAKEUP_F0__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_PD_WAKEUP_F0__REG), regVal);
-	} else if (*fspNum == LPDDR4_FSP_1) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_PD_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_PD_WAKEUP_F1__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_PD_WAKEUP_F1__REG), regVal);
+	if (*fspnum == LPDDR4_FSP_0) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_PD_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_PD_WAKEUP_F0__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_PD_WAKEUP_F0__REG), regval);
+	} else if (*fspnum == LPDDR4_FSP_1) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_PD_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_PD_WAKEUP_F1__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_PD_WAKEUP_F1__REG), regval);
 	} else {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_PD_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_PD_WAKEUP_F2__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_PD_WAKEUP_F2__REG), regVal);
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_PD_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_PD_WAKEUP_F2__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_PD_WAKEUP_F2__REG), regval);
 	}
 }
 
-static void writesrshortwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles)
+static void writesrshortwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles)
 {
-	uint32_t regVal = 0U;
+	u32 regval = 0U;
 
-	if (*fspNum == LPDDR4_FSP_0) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SR_SHORT_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_SHORT_WAKEUP_F0__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SR_SHORT_WAKEUP_F0__REG), regVal);
-	} else if (*fspNum == LPDDR4_FSP_1) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SR_SHORT_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_SHORT_WAKEUP_F1__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SR_SHORT_WAKEUP_F1__REG), regVal);
+	if (*fspnum == LPDDR4_FSP_0) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SR_SHORT_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_SHORT_WAKEUP_F0__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SR_SHORT_WAKEUP_F0__REG), regval);
+	} else if (*fspnum == LPDDR4_FSP_1) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SR_SHORT_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_SHORT_WAKEUP_F1__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SR_SHORT_WAKEUP_F1__REG), regval);
 	} else {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SR_SHORT_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_SHORT_WAKEUP_F2__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SR_SHORT_WAKEUP_F2__REG), regVal);
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SR_SHORT_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_SHORT_WAKEUP_F2__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SR_SHORT_WAKEUP_F2__REG), regval);
 	}
 }
 
-static void writesrlongwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles)
+static void writesrlongwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles)
 {
-	uint32_t regVal = 0U;
+	u32 regval = 0U;
 
-	if (*fspNum == LPDDR4_FSP_0) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_WAKEUP_F0__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SR_LONG_WAKEUP_F0__REG), regVal);
-	} else if (*fspNum == LPDDR4_FSP_1) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_WAKEUP_F1__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SR_LONG_WAKEUP_F1__REG), regVal);
+	if (*fspnum == LPDDR4_FSP_0) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_WAKEUP_F0__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SR_LONG_WAKEUP_F0__REG), regval);
+	} else if (*fspnum == LPDDR4_FSP_1) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_WAKEUP_F1__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SR_LONG_WAKEUP_F1__REG), regval);
 	} else {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_WAKEUP_F2__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SR_LONG_WAKEUP_F2__REG), regVal);
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_WAKEUP_F2__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SR_LONG_WAKEUP_F2__REG), regval);
 	}
 }
 
-static void writesrlonggatewakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles)
+static void writesrlonggatewakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles)
 {
-	uint32_t regVal = 0U;
+	u32 regval = 0U;
 
-	if (*fspNum == LPDDR4_FSP_0) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__REG), regVal);
-	} else if (*fspNum == LPDDR4_FSP_1) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__REG), regVal);
+	if (*fspnum == LPDDR4_FSP_0) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F0__REG), regval);
+	} else if (*fspnum == LPDDR4_FSP_1) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F1__REG), regval);
 	} else {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__REG), regVal);
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SR_LONG_MCCLK_GATE_WAKEUP_F2__REG), regval);
 	}
 }
 
-static void writesrdpshortwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles)
+static void writesrdpshortwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles)
 {
-	uint32_t regVal = 0U;
+	u32 regval = 0U;
 
-	if (*fspNum == LPDDR4_FSP_0) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__REG), regVal);
-	} else if (*fspNum == LPDDR4_FSP_1) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__REG), regVal);
+	if (*fspnum == LPDDR4_FSP_0) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F0__REG), regval);
+	} else if (*fspnum == LPDDR4_FSP_1) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F1__REG), regval);
 	} else {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__REG), regVal);
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SRPD_SHORT_WAKEUP_F2__REG), regval);
 	}
 }
 
-static void writesrdplongwakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles)
+static void writesrdplongwakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles)
 {
-	uint32_t regVal = 0U;
+	u32 regval = 0U;
 
-	if (*fspNum == LPDDR4_FSP_0) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__REG), regVal);
-	} else if (*fspNum == LPDDR4_FSP_1) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__REG), regVal);
+	if (*fspnum == LPDDR4_FSP_0) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F0__REG), regval);
+	} else if (*fspnum == LPDDR4_FSP_1) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F1__REG), regval);
 	} else {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__REG), regVal);
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_WAKEUP_F2__REG), regval);
 	}
 }
-static void writesrdplonggatewakeup(const lpddr4_ctlfspnum *fspNum, lpddr4_ctlregs *ctlRegBase, const uint32_t *cycles)
+static void writesrdplonggatewakeup(const lpddr4_ctlfspnum *fspnum, lpddr4_ctlregs *ctlregbase, const u32 *cycles)
 {
-	uint32_t regVal = 0U;
+	u32 regval = 0U;
 
-	if (*fspNum == LPDDR4_FSP_0) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__REG), regVal);
-	} else if (*fspNum == LPDDR4_FSP_1) {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__REG), regVal);
+	if (*fspnum == LPDDR4_FSP_0) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F0__REG), regval);
+	} else if (*fspnum == LPDDR4_FSP_1) {
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F1__REG), regval);
 	} else {
-		regVal = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__REG)), *cycles);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__REG), regVal);
+		regval = CPS_FLD_WRITE(LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__REG)), *cycles);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__LPI_SRPD_LONG_MCCLK_GATE_WAKEUP_F2__REG), regval);
 	}
 }
 
-static void lpddr4_writelpiwakeuptime(lpddr4_ctlregs *ctlRegBase, const lpddr4_lpiwakeupparam *lpiWakeUpParam, const lpddr4_ctlfspnum *fspNum, const uint32_t *cycles)
+static void lpddr4_writelpiwakeuptime(lpddr4_ctlregs *ctlregbase, const lpddr4_lpiwakeupparam *lpiwakeupparam, const lpddr4_ctlfspnum *fspnum, const u32 *cycles)
 {
-	if (*lpiWakeUpParam == LPDDR4_LPI_PD_WAKEUP_FN)
-		writepdwakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SR_SHORT_WAKEUP_FN)
-		writesrshortwakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SR_LONG_WAKEUP_FN)
-		writesrlongwakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SR_LONG_MCCLK_GATE_WAKEUP_FN)
-		writesrlonggatewakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SRPD_SHORT_WAKEUP_FN)
-		writesrdpshortwakeup(fspNum, ctlRegBase, cycles);
-	else if (*lpiWakeUpParam == LPDDR4_LPI_SRPD_LONG_WAKEUP_FN)
-		writesrdplongwakeup(fspNum, ctlRegBase, cycles);
+	if (*lpiwakeupparam == LPDDR4_LPI_PD_WAKEUP_FN)
+		writepdwakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SR_SHORT_WAKEUP_FN)
+		writesrshortwakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SR_LONG_WAKEUP_FN)
+		writesrlongwakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SR_LONG_MCCLK_GATE_WAKEUP_FN)
+		writesrlonggatewakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SRPD_SHORT_WAKEUP_FN)
+		writesrdpshortwakeup(fspnum, ctlregbase, cycles);
+	else if (*lpiwakeupparam == LPDDR4_LPI_SRPD_LONG_WAKEUP_FN)
+		writesrdplongwakeup(fspnum, ctlregbase, cycles);
 	else
-		writesrdplonggatewakeup(fspNum, ctlRegBase, cycles);
+		writesrdplonggatewakeup(fspnum, ctlregbase, cycles);
 }
 
-uint32_t lpddr4_setlpiwakeuptime(const lpddr4_privatedata *pD, const lpddr4_lpiwakeupparam *lpiWakeUpParam, const lpddr4_ctlfspnum *fspNum, const uint32_t *cycles)
+u32 lpddr4_setlpiwakeuptime(const lpddr4_privatedata *pd, const lpddr4_lpiwakeupparam *lpiwakeupparam, const lpddr4_ctlfspnum *fspnum, const u32 *cycles)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_setlpiwakeuptimeSF(pD, lpiWakeUpParam, fspNum, cycles);
-	if (result == (uint32_t)CDN_EOK) {
+	result = lpddr4_setlpiwakeuptimesf(pd, lpiwakeupparam, fspnum, cycles);
+	if (result == (u32)0) {
 		if (*cycles > NIBBLE_MASK)
-			result = (uint32_t)CDN_EINVAL;
+			result = (u32)EINVAL;
 	}
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-		lpddr4_writelpiwakeuptime(ctlRegBase, lpiWakeUpParam, fspNum, cycles);
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+		lpddr4_writelpiwakeuptime(ctlregbase, lpiwakeupparam, fspnum, cycles);
 	}
 	return result;
 }
 
-uint32_t lpddr4_getdbireadmode(const lpddr4_privatedata *pD, bool *on_off)
+u32 lpddr4_getdbireadmode(const lpddr4_privatedata *pd, bool *on_off)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_getdbireadmodeSF(pD, on_off);
+	result = lpddr4_getdbireadmodesf(pd, on_off);
 
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-		if (CPS_FLD_READ(LPDDR4__RD_DBI_EN__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__RD_DBI_EN__REG))) == 0U)
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+		if (CPS_FLD_READ(LPDDR4__RD_DBI_EN__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__RD_DBI_EN__REG))) == 0U)
 			*on_off = false;
 		else
 			*on_off = true;
@@ -944,15 +931,15 @@ uint32_t lpddr4_getdbireadmode(const lpddr4_privatedata *pD, bool *on_off)
 	return result;
 }
 
-uint32_t lpddr4_getdbiwritemode(const lpddr4_privatedata *pD, bool *on_off)
+u32 lpddr4_getdbiwritemode(const lpddr4_privatedata *pd, bool *on_off)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_getdbireadmodeSF(pD, on_off);
+	result = lpddr4_getdbireadmodesf(pd, on_off);
 
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-		if (CPS_FLD_READ(LPDDR4__WR_DBI_EN__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__WR_DBI_EN__REG))) == 0U)
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+		if (CPS_FLD_READ(LPDDR4__WR_DBI_EN__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__WR_DBI_EN__REG))) == 0U)
 			*on_off = false;
 		else
 			*on_off = true;
@@ -960,122 +947,122 @@ uint32_t lpddr4_getdbiwritemode(const lpddr4_privatedata *pD, bool *on_off)
 	return result;
 }
 
-uint32_t lpddr4_setdbimode(const lpddr4_privatedata *pD, const lpddr4_dbimode *mode)
+u32 lpddr4_setdbimode(const lpddr4_privatedata *pd, const lpddr4_dbimode *mode)
 {
-	uint32_t result = 0U;
-	uint32_t regVal = 0U;
+	u32 result = 0U;
+	u32 regval = 0U;
 
-	result = lpddr4_setdbimodeSF(pD, mode);
+	result = lpddr4_setdbimodesf(pd, mode);
 
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
 
 		if (*mode == LPDDR4_DBI_RD_ON)
-			regVal = CPS_FLD_WRITE(LPDDR4__RD_DBI_EN__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__RD_DBI_EN__REG)), 1U);
+			regval = CPS_FLD_WRITE(LPDDR4__RD_DBI_EN__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__RD_DBI_EN__REG)), 1U);
 		else if (*mode == LPDDR4_DBI_RD_OFF)
-			regVal = CPS_FLD_WRITE(LPDDR4__RD_DBI_EN__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__RD_DBI_EN__REG)), 0U);
+			regval = CPS_FLD_WRITE(LPDDR4__RD_DBI_EN__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__RD_DBI_EN__REG)), 0U);
 		else if (*mode == LPDDR4_DBI_WR_ON)
-			regVal = CPS_FLD_WRITE(LPDDR4__WR_DBI_EN__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__WR_DBI_EN__REG)), 1U);
+			regval = CPS_FLD_WRITE(LPDDR4__WR_DBI_EN__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__WR_DBI_EN__REG)), 1U);
 		else
-			regVal = CPS_FLD_WRITE(LPDDR4__WR_DBI_EN__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__WR_DBI_EN__REG)), 0U);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__RD_DBI_EN__REG), regVal);
+			regval = CPS_FLD_WRITE(LPDDR4__WR_DBI_EN__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__WR_DBI_EN__REG)), 0U);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__RD_DBI_EN__REG), regval);
 	}
 	return result;
 }
 
-uint32_t lpddr4_getrefreshrate(const lpddr4_privatedata *pD, const lpddr4_ctlfspnum *fspNum, uint32_t *tref, uint32_t *tras_max)
+u32 lpddr4_getrefreshrate(const lpddr4_privatedata *pd, const lpddr4_ctlfspnum *fspnum, u32 *tref, u32 *tras_max)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_getrefreshrateSF(pD, fspNum, tref, tras_max);
+	result = lpddr4_getrefreshratesf(pd, fspnum, tref, tras_max);
 
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
 
-		switch (*fspNum) {
+		switch (*fspnum) {
 		case LPDDR4_FSP_2:
-			*tref = CPS_FLD_READ(LPDDR4__TREF_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TREF_F2__REG)));
-			*tras_max = CPS_FLD_READ(LPDDR4__TRAS_MAX_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TRAS_MAX_F2__REG)));
+			*tref = CPS_FLD_READ(LPDDR4__TREF_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TREF_F2__REG)));
+			*tras_max = CPS_FLD_READ(LPDDR4__TRAS_MAX_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TRAS_MAX_F2__REG)));
 			break;
 		case LPDDR4_FSP_1:
-			*tref = CPS_FLD_READ(LPDDR4__TREF_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TREF_F1__REG)));
-			*tras_max = CPS_FLD_READ(LPDDR4__TRAS_MAX_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TRAS_MAX_F1__REG)));
+			*tref = CPS_FLD_READ(LPDDR4__TREF_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TREF_F1__REG)));
+			*tras_max = CPS_FLD_READ(LPDDR4__TRAS_MAX_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TRAS_MAX_F1__REG)));
 			break;
 		default:
-			*tref = CPS_FLD_READ(LPDDR4__TREF_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TREF_F0__REG)));
-			*tras_max = CPS_FLD_READ(LPDDR4__TRAS_MAX_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TRAS_MAX_F0__REG)));
+			*tref = CPS_FLD_READ(LPDDR4__TREF_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TREF_F0__REG)));
+			*tras_max = CPS_FLD_READ(LPDDR4__TRAS_MAX_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TRAS_MAX_F0__REG)));
 			break;
 		}
 	}
 	return result;
 }
 
-static void lpddr4_updatefsp2refrateparams(const lpddr4_privatedata *pD, const uint32_t *tref, const uint32_t *tras_max)
+static void lpddr4_updatefsp2refrateparams(const lpddr4_privatedata *pd, const u32 *tref, const u32 *tras_max)
 {
-	uint32_t regVal = 0U;
-	lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
+	u32 regval = 0U;
+	lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
 
-	regVal = CPS_FLD_WRITE(LPDDR4__TREF_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TREF_F2__REG)), *tref);
-	CPS_REG_WRITE(&(ctlRegBase->LPDDR4__TREF_F2__REG), regVal);
-	regVal = CPS_FLD_WRITE(LPDDR4__TRAS_MAX_F2__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TRAS_MAX_F2__REG)), *tras_max);
-	CPS_REG_WRITE(&(ctlRegBase->LPDDR4__TRAS_MAX_F2__REG), regVal);
+	regval = CPS_FLD_WRITE(LPDDR4__TREF_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TREF_F2__REG)), *tref);
+	CPS_REG_WRITE(&(ctlregbase->LPDDR4__TREF_F2__REG), regval);
+	regval = CPS_FLD_WRITE(LPDDR4__TRAS_MAX_F2__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TRAS_MAX_F2__REG)), *tras_max);
+	CPS_REG_WRITE(&(ctlregbase->LPDDR4__TRAS_MAX_F2__REG), regval);
 }
 
-static void lpddr4_updatefsp1refrateparams(const lpddr4_privatedata *pD, const uint32_t *tref, const uint32_t *tras_max)
+static void lpddr4_updatefsp1refrateparams(const lpddr4_privatedata *pd, const u32 *tref, const u32 *tras_max)
 {
-	uint32_t regVal = 0U;
-	lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
+	u32 regval = 0U;
+	lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
 
-	regVal = CPS_FLD_WRITE(LPDDR4__TREF_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TREF_F1__REG)), *tref);
-	CPS_REG_WRITE(&(ctlRegBase->LPDDR4__TREF_F1__REG), regVal);
-	regVal = CPS_FLD_WRITE(LPDDR4__TRAS_MAX_F1__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TRAS_MAX_F1__REG)), *tras_max);
-	CPS_REG_WRITE(&(ctlRegBase->LPDDR4__TRAS_MAX_F1__REG), regVal);;
+	regval = CPS_FLD_WRITE(LPDDR4__TREF_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TREF_F1__REG)), *tref);
+	CPS_REG_WRITE(&(ctlregbase->LPDDR4__TREF_F1__REG), regval);
+	regval = CPS_FLD_WRITE(LPDDR4__TRAS_MAX_F1__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TRAS_MAX_F1__REG)), *tras_max);
+	CPS_REG_WRITE(&(ctlregbase->LPDDR4__TRAS_MAX_F1__REG), regval);;
 }
 
-static void lpddr4_updatefsp0refrateparams(const lpddr4_privatedata *pD, const uint32_t *tref, const uint32_t *tras_max)
+static void lpddr4_updatefsp0refrateparams(const lpddr4_privatedata *pd, const u32 *tref, const u32 *tras_max)
 {
-	uint32_t regVal = 0U;
-	lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
+	u32 regval = 0U;
+	lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
 
-	regVal = CPS_FLD_WRITE(LPDDR4__TREF_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TREF_F0__REG)), *tref);
-	CPS_REG_WRITE(&(ctlRegBase->LPDDR4__TREF_F0__REG), regVal);
-	regVal = CPS_FLD_WRITE(LPDDR4__TRAS_MAX_F0__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TRAS_MAX_F0__REG)), *tras_max);
-	CPS_REG_WRITE(&(ctlRegBase->LPDDR4__TRAS_MAX_F0__REG), regVal);
+	regval = CPS_FLD_WRITE(LPDDR4__TREF_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TREF_F0__REG)), *tref);
+	CPS_REG_WRITE(&(ctlregbase->LPDDR4__TREF_F0__REG), regval);
+	regval = CPS_FLD_WRITE(LPDDR4__TRAS_MAX_F0__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TRAS_MAX_F0__REG)), *tras_max);
+	CPS_REG_WRITE(&(ctlregbase->LPDDR4__TRAS_MAX_F0__REG), regval);
 }
 
-uint32_t lpddr4_setrefreshrate(const lpddr4_privatedata *pD, const lpddr4_ctlfspnum *fspNum, const uint32_t *tref, const uint32_t *tras_max)
+u32 lpddr4_setrefreshrate(const lpddr4_privatedata *pd, const lpddr4_ctlfspnum *fspnum, const u32 *tref, const u32 *tras_max)
 {
-	uint32_t result = 0U;
+	u32 result = 0U;
 
-	result = lpddr4_setrefreshrateSF(pD, fspNum, tref, tras_max);
+	result = lpddr4_setrefreshratesf(pd, fspnum, tref, tras_max);
 
-	if (result == (uint32_t)CDN_EOK) {
-		switch (*fspNum) {
+	if (result == (u32)0) {
+		switch (*fspnum) {
 		case LPDDR4_FSP_2:
-			lpddr4_updatefsp2refrateparams(pD, tref, tras_max);
+			lpddr4_updatefsp2refrateparams(pd, tref, tras_max);
 			break;
 		case LPDDR4_FSP_1:
-			lpddr4_updatefsp1refrateparams(pD, tref, tras_max);
+			lpddr4_updatefsp1refrateparams(pd, tref, tras_max);
 			break;
 		default:
-			lpddr4_updatefsp0refrateparams(pD, tref, tras_max);
+			lpddr4_updatefsp0refrateparams(pd, tref, tras_max);
 			break;
 		}
 	}
 	return result;
 }
 
-uint32_t lpddr4_refreshperchipselect(const lpddr4_privatedata *pD, const uint32_t trefInterval)
+u32 lpddr4_refreshperchipselect(const lpddr4_privatedata *pd, const u32 trefinterval)
 {
-	uint32_t result = 0U;
-	uint32_t regVal = 0U;
+	u32 result = 0U;
+	u32 regval = 0U;
 
-	result = lpddr4_refreshperchipselectSF(pD);
+	result = lpddr4_refreshperchipselectsf(pd);
 
-	if (result == (uint32_t)CDN_EOK) {
-		lpddr4_ctlregs *ctlRegBase = (lpddr4_ctlregs *)pD->ctlbase;
-		regVal = CPS_FLD_WRITE(LPDDR4__TREF_INTERVAL__FLD, CPS_REG_READ(&(ctlRegBase->LPDDR4__TREF_INTERVAL__REG)), trefInterval);
-		CPS_REG_WRITE(&(ctlRegBase->LPDDR4__TREF_INTERVAL__REG), regVal);
+	if (result == (u32)0) {
+		lpddr4_ctlregs *ctlregbase = (lpddr4_ctlregs *)pd->ctlbase;
+		regval = CPS_FLD_WRITE(LPDDR4__TREF_INTERVAL__FLD, CPS_REG_READ(&(ctlregbase->LPDDR4__TREF_INTERVAL__REG)), trefinterval);
+		CPS_REG_WRITE(&(ctlregbase->LPDDR4__TREF_INTERVAL__REG), regval);
 	}
 	return result;
 }

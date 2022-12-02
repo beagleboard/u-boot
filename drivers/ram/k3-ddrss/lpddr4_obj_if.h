@@ -2,88 +2,87 @@
 /*
  * Cadence DDR Driver
  *
- * Copyright (C) 2012-2021 Cadence Design Systems, Inc.
- * Copyright (C) 2018-2021 Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (C) 2012-2022 Cadence Design Systems, Inc.
+ * Copyright (C) 2018-2022 Texas Instruments Incorporated - https://www.ti.com/
  */
 
-#ifndef lpddr4_obj_IF_H
-#define lpddr4_obj_IF_H
+#ifndef lpddr4_obj_if_h
+#define lpddr4_obj_if_h
 
 #include "lpddr4_if.h"
 
-
 typedef struct lpddr4_obj_s {
-	uint32_t (*probe)(const lpddr4_config *config, uint16_t *configSize);
+	u32 (*probe)(const lpddr4_config *config, u16 *configsize);
 
-	uint32_t (*init)(lpddr4_privatedata *pD, const lpddr4_config *cfg);
+	u32 (*init)(lpddr4_privatedata *pd, const lpddr4_config *cfg);
 
-	uint32_t (*start)(const lpddr4_privatedata *pD);
+	u32 (*start)(const lpddr4_privatedata *pd);
 
-	uint32_t (*readreg)(const lpddr4_privatedata *pD, lpddr4_regblock cpp, uint32_t regOffset, uint32_t *regValue);
+	u32 (*readreg)(const lpddr4_privatedata *pd, lpddr4_regblock cpp, u32 regoffset, u32 *regvalue);
 
-	uint32_t (*writereg)(const lpddr4_privatedata *pD, lpddr4_regblock cpp, uint32_t regOffset, uint32_t regValue);
+	u32 (*writereg)(const lpddr4_privatedata *pd, lpddr4_regblock cpp, u32 regoffset, u32 regvalue);
 
-	uint32_t (*getmmrregister)(const lpddr4_privatedata *pD, uint32_t readModeRegVal, uint64_t *mmrValue, uint8_t *mmrStatus);
+	u32 (*getmmrregister)(const lpddr4_privatedata *pd, u32 readmoderegval, u64 *mmrvalue, u8 *mmrstatus);
 
-	uint32_t (*setmmrregister)(const lpddr4_privatedata *pD, uint32_t writeModeRegVal, uint8_t *mrwStatus);
+	u32 (*setmmrregister)(const lpddr4_privatedata *pd, u32 writemoderegval, u8 *mrwstatus);
 
-	uint32_t (*writectlconfig)(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount);
+	u32 (*writectlconfig)(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount);
 
-	uint32_t (*writephyconfig)(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount);
+	u32 (*writephyconfig)(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount);
 
-	uint32_t (*writephyindepconfig)(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount);
+	u32 (*writephyindepconfig)(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount);
 
-	uint32_t (*readctlconfig)(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount);
+	u32 (*readctlconfig)(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount);
 
-	uint32_t (*readphyconfig)(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount);
+	u32 (*readphyconfig)(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount);
 
-	uint32_t (*readphyindepconfig)(const lpddr4_privatedata *pD, uint32_t regValues[], uint16_t regNum[], uint16_t regCount);
+	u32 (*readphyindepconfig)(const lpddr4_privatedata *pd, u32 regvalues[], u16 regnum[], u16 regcount);
 
-	uint32_t (*getctlinterruptmask)(const lpddr4_privatedata *pD, uint64_t *mask);
+	u32 (*getctlinterruptmask)(const lpddr4_privatedata *pd, u64 *mask);
 
-	uint32_t (*setctlinterruptmask)(const lpddr4_privatedata *pD, const uint64_t *mask);
+	u32 (*setctlinterruptmask)(const lpddr4_privatedata *pd, const u64 *mask);
 
-	uint32_t (*checkctlinterrupt)(const lpddr4_privatedata *pD, lpddr4_intr_ctlinterrupt intr, bool *irqStatus);
+	u32 (*checkctlinterrupt)(const lpddr4_privatedata *pd, lpddr4_intr_ctlinterrupt intr, bool *irqstatus);
 
-	uint32_t (*ackctlinterrupt)(const lpddr4_privatedata *pD, lpddr4_intr_ctlinterrupt intr);
+	u32 (*ackctlinterrupt)(const lpddr4_privatedata *pd, lpddr4_intr_ctlinterrupt intr);
 
-	uint32_t (*getphyindepinterruptmask)(const lpddr4_privatedata *pD, uint32_t *mask);
+	u32 (*getphyindepinterruptmask)(const lpddr4_privatedata *pd, u32 *mask);
 
-	uint32_t (*setphyindepinterruptmask)(const lpddr4_privatedata *pD, const uint32_t *mask);
+	u32 (*setphyindepinterruptmask)(const lpddr4_privatedata *pd, const u32 *mask);
 
-	uint32_t (*checkphyindepinterrupt)(const lpddr4_privatedata *pD, lpddr4_intr_phyindepinterrupt intr, bool *irqStatus);
+	u32 (*checkphyindepinterrupt)(const lpddr4_privatedata *pd, lpddr4_intr_phyindepinterrupt intr, bool *irqstatus);
 
-	uint32_t (*ackphyindepinterrupt)(const lpddr4_privatedata *pD, lpddr4_intr_phyindepinterrupt intr);
+	u32 (*ackphyindepinterrupt)(const lpddr4_privatedata *pd, lpddr4_intr_phyindepinterrupt intr);
 
-	uint32_t (*getdebuginitinfo)(const lpddr4_privatedata *pD, lpddr4_debuginfo *debugInfo);
+	u32 (*getdebuginitinfo)(const lpddr4_privatedata *pd, lpddr4_debuginfo *debuginfo);
 
-	uint32_t (*getlpiwakeuptime)(const lpddr4_privatedata *pD, const lpddr4_lpiwakeupparam *lpiWakeUpParam, const lpddr4_ctlfspnum *fspNum, uint32_t *cycles);
+	u32 (*getlpiwakeuptime)(const lpddr4_privatedata *pd, const lpddr4_lpiwakeupparam *lpiwakeupparam, const lpddr4_ctlfspnum *fspnum, u32 *cycles);
 
-	uint32_t (*setlpiwakeuptime)(const lpddr4_privatedata *pD, const lpddr4_lpiwakeupparam *lpiWakeUpParam, const lpddr4_ctlfspnum *fspNum, const uint32_t *cycles);
+	u32 (*setlpiwakeuptime)(const lpddr4_privatedata *pd, const lpddr4_lpiwakeupparam *lpiwakeupparam, const lpddr4_ctlfspnum *fspnum, const u32 *cycles);
 
-	uint32_t (*geteccenable)(const lpddr4_privatedata *pD, lpddr4_eccenable *eccParam);
+	u32 (*geteccenable)(const lpddr4_privatedata *pd, lpddr4_eccenable *eccparam);
 
-	uint32_t (*seteccenable)(const lpddr4_privatedata *pD, const lpddr4_eccenable *eccParam);
+	u32 (*seteccenable)(const lpddr4_privatedata *pd, const lpddr4_eccenable *eccparam);
 
-	uint32_t (*getreducmode)(const lpddr4_privatedata *pD, lpddr4_reducmode *mode);
+	u32 (*getreducmode)(const lpddr4_privatedata *pd, lpddr4_reducmode *mode);
 
-	uint32_t (*setreducmode)(const lpddr4_privatedata *pD, const lpddr4_reducmode *mode);
+	u32 (*setreducmode)(const lpddr4_privatedata *pd, const lpddr4_reducmode *mode);
 
-	uint32_t (*getdbireadmode)(const lpddr4_privatedata *pD, bool *on_off);
+	u32 (*getdbireadmode)(const lpddr4_privatedata *pd, bool *on_off);
 
-	uint32_t (*getdbiwritemode)(const lpddr4_privatedata *pD, bool *on_off);
+	u32 (*getdbiwritemode)(const lpddr4_privatedata *pd, bool *on_off);
 
-	uint32_t (*setdbimode)(const lpddr4_privatedata *pD, const lpddr4_dbimode *mode);
+	u32 (*setdbimode)(const lpddr4_privatedata *pd, const lpddr4_dbimode *mode);
 
-	uint32_t (*getrefreshrate)(const lpddr4_privatedata *pD, const lpddr4_ctlfspnum *fspNum, uint32_t *tref, uint32_t *tras_max);
+	u32 (*getrefreshrate)(const lpddr4_privatedata *pd, const lpddr4_ctlfspnum *fspnum, u32 *tref, u32 *tras_max);
 
-	uint32_t (*setrefreshrate)(const lpddr4_privatedata *pD, const lpddr4_ctlfspnum *fspNum, const uint32_t *tref, const uint32_t *tras_max);
+	u32 (*setrefreshrate)(const lpddr4_privatedata *pd, const lpddr4_ctlfspnum *fspnum, const u32 *tref, const u32 *tras_max);
 
-	uint32_t (*refreshperchipselect)(const lpddr4_privatedata *pD, const uint32_t trefInterval);
+	u32 (*refreshperchipselect)(const lpddr4_privatedata *pd, const u32 trefinterval);
+
+	u32 (*deferredregverify)(const lpddr4_privatedata *pd, lpddr4_regblock cpp, u32 regvalues[], u16 regnum[], u16 regcount);
 } lpddr4_obj;
 
 extern lpddr4_obj *lpddr4_getinstance(void);
 
-
-
-#endif  /* lpddr4_obj_IF_H */
+#endif  /* lpddr4_obj_if_h */
