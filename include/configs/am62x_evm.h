@@ -391,7 +391,24 @@
 #else
 
 #define EXTRA_ANDROID_ENV_SETTINGS  ""
+
+#if CONFIG_IS_ENABLED(CMD_PXE)
+# define BOOT_TARGET_PXE(func) func(PXE, pxe, na)
+#else
+# define BOOT_TARGET_PXE(func)
+#endif
+
+#if CONFIG_IS_ENABLED(CMD_DHCP)
+# define BOOT_TARGET_DHCP(func) func(DHCP, dhcp, na)
+#else
+# define BOOT_TARGET_DHCP(func)
+#endif
+
 #define BOOT_TARGET_DEVICES(func) \
+	func(MMC, mmc, 1) \
+	func(MMC, mmc, 0) \
+	BOOT_TARGET_PXE(func) \
+	BOOT_TARGET_DHCP(func) \
 	func(LINUX, linux, na) \
 
 #endif
@@ -411,7 +428,8 @@
 	EXTRA_ENV_AM625_BOARD_SETTINGS					\
 	EXTRA_ENV_AM625_BOARD_SETTINGS_MMC				\
 	EXTRA_ENV_DFUARGS						\
-	EXTRA_ENV_AM625_BOARD_SETTING_USBMSC
+	EXTRA_ENV_AM625_BOARD_SETTING_USBMSC				\
+	BOOTENV
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
