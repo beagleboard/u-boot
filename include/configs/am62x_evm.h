@@ -151,7 +151,7 @@
 #define BOOTENV_DEV_NAME_LINUX(devtypeu, devtypel, instance)	\
 		"linux "
 
-#if defined(CONFIG_ANDROID_BOOT_IMAGE)
+#if 0
 
 /* ANDROID BOOT */
 #ifndef BOOT_PARTITION
