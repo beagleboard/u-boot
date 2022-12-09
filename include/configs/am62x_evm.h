@@ -137,6 +137,157 @@
 		"run run_kern\0"
 
 
+#define EXTRA_ENV_AM625_BEAGPLAY_PRODUCTION_BOARD_SETTINGS			\
+	"play_eeprom_i2c_dev=0;\0"						\
+	"play_eeprom_i2c_addr=0x50;\0"						\
+	"play_eeprom_wp_gpio=10;\0"						\
+	"play_eeprom_dump=i2c dev ${play_eeprom_i2c_dev}; "			\
+		"i2c md ${play_eeprom_i2c_addr} 0x00.1 40; "			\
+		"\0"								\
+	"play_eeprom_production_program=i2c dev ${play_eeprom_i2c_dev}; "	\
+		"i2c md ${play_eeprom_i2c_addr} 0x00.1 40; "			\
+		"gpio clear ${play_eeprom_wp_gpio}; "				\
+		"i2c mw ${play_eeprom_i2c_addr} 0x00.1 aa; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x01.1 55; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x02.1 33; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x03.1 ee; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x04.1 01; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x05.1 37; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x06.1 00; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x07.1 10; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x08.1 2e; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x09.1 00; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0a.1 42; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0b.1 45; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0c.1 41; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0d.1 47; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0e.1 4c; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0f.1 45; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x10.1 50; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x11.1 4c; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x12.1 41; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x13.1 59; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x14.1 2d; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x15.1 41; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x16.1 30; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x17.1 2d; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x18.1 00; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x19.1 00; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1a.1 30; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1b.1 32; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1c.1 30; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1d.1 30; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1e.1 37; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1f.1 38; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x20.1 30; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x21.1 31; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x22.1 30; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x23.1 32; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x24.1 30; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x25.1 30; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x26.1 30; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x27.1 31; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x28.1 36; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x29.1 34; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2a.1 57; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2b.1 57; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2c.1 32; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2d.1 33; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2e.1 42; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2f.1 42; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x30.1 42; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x31.1 42; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x32.1 42; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x33.1 42; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x34.1 53; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x35.1 53; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x36.1 53; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x37.1 53; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x38.1 11; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x39.1 02; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3a.1 00; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3b.1 60; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3c.1 7d; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3d.1 fe; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3e.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3f.1 ff; "			\
+		"gpio set ${play_eeprom_wp_gpio}; "				\
+		"i2c md ${play_eeprom_i2c_addr} 0x00.1 40; "			\
+		"\0"								\
+	"play_eeprom_erase=i2c dev ${play_eeprom_i2c_dev}; "			\
+		"i2c md ${play_eeprom_i2c_addr} 0x00.1 40; "			\
+		"gpio clear ${play_eeprom_wp_gpio}; "				\
+		"i2c mw ${play_eeprom_i2c_addr} 0x00.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x01.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x02.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x03.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x04.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x05.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x06.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x07.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x08.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x09.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0a.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0b.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0c.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0d.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0e.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x0f.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x10.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x11.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x12.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x13.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x14.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x15.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x16.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x17.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x18.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x19.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1a.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1b.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1c.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1d.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1e.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x1f.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x20.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x21.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x22.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x23.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x24.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x25.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x26.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x27.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x28.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x29.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2a.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2b.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2c.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2d.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2e.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x2f.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x30.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x31.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x32.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x33.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x34.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x35.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x36.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x37.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x38.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x39.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3a.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3b.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3c.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3d.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3e.1 ff; "			\
+		"i2c mw ${play_eeprom_i2c_addr} 0x3f.1 ff; "			\
+		"gpio set ${play_eeprom_wp_gpio}; "				\
+		"i2c md ${play_eeprom_i2c_addr} 0x00.1 40; "			\
+		"\0"								\
+	"emmc_erase_boot0=mmc dev 0 1; "					\
+		"mmc erase 0 0x2400; "						\
+		"\0"								\
+
 #define BOOTENV_DEV_LINUX(devtypeu, devtypel, instance) \
 	"bootcmd_linux=" \
 		"if test \"${android_boot}\" -eq 0; then;" \
@@ -429,6 +580,7 @@
 	EXTRA_ENV_AM625_BOARD_SETTINGS_MMC				\
 	EXTRA_ENV_DFUARGS						\
 	EXTRA_ENV_AM625_BOARD_SETTING_USBMSC				\
+	EXTRA_ENV_AM625_BEAGPLAY_PRODUCTION_BOARD_SETTINGS		\
 	BOOTENV
 
 /* Now for the remaining common defines */
