@@ -21,7 +21,7 @@
 
 #define board_is_am62x_skevm()		board_ti_k3_is("AM62-SKEVM")
 #define board_is_am62x_lp_skevm()	board_ti_k3_is("AM62-LP-SKEVM")
-#define board_is_am62x_play()		board_ti_k3_is("BEAGLEPLAY")
+#define board_is_am62x_play()		board_ti_k3_is("BEAGLEPLAY-A0-")
 
 DECLARE_GLOBAL_DATA_PTR;
 
