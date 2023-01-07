@@ -736,6 +736,21 @@ config SPL_MTD_SUPPORT
 	  devices. See SPL_NAND_SUPPORT and SPL_ONENAND_SUPPORT for how
 	  to enable specific MTD drivers.
 
+config SPL_MTD_LOAD
+	bool "Support loading from MTD framework"
+	depends on SPL_MTD_SUPPORT
+	help
+	  Enable support for loading next stage, U-Boot or otherwise, from
+	  MTD Framework in U-Boot SPL.
+
+config SYS_MTD_U_BOOT_OFFS
+	hex "address of u-boot payload in MTD flash"
+	default 0x80000 if ARCH_K3
+	default 0x0
+	depends on SPL_MTD_LOAD
+	help
+	 Address within MTD Flash from where the u-boot payload is fetched.
+
 config SPL_MUSB_NEW_SUPPORT
 	bool "Support new Mentor Graphics USB"
 	help
@@ -777,6 +792,12 @@ config SPL_NAND_IDENT
 	bool "Use chip ID to identify NAND flash"
 	help
 	  SPL uses the chip ID list to identify the NAND flash.
+
+config SPL_NAND_SPI_SUPPORT
+	bool "Support loading from SPI NAND flash"
+	depends on SPL_MTD_LOAD
+	help
+	  Enable support for SPI NAND Flash in SPL.
 
 config SPL_UBI
 	bool "Support UBI"

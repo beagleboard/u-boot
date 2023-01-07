@@ -542,7 +542,8 @@ static u8 fsl_elbc_read_byte(struct mtd_info *mtd)
 /*
  * Read from the FCM Controller Data Buffer
  */
-static void fsl_elbc_read_buf(struct mtd_info *mtd, u8 *buf, int len)
+static void fsl_elbc_read_buf(struct mtd_info *mtd, u8 *buf, int len,
+			      bool force_8bit)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct fsl_elbc_mtd *priv = nand_get_controller_data(chip);
@@ -599,8 +600,8 @@ static int fsl_elbc_wait(struct mtd_info *mtd, struct nand_chip *chip)
 static int fsl_elbc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 			      uint8_t *buf, int oob_required, int page)
 {
-	fsl_elbc_read_buf(mtd, buf, mtd->writesize);
-	fsl_elbc_read_buf(mtd, chip->oob_poi, mtd->oobsize);
+	fsl_elbc_read_buf(mtd, buf, mtd->writesize, false);
+	fsl_elbc_read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 
 	if (fsl_elbc_wait(mtd, chip) & NAND_STATUS_FAIL)
 		mtd->ecc_stats.failed++;

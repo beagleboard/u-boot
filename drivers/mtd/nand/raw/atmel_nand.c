@@ -552,8 +552,8 @@ static int atmel_nand_pmecc_read_page(struct mtd_info *mtd,
 	pmecc_writel(host->pmecc, ctrl, PMECC_CTRL_ENABLE);
 	pmecc_writel(host->pmecc, ctrl, PMECC_CTRL_DATA);
 
-	chip->read_buf(mtd, buf, eccsize);
-	chip->read_buf(mtd, oob, mtd->oobsize);
+	chip->read_buf(mtd, buf, eccsize, false);
+	chip->read_buf(mtd, oob, mtd->oobsize, false);
 
 	while (--timeout) {
 		if (!(pmecc_readl(host->pmecc, sr) & PMECC_SR_BUSY))
@@ -1046,7 +1046,7 @@ static int atmel_nand_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 	int stat;
 
 	/* read the page */
-	chip->read_buf(mtd, p, eccsize);
+	chip->read_buf(mtd, p, eccsize, false);
 
 	/* move to ECC position if needed */
 	if (eccpos[0] != 0) {
@@ -1062,7 +1062,7 @@ static int atmel_nand_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 
 	/* the ECC controller needs to read the ECC just after the data */
 	ecc_pos = oob + eccpos[0];
-	chip->read_buf(mtd, ecc_pos, eccbytes);
+	chip->read_buf(mtd, ecc_pos, eccbytes, false);
 
 	/* check if there's an error */
 	stat = chip->ecc.correct(mtd, p, oob, NULL);
@@ -1076,7 +1076,7 @@ static int atmel_nand_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 	chip->cmdfunc(mtd, NAND_CMD_RNDOUT, mtd->writesize, -1);
 
 	/* read the oob */
-	chip->read_buf(mtd, oob, mtd->oobsize);
+	chip->read_buf(mtd, oob, mtd->oobsize, false);
 
 	return 0;
 }
@@ -1335,10 +1335,10 @@ static int nand_read_page(int block, int page, void *dst)
 	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
 		if (this->ecc.mode != NAND_ECC_SOFT)
 			this->ecc.hwctl(mtd, NAND_ECC_READ);
-		this->read_buf(mtd, p, eccsize);
+		this->read_buf(mtd, p, eccsize, false);
 		this->ecc.calculate(mtd, p, &ecc_calc[i]);
 	}
-	this->read_buf(mtd, oob_data, CONFIG_SYS_NAND_OOBSIZE);
+	this->read_buf(mtd, oob_data, CONFIG_SYS_NAND_OOBSIZE, false);
 
 	for (i = 0; i < ECCTOTAL; i++)
 		ecc_code[i] = oob_data[nand_ecc_pos[i]];

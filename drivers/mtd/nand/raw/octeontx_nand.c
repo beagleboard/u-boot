@@ -510,7 +510,8 @@ static u8 octeontx_nand_read_byte(struct mtd_info *mtd)
  * Read a number of pending bytes from the temporary buffer. Used
  * to get page and OOB data.
  */
-static void octeontx_nand_read_buf(struct mtd_info *mtd, u8 *buf, int len)
+static void octeontx_nand_read_buf(struct mtd_info *mtd, u8 *buf, int len,
+				   bool force_8bit)
 {
 	struct nand_chip *nand = mtd_to_nand(mtd);
 	struct octeontx_nfc *tn = to_otx_nfc(nand->controller);
@@ -1750,9 +1751,9 @@ static int octeontx_nand_read_page_raw(struct mtd_info *mtd,
 				       struct nand_chip *chip,
 				       u8 *buf, int oob_required, int page)
 {
-	chip->read_buf(mtd, buf, mtd->writesize);
+	chip->read_buf(mtd, buf, mtd->writesize, false);
 	if (oob_required)
-		chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
+		chip->read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 	return 0;
 }
 
@@ -1762,7 +1763,7 @@ static int octeontx_nand_read_oob_std(struct mtd_info *mtd,
 
 {
 	chip->cmdfunc(mtd, NAND_CMD_READOOB, 0, page);
-	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
+	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize, false);
 	return 0;
 }
 

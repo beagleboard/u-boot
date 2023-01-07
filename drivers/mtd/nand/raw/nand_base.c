@@ -304,7 +304,7 @@ void nand_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
  *
  * Default read function for 8bit buswidth.
  */
-void nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+void nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len, bool force_8bit)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
 
@@ -335,12 +335,15 @@ void nand_write_buf16(struct mtd_info *mtd, const uint8_t *buf, int len)
  *
  * Default read function for 16bit buswidth.
  */
-void nand_read_buf16(struct mtd_info *mtd, uint8_t *buf, int len)
+void nand_read_buf16(struct mtd_info *mtd, uint8_t *buf, int len, bool force_8bit)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	u16 *p = (u16 *) buf;
 
-	ioread16_rep(chip->IO_ADDR_R, p, len >> 1);
+	if (force_8bit)
+		ioread8_rep(chip->IO_ADDR_R, buf, len);
+	else
+		ioread16_rep(chip->IO_ADDR_R, p, len >> 1);
 }
 
 /**
@@ -450,7 +453,10 @@ static int nand_default_block_markbad(struct mtd_info *mtd, loff_t ofs)
 static int nand_block_markbad_lowlevel(struct mtd_info *mtd, loff_t ofs)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
-	int res, ret = 0;
+	int ret = 0;
+#ifndef CONFIG_SPL_BUILD
+	int res;
+#endif
 
 	if (!(chip->bbt_options & NAND_BBT_NO_OOB_BBM)) {
 		struct erase_info einfo;
@@ -468,12 +474,14 @@ static int nand_block_markbad_lowlevel(struct mtd_info *mtd, loff_t ofs)
 		nand_release_device(mtd);
 	}
 
+#ifndef CONFIG_SPL_BUILD
 	/* Mark block bad in BBT */
 	if (chip->bbt) {
 		res = nand_markbad_bbt(mtd, ofs);
 		if (!ret)
 			ret = res;
 	}
+#endif
 
 	if (!ret)
 		mtd->ecc_stats.badblocks++;
@@ -520,7 +528,11 @@ static int nand_block_isreserved(struct mtd_info *mtd, loff_t ofs)
 	if (!chip->bbt)
 		return 0;
 	/* Return info from the table */
+#ifndef CONFIG_SPL_BUILD
 	return nand_isreserved_bbt(mtd, ofs);
+#else
+	return 0;
+#endif
 }
 
 /**
@@ -546,7 +558,11 @@ static int nand_block_checkbad(struct mtd_info *mtd, loff_t ofs, int allowbbt)
 		return chip->block_bad(mtd, ofs);
 
 	/* Return info from the table */
+#ifndef CONFIG_SPL_BUILD
 	return nand_isbad_bbt(mtd, ofs, allowbbt);
+#else
+	return 0;
+#endif
 }
 
 /**
@@ -1109,7 +1125,7 @@ int nand_read_page_op(struct nand_chip *chip, unsigned int page,
 
 	chip->cmdfunc(mtd, NAND_CMD_READ0, offset_in_page, page);
 	if (len)
-		chip->read_buf(mtd, buf, len);
+		chip->read_buf(mtd, buf, len, false);
 
 	return 0;
 }
@@ -1131,15 +1147,13 @@ static int nand_read_param_page_op(struct nand_chip *chip, u8 page, void *buf,
 				   unsigned int len)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
-	unsigned int i;
-	u8 *p = buf;
 
 	if (len && !buf)
 		return -EINVAL;
 
 	chip->cmdfunc(mtd, NAND_CMD_PARAM, page, -1);
-	for (i = 0; i < len; i++)
-		p[i] = chip->read_byte(mtd);
+	if (len)
+		chip->read_buf(mtd, buf, len, true);
 
 	return 0;
 }
@@ -1171,7 +1185,7 @@ int nand_change_read_column_op(struct nand_chip *chip,
 
 	chip->cmdfunc(mtd, NAND_CMD_RNDOUT, offset_in_page, -1);
 	if (len)
-		chip->read_buf(mtd, buf, len);
+		chip->read_buf(mtd, buf, len, false);
 
 	return 0;
 }
@@ -1203,7 +1217,7 @@ int nand_read_oob_op(struct nand_chip *chip, unsigned int page,
 
 	chip->cmdfunc(mtd, NAND_CMD_READOOB, offset_in_oob, page);
 	if (len)
-		chip->read_buf(mtd, buf, len);
+		chip->read_buf(mtd, buf, len, false);
 
 	return 0;
 }
@@ -1356,16 +1370,14 @@ int nand_readid_op(struct nand_chip *chip, u8 addr, void *buf,
 		   unsigned int len)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
-	unsigned int i;
-	u8 *id = buf;
 
 	if (len && !buf)
 		return -EINVAL;
 
 	chip->cmdfunc(mtd, NAND_CMD_READID, addr, -1);
 
-	for (i = 0; i < len; i++)
-		id[i] = chip->read_byte(mtd);
+	if (len)
+		chip->read_buf(mtd, buf, len, true);
 
 	return 0;
 }
@@ -1493,12 +1505,9 @@ static int nand_get_features_op(struct nand_chip *chip, u8 feature,
 				void *data)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
-	u8 *params = data;
-	int i;
 
 	chip->cmdfunc(mtd, NAND_CMD_GET_FEATURES, feature, -1);
-	for (i = 0; i < ONFI_SUBFEATURE_PARAM_LEN; ++i)
-		params[i] = chip->read_byte(mtd);
+	chip->read_buf(mtd, data, ONFI_SUBFEATURE_PARAM_LEN, true);
 
 	return 0;
 }
@@ -1544,14 +1553,14 @@ int nand_read_data_op(struct nand_chip *chip, void *buf, unsigned int len,
 	if (!len || !buf)
 		return -EINVAL;
 
-	if (force_8bit) {
+	if (force_8bit && !(chip->quirks & NAND_QUIRK_FORCE_32BIT_READS)) {
 		u8 *p = buf;
 		unsigned int i;
 
 		for (i = 0; i < len; i++)
 			p[i] = chip->read_byte(mtd);
 	} else {
-		chip->read_buf(mtd, buf, len);
+		chip->read_buf(mtd, buf, len, false);
 	}
 
 	return 0;
@@ -3749,8 +3758,11 @@ static void nand_set_defaults(struct nand_chip *chip, int busw)
 		chip->write_byte = busw ? nand_write_byte16 : nand_write_byte;
 	if (!chip->read_buf || chip->read_buf == nand_read_buf)
 		chip->read_buf = busw ? nand_read_buf16 : nand_read_buf;
+
+#ifndef CONFIG_SPL_BUILD
 	if (!chip->scan_bbt)
 		chip->scan_bbt = nand_default_bbt;
+#endif
 
 	if (!chip->controller) {
 		chip->controller = &chip->hwcontrol;

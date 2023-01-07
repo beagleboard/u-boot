@@ -28,7 +28,17 @@ config DRIVER_TI_KEYSTONE_NET
 config TI_AM65_CPSW_NUSS
 	bool "TI K3 AM65x MCU CPSW Nuss Ethernet controller driver"
 	depends on ARCH_K3
+	imply MISC_INIT_R
+	imply MISC
 	select PHYLIB
 	help
 	  This driver supports TI K3 MCU CPSW Nuss Ethernet controller
 	  in Texas Instruments K3 AM65x SoCs.
+
+config TI_AM64_ICSSG_PRUETH
+	bool "TI Gigabit PRU Ethernet driver"
+	depends on ARCH_K3
+	select PHYLIB
+	help
+	  Support Gigabit Ethernet ports over the ICSSG PRU Subsystem
+	  This subsystem is available starting with the AM65 platform.

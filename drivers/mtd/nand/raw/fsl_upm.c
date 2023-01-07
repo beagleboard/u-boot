@@ -145,7 +145,8 @@ static void upm_nand_write_buf(struct mtd_info *mtd, const u_char *buf, int len)
 		fun_wait(fun);
 }
 
-static void upm_nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
+static void upm_nand_read_buf(struct mtd_info *mtd, u_char *buf, int len,
+			      bool force_8bit)
 {
 	int i;
 	struct nand_chip *chip = mtd_to_nand(mtd);

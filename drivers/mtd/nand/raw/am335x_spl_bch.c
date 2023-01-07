@@ -168,11 +168,11 @@ static int nand_read_page(int block, int page, void *dst)
 		this->ecc.hwctl(mtd, NAND_ECC_READ);
 		nand_command(block, page, data_pos, NAND_CMD_RNDOUT);
 
-		this->read_buf(mtd, p, eccsize);
+		this->read_buf(mtd, p, eccsize, false);
 
 		nand_command(block, page, oob_pos, NAND_CMD_RNDOUT);
 
-		this->read_buf(mtd, oob, eccbytes);
+		this->read_buf(mtd, oob, eccbytes, false);
 		this->ecc.calculate(mtd, p, &ecc_calc[i]);
 
 		data_pos += eccsize;

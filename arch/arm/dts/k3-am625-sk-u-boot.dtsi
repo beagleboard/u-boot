@@ -1,0 +1,71 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * AM625 SK dts file for SPLs
+ * Copyright (C) 2021-2022 Texas Instruments Incorporated - https://www.ti.com/
+ */
+
+#include "k3-am62x-sk-common-u-boot.dtsi"
+
+&main_rgmii2_pins_default {
+	u-boot,dm-spl;
+};
+
+&cpsw3g_phy1 {
+	u-boot,dm-spl;
+};
+
+&ospi0 {
+	u-boot,dm-spl;
+
+	flash@0 {
+		u-boot,dm-spl;
+
+		partitions {
+			u-boot,dm-spl;
+
+			partition@3fc0000 {
+				u-boot,dm-spl;
+			};
+		};
+	};
+};
+
+&main_gpio0 {
+	u-boot,dm-spl;
+};
+
+&main_i2c1 {
+	u-boot,dm-spl;
+};
+
+&main_i2c1_pins_default {
+	u-boot,dm-spl;
+};
+
+&exp1 {
+	u-boot,dm-spl;
+};
+
+&vmain_pd {
+	u-boot,dm-spl;
+};
+
+&vcc_5v0 {
+	u-boot,dm-spl;
+};
+
+&vcc_3v3_sys {
+	u-boot,dm-spl;
+};
+
+&vdd_mmc1 {
+	u-boot,dm-spl;
+};
+
+&vdd_sd_dv {
+	u-boot,dm-spl;
+};
+
+&vdd_sd_dv_pins_default {
+	u-boot,dm-spl;
+};

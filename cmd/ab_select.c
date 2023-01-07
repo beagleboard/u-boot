@@ -26,7 +26,7 @@ static int do_ab_select(struct cmd_tbl *cmdtp, int flag, int argc,
 		return CMD_RET_FAILURE;
 	}
 
-	ret = ab_select_slot(dev_desc, &part_info);
+	ret = ab_select_slot(dev_desc, &part_info, true);
 	if (ret < 0) {
 		printf("Android boot failed, error %d.\n", ret);
 		return CMD_RET_FAILURE;

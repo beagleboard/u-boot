@@ -121,6 +121,14 @@ config CADENCE_QSPI
 	  used to access the SPI NOR flash on platforms embedding this
 	  Cadence IP core.
 
+config CADENCE_QSPI_PHY
+	bool "PHY tuning for Cadence QSPI"
+	depends on CADENCE_QSPI && DM_THERMAL && SPL_THERMAL
+	help
+	 To allow running at high speeds, a PHY tuning sequence has to be
+	 performed. The tuning algorithm as of now only works for Octal DTR
+	 operation.
+
 config CF_SPI
         bool "ColdFire SPI driver"
         help

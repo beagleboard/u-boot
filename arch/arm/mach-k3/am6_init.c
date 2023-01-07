@@ -27,7 +27,6 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #ifdef CONFIG_SPL_BUILD
 #ifdef CONFIG_K3_LOAD_SYSFW
-#ifdef CONFIG_TI_SECURE_DEVICE
 struct fwl_data main_cbass_fwls[] = {
 	{ "MMCSD1_CFG", 2057, 1 },
 	{ "MMCSD0_CFG", 2058, 1 },
@@ -43,7 +42,6 @@ struct fwl_data main_cbass_fwls[] = {
 	{ "MCU_FSS0_S0", 1036, 8 },
 	{ "MCU_CPSW0", 1220, 1 },
 };
-#endif
 #endif
 
 static void ctrl_mmr_unlock(void)
@@ -125,9 +123,10 @@ static int fixup_usb_boot(void)
 		 * If bootmode is Host bootmode, fixup the dr_mode to host
 		 * before the dwc3 bind takes place
 		 */
+
 		ret = fdt_find_and_setprop((void *)gd->fdt_blob,
-				"/interconnect@100000/dwc3@4000000/usb@10000",
-				"dr_mode", "host", 11, 0);
+				"/bus@100000/dwc3@4000000/usb@10000",
+				"dr_mode", "host", 5, 0);
 		if (ret)
 			printf("%s: fdt_find_and_setprop() failed:%d\n", __func__,
 			       ret);
@@ -142,7 +141,7 @@ static int fixup_usb_boot(void)
 		break;
 	}
 
-	return 0;
+	return ret;
 }
 
 int fdtdec_board_setup(const void *fdt_blob)
@@ -150,6 +149,19 @@ int fdtdec_board_setup(const void *fdt_blob)
 	return fixup_usb_boot();
 }
 #endif
+
+static void setup_am654_navss_northbridge(void)
+{
+	/*
+	 * NB0 is bridge to SRAM and NB1 is bridge to DDR.
+	 * To ensure that SRAM transfers are not stalled due to
+	 * delays during DDR refreshes, SRAM traffic should be higher
+	 * priority (threadmap=2) than DDR traffic (threadmap=0).
+	 */
+	writel(0x2, NAVSS0_NBSS_NB0_CFG_BASE + NAVSS_NBSS_THREADMAP);
+	writel(0x0, NAVSS0_NBSS_NB1_CFG_BASE + NAVSS_NBSS_THREADMAP);
+}
+
 void board_init_f(ulong dummy)
 {
 #if defined(CONFIG_K3_LOAD_SYSFW) || defined(CONFIG_K3_AM654_DDRSS)
@@ -166,6 +178,8 @@ void board_init_f(ulong dummy)
 
 	/* Make all control module registers accessible */
 	ctrl_mmr_unlock();
+
+	setup_am654_navss_northbridge();
 
 #ifdef CONFIG_CPU_V7R
 	disable_linefill_optimization();
@@ -222,10 +236,8 @@ void board_init_f(ulong dummy)
 	preloader_console_init();
 
 	/* Disable ROM configured firewalls right after loading sysfw */
-#ifdef CONFIG_TI_SECURE_DEVICE
 	remove_fwl_configs(main_cbass_fwls, ARRAY_SIZE(main_cbass_fwls));
 	remove_fwl_configs(mcu_cbass_fwls, ARRAY_SIZE(mcu_cbass_fwls));
-#endif
 #else
 	/* Prepare console output */
 	preloader_console_init();

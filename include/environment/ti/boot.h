@@ -96,9 +96,7 @@
  *   3. User should provide $fdtaddr as 3rd argument to 'bootm'
  */
 #define PREPARE_FDT \
-	"echo Preparing FDT...; " \
-	"if test $board_name = am57xx_evm_reva3; then " \
-		"echo \"  Reading DTBO partition...\"; " \
+	"prepare_fdt_am57xx_evm_reva3=" \
 		"part start mmc ${mmcdev} dtbo${slot_suffix} p_dtbo_start; " \
 		"part size mmc ${mmcdev} dtbo${slot_suffix} p_dtbo_size; " \
 		"mmc read ${dtboaddr} ${p_dtbo_start} ${p_dtbo_size}; " \
@@ -111,16 +109,23 @@
 		"adtimg get dt --index=0 dtbo0_addr dtbo0_size; " \
 		"fdt apply $dtbo0_addr; " \
 		"adtimg get dt --index=1 dtbo1_addr dtbo1_size; " \
-		"fdt apply $dtbo1_addr; " \
-	"elif test $board_name = beagle_x15_revc; then " \
-		"echo \"  Reading DTB for Beagle X15 RevC...\"; " \
+		"fdt apply $dtbo1_addr;\0" \
+	"prepare_fdt_beagle_x15_revc=" \
 		"abootimg get dtb --index=0 dtb_start dtb_size; " \
 		"cp.b $dtb_start $fdtaddr $dtb_size; " \
-		"fdt addr $fdtaddr 0x80000; " \
-	"else " \
-		"echo Error: Android boot is not supported for $board_name; " \
-		"exit; " \
-	"fi; " \
+		"fdt addr $fdtaddr 0x80000;\0" \
+	"prepare_fdt=" \
+		"echo Preparing FDT...; " \
+		"if test $board_name = am57xx_evm_reva3; then " \
+			"echo \"  Reading DTBO...\"; " \
+			"run prepare_fdt_am57xx_evm_reva3; " \
+		"elif test $board_name = beagle_x15_revc; then " \
+			"echo \"  Reading DTB for Beagle X15 RevC...\"; " \
+			"run prepare_fdt_beagle_x15_revc; " \
+		"else " \
+			"echo Error: Android boot is not supported for $board_name; " \
+			"exit; " \
+		"fi;\0" \
 
 #define FASTBOOT_CMD \
 	"echo Booting into fastboot ...; " \
@@ -129,6 +134,7 @@
 #define DEFAULT_COMMON_BOOT_TI_ARGS \
 	"console=" CONSOLEDEV ",115200n8\0" \
 	"fdtfile=undefined\0" \
+	"boot=mmc\0" \
 	"bootpart=0:2\0" \
 	"bootdir=/boot\0" \
 	"bootfile=zImage\0" \
@@ -144,11 +150,7 @@
 		"setenv bootpart 1:2; " \
 		"setenv mmcroot /dev/mmcblk0p2 rw; " \
 		"run mmcboot;\0" \
-	"emmc_android_boot=" \
-		"setenv mmcdev 1; " \
-		"mmc dev $mmcdev; " \
-		"mmc rescan; " \
-		AB_SELECT_SLOT \
+	"emmc_android_bcb_load=" \
 		"if bcb load " __stringify(CONFIG_FASTBOOT_FLASH_MMC_DEV) " " \
 		CONTROL_PARTITION "; then " \
 			"setenv ardaddr -; " \
@@ -169,26 +171,36 @@
 		"else " \
 			"echo Warning: BCB is corrupted or does not exist; " \
 			"echo Android: Normal boot...; " \
-		"fi; " \
+		"fi;\0" \
+	PREPARE_FDT \
+	"emmc_android_bootm=" \
+		"if part start mmc $mmcdev $apart boot_start; then " \
+			"part size mmc $mmcdev $apart boot_size; " \
+			"mmc read $loadaddr $boot_start $boot_size; " \
+			"run prepare_fdt; " \
+			"bootm $loadaddr $ardaddr $fdtaddr; " \
+		"else " \
+			"echo $apart partition not found; " \
+			"exit; " \
+		"fi;\0" \
+	"emmc_android_boot=" \
+		"setenv mmcdev 1; " \
+		"mmc dev $mmcdev; " \
+		"mmc rescan; " \
+		AB_SELECT_SLOT \
+		"run emmc_android_bcb_load; " \
 		"setenv eval_bootargs setenv bootargs $bootargs; " \
 		"run eval_bootargs; " \
 		"setenv machid fe6; " \
 		AVB_VERIFY_CHECK \
 		AB_SELECT_ARGS \
-		"if part start mmc $mmcdev $apart boot_start; then " \
-			"part size mmc $mmcdev $apart boot_size; " \
-			"mmc read $loadaddr $boot_start $boot_size; " \
-			PREPARE_FDT \
-			"bootm $loadaddr $ardaddr $fdtaddr; " \
-		"else " \
-			"echo $apart partition not found; " \
-			"exit; " \
-		"fi;\0"
+		"run emmc_android_bootm;\0" \
 
 #ifdef CONFIG_OMAP54XX
 
 #define DEFAULT_FDT_TI_ARGS \
-	"findfdt="\
+        "idk_lcd=no\0" \
+	"findfdt_iter1=" \
 		"if test $board_name = omap5_uevm; then " \
 			"setenv fdtfile omap5-uevm.dtb; fi; " \
 		"if test $board_name = dra7xx; then " \
@@ -202,23 +214,39 @@
 		"if test $board_name = dra76x_acd; then " \
 			"setenv fdtfile dra76-evm.dtb; fi;" \
 		"if test $board_name = beagle_x15; then " \
-			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
+			"setenv fdtfile am57xx-beagle-x15.dtb; fi;\0" \
+	"findfdt_iter2=" \
 		"if test $board_name = beagle_x15_revb1; then " \
 			"setenv fdtfile am57xx-beagle-x15-revb1.dtb; fi;" \
 		"if test $board_name = beagle_x15_revc; then " \
 			"setenv fdtfile am57xx-beagle-x15-revc.dtb; fi;" \
 		"if test $board_name = am5729_beagleboneai; then " \
 			"setenv fdtfile am5729-beagleboneai.dtb; fi;" \
-		"if test $board_name = am572x_idk; then " \
+		"if test $board_name = am572x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am572x-idk.dtb; fi;" \
-		"if test $board_name = am574x_idk; then " \
-			"setenv fdtfile am574x-idk.dtb; fi;" \
+		"if test $board_name = am572x_idk && test $idk_lcd = osd101t2045; then " \
+			"setenv fdtfile am572x-idk-lcd-osd101t2045.dtb; fi;" \
+		"if test $board_name = am572x_idk && test $idk_lcd = osd101t2587; then " \
+			"setenv fdtfile am572x-idk-lcd-osd101t2587.dtb; fi;" \
+		"if test $board_name = am574x_idk && test $idk_lcd = no; then " \
+			"setenv fdtfile am574x-idk.dtb; fi;\0" \
+	"findfdt_iter3=" \
+		"if test $board_name = am574x_idk && test $idk_lcd = osd101t2587; then " \
+			"setenv fdtfile am574x-idk-lcd-osd101t2587.dtb; fi;" \
 		"if test $board_name = am57xx_evm; then " \
-			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
+			"setenv fdtfile am57xx-evm.dtb; fi;" \
 		"if test $board_name = am57xx_evm_reva3; then " \
-			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
-		"if test $board_name = am571x_idk; then " \
+			"setenv fdtfile am57xx-evm-reva3.dtb; fi;" \
+		"if test $board_name = am571x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am571x-idk.dtb; fi;" \
+		"if test $board_name = am571x_idk && test $idk_lcd = osd101t2045; then " \
+			"setenv fdtfile am571x-idk-lcd-osd101t2045.dtb; fi;" \
+		"if test $board_name = am571x_idk && test $idk_lcd = osd101t2587; then " \
+			"setenv fdtfile am571x-idk-lcd-osd101t2587.dtb; fi;\0" \
+	"findfdt="\
+		"run findfdt_iter1; " \
+		"run findfdt_iter2; " \
+		"run findfdt_iter3; " \
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree to use; fi; \0"
 

@@ -51,7 +51,6 @@ static int tps65941_bind(struct udevice *dev)
 	if (!ofnode_valid(regulators_node)) {
 		debug("%s: %s regulators subnode not found!\n", __func__,
 		      dev->name);
-		return -ENXIO;
 	}
 
 	debug("%s: '%s' - found regulators subnode\n", __func__, dev->name);
@@ -71,7 +70,9 @@ static struct dm_pmic_ops tps65941_ops = {
 
 static const struct udevice_id tps65941_ids[] = {
 	{ .compatible = "ti,tps659411", .data = TPS659411 },
+	{ .compatible = "ti,tps659412", .data = TPS659412 },
 	{ .compatible = "ti,tps659413", .data = TPS659413 },
+	{ .compatible = "ti,lp876441",  .data =  LP876441 },
 	{ }
 };
 

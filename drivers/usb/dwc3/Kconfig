@@ -53,6 +53,13 @@ config USB_DWC3_UNIPHIER
 	  Support of USB2/3 functionality in Socionext UniPhier platforms.
 	  Say 'Y' here if you have one such device.
 
+config USB_DWC3_AM62
+	tristate "Texas Instruments AM62 Platforms"
+	depends on ARCH_K3 || COMPILE_TEST
+	default USB_DWC3
+	help
+	  Support of USB2/3 functionality in TI's AM62 platforms
+
 menu "PHY Subsystem"
 
 config USB_DWC3_PHY_OMAP

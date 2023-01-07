@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2021 Texas Instruments Incorporated - http://www.ti.com/
+ */
+
+&tps659413 {
+	esm: esm {
+		compatible = "ti,tps659413-esm";
+		u-boot,dm-spl;
+	};
+};

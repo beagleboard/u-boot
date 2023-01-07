@@ -25,6 +25,7 @@ The following are the mandatory properties:
 - compatible:		Should be one of the following,
 			    "ti,j721e-c66-dsp" for C66x DSPs on K3 J721E SoCs
 			    "ti,j721e-c71-dsp" for C71x DSPs on K3 J721E SoCs
+			    "ti,j721s2-c71-dsp" for C71x DSPs on K3 J721S2 SoCs
 
 - reg:			Should contain an entry for each value in 'reg-names'.
 			Each entry should have the memory region's start address
