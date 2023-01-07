@@ -7,5 +7,6 @@ build:
   script:
     - ./build.sh
   artifacts:
+    expire_in: 1 week
     paths:
       - "deploy/*"
