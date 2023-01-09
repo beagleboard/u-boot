@@ -26,6 +26,8 @@
 
 #include "../common/board_detect.h"
 
+#define board_is_bboneai_64_b0()	(board_ti_k3_is("BBONEAI-64-B0-"))
+
 #define board_is_j721e_som()	(board_ti_k3_is("J721EX-PM1-SOM") || \
 				 board_ti_k3_is("J721EX-PM2-SOM"))
 
@@ -92,7 +94,10 @@ int board_fit_config_name_match(const char *name)
 {
 	bool eeprom_read = board_ti_was_eeprom_read();
 
-	if (board_is_j721e_pm1_som()) {
+	if (board_is_bboneai_64_b0()) {
+		if (!strcmp(name, "k3-j721e-beaglebonai64"))
+			return 0;
+	} else if (board_is_j721e_pm1_som()) {
 		/* Loading for pm1 board a72 spl/u-boot */
 		if (!strcmp(name, "k3-j721e-tps65917-proc-board"))
 			return 0;
@@ -214,6 +219,8 @@ static void setup_board_eeprom_env(void)
 		name = "J721EX-PM1-SOM";
 	else if (board_ti_k3_is("J721EX-PM2-SOM"))
 		name = "J721EX-PM2-SOM";
+	else if (board_ti_k3_is("BBONEAI-64-B0-"))
+		name = "BBONEAI-64-B0-";
 	else if (board_is_j721e_sk())
 		name = "j721e-sk";
 	else if (board_is_j7200_som())
@@ -567,7 +574,8 @@ void spl_board_init(void)
 
 
 #ifdef CONFIG_ESM_K3
-	if (board_ti_k3_is("J721EX-PM2-SOM")) {
+	if (board_ti_k3_is("J721EX-PM2-SOM") ||
+	    board_ti_k3_is("BBONEAI-64-B0-")) {
 		ret = uclass_get_device_by_driver(UCLASS_MISC,
 						  DM_GET_DRIVER(k3_esm), &dev);
 		if (ret)
@@ -576,7 +584,8 @@ void spl_board_init(void)
 #endif
 
 #ifdef CONFIG_ESM_PMIC
-	if (board_ti_k3_is("J721EX-PM2-SOM")) {
+	if (board_ti_k3_is("J721EX-PM2-SOM") ||
+	    board_ti_k3_is("BBONEAI-64-B0-")) {
 		ret = uclass_get_device_by_driver(UCLASS_MISC,
 						  DM_GET_DRIVER(pmic_esm),
 						  &dev);
