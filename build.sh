@@ -8,6 +8,8 @@ sys=$(uname -m)
 
 DIR="$PWD"
 
+device="bb-u-boot-beagleboneai64-sdk-8.5"
+
 if [ ! -f ./load.menuconfig ] ; then
 	echo "Developers: too enable menuconfig run: [touch load.menuconfig]"
 fi
@@ -26,8 +28,8 @@ if [ "x${sys}" = "xaarch64" ] ; then
 	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- j721e_evm_r5_defconfig O=../r5
 	make ARCH=arm -j2 CROSS_COMPILE=arm-linux-gnueabihf- O=../r5
 
-	sudo cp -v ../r5/tiboot3.bin /opt/u-boot/bb-u-boot-beagleboneai64
-	ls -lh /opt/u-boot/bb-u-boot-beagleboneai64/tiboot3.bin
+	sudo cp -v ../r5/tiboot3.bin /opt/u-boot/${device}/
+	ls -lh /opt/u-boot/${device}/tiboot3.bin
 else
 	make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- j721e_evm_r5_defconfig
 	if [ -f ./load.menuconfig ] ; then
@@ -54,12 +56,12 @@ if [ "x${sys}" = "xaarch64" ] ; then
 	fi
 
 	make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- j721e_evm_a72_defconfig O=../a72
-	make -j2 CROSS_COMPILE=aarch64-linux-gnu- ATF=/opt/u-boot/bb-arm-trusted-firmware-k3-generic-opteed/bl31.bin TEE=/opt/u-boot/bb-optee-os-k3-j721e/tee-pager_v2.bin DM=/opt/u-boot/bb-u-boot-beagleboneai64/ipc_echo_testb_mcu1_0_release_strip.xer5f O=../a72
+	make -j2 CROSS_COMPILE=aarch64-linux-gnu- ATF=/opt/u-boot/${device}/bl31.bin TEE=/opt/u-boot/${device}/tee-pager_v2.bin DM=/opt/u-boot/${device}/ipc_echo_testb_mcu1_0_release_strip.xer5f O=../a72
 
-	sudo cp -v ../a72/tispl.bin /opt/u-boot/bb-u-boot-beagleboneai64
-	sudo cp -v ../a72/u-boot.img /opt/u-boot/bb-u-boot-beagleboneai64
-	ls -lh /opt/u-boot/bb-u-boot-beagleboneai64/tispl.bin
-	ls -lh /opt/u-boot/bb-u-boot-beagleboneai64/u-boot.img
+	sudo cp -v ../a72/tispl.bin /opt/u-boot/${device}/
+	sudo cp -v ../a72/u-boot.img /opt/u-boot/${device}/
+	ls -lh /opt/u-boot/${device}/tispl.bin
+	ls -lh /opt/u-boot/${device}/u-boot.img
 else
 	make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- j721e_evm_a72_defconfig
 	if [ -f ./load.menuconfig ] ; then
