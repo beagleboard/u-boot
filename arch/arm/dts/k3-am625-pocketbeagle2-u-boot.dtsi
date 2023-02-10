@@ -1,0 +1,162 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * https://beagleboard.org/pocketbeagle2
+ *
+ * Copyright (C) 2023 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2023 Robert Nelson, BeagleBoard.org Foundation
+ */
+
+/ {
+	chosen {
+		stdout-path = "serial2:115200n8";
+		tick-timer = &timer1;
+	};
+
+	aliases {
+		mmc0 = &sdhci0;
+		mmc1 = &sdhci1;
+		i2c0 = &main_i2c0;
+	};
+
+	memory@80000000 {
+		u-boot,dm-spl;
+	};
+};
+
+&cbass_main {
+	u-boot,dm-spl;
+
+	timer1: timer@2400000 {
+		compatible = "ti,omap5430-timer";
+		reg = <0x00 0x2400000 0x00 0x80>;
+		ti,timer-alwon;
+		clock-frequency = <25000000>;
+		u-boot,dm-spl;
+	};
+};
+
+&dmss {
+	u-boot,dm-spl;
+};
+
+&main_bcdma {
+	u-boot,dm-spl;
+};
+
+&main_pktdma {
+	u-boot,dm-spl;
+};
+
+&secure_proxy_main {
+	u-boot,dm-spl;
+};
+
+&k3_pds {
+	u-boot,dm-spl;
+};
+
+&k3_clks {
+	u-boot,dm-spl;
+};
+
+&k3_reset {
+	u-boot,dm-spl;
+};
+
+&wkup_conf {
+	u-boot,dm-spl;
+};
+
+&chipid {
+	u-boot,dm-spl;
+};
+
+&wkup_uart0 {
+	u-boot,dm-spl;
+};
+
+&main_pmx0 {
+	u-boot,dm-spl;
+};
+
+&main_uart0 {
+	u-boot,dm-spl;
+};
+
+&console_pins_default {
+	u-boot,dm-spl;
+};
+
+&cbass_mcu {
+	u-boot,dm-spl;
+};
+
+&cbass_wakeup {
+	u-boot,dm-spl;
+};
+
+&mcu_pmx0 {
+	u-boot,dm-spl;
+};
+
+&main_i2c0 {
+	u-boot,dm-spl;
+};
+
+&local_i2c_pins_default {
+	u-boot,dm-spl;
+};
+
+&gpio0_pins_default {
+	u-boot,dm-spl;
+};
+
+&main_gpio0 {
+	u-boot,dm-spl;
+};
+
+&main_gpio1 {
+	u-boot,dm-spl;
+};
+
+&cpsw3g {
+	status = "disabled";
+};
+
+&sdhci0 {
+	u-boot,dm-spl;
+};
+
+&sdhci1 {
+	u-boot,dm-spl;
+	sdhci-caps-mask = <0x00000007 0x00000000>;
+	/delete-property/ cd-gpios;
+	/delete-property/ cd-debounce-delay-ms;
+	/delete-property/ ti,fails-without-test-cd;
+	/delete-property/ no-1-8-v;
+};
+
+&emmc_pins_default {
+	u-boot,dm-spl;
+};
+
+&sd_pins_default {
+	u-boot,dm-spl;
+	pinctrl-single,pins = <
+		AM62X_IOPAD(0x023c, PIN_INPUT, 0) /* (A21) MMC1_CMD */
+		AM62X_IOPAD(0x0234, PIN_INPUT, 0) /* (B22) MMC1_CLK */
+		AM62X_IOPAD(0x0230, PIN_INPUT, 0) /* (A22) MMC1_DAT0 */
+		AM62X_IOPAD(0x022c, PIN_INPUT, 0) /* (B21) MMC1_DAT1 */
+		AM62X_IOPAD(0x0228, PIN_INPUT, 0) /* (C21) MMC1_DAT2 */
+		AM62X_IOPAD(0x0224, PIN_INPUT, 0) /* (D22) MMC1_DAT3 */
+		AM62X_IOPAD(0x0240, PIN_INPUT, 0) /* (D17) MMC1_SDCD.MMC1_SDCD */
+	>;
+};
+
+&dmsc {
+	u-boot,dm-spl;
+	k3_sysreset: sysreset-controller {
+		compatible = "ti,sci-sysreset";
+		u-boot,dm-spl;
+	};
+};
