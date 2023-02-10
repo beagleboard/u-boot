@@ -84,6 +84,8 @@
 			"setenv name_fdt k3-am62x-lp-sk.dtb; fi;"	\
 		"if test $board_name = am62x_play; then "		\
 			"setenv name_fdt k3-am625-beagleplay.dtb; fi;"	\
+		"if test $board_name = am62x_pocketbeagle2; then "	\
+			"setenv name_fdt k3-am625-pocketbeagle2.dtb; fi;" \
 		"setenv fdtfile ${name_fdt}\0"				\
 	"name_kern=Image\0"						\
 	"console=ttyS2,115200n8\0"					\
