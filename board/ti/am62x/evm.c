@@ -46,8 +46,11 @@ int board_fit_config_name_match(const char *name)
 {
 	bool eeprom_read = board_ti_was_eeprom_read();
 
-	if (!eeprom_read)
+	if (!eeprom_read) {
+		if (!strcmp(name, "k3-am625-r5-pocketbeagle2") || !strcmp(name, "k3-am625-pocketbeagle2"))
+			return 0;
 		return -1;
+	}
 
 	if (board_is_am62x_lp_skevm()) {
 		if (!strcmp(name, "k3-am62x-r5-lp-sk") || !strcmp(name, "k3-am62x-lp-sk"))
@@ -151,7 +154,7 @@ int checkboard(void)
 #ifdef CONFIG_BOARD_LATE_INIT
 static void setup_board_eeprom_env(void)
 {
-	char *name = "am62x_play";
+	char *name = "am62x_pocketbeagle2";
 
 	if (do_board_detect())
 		goto invalid_eeprom;
