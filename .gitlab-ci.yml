@@ -1,9 +1,12 @@
 image: robertcnelson/debian-bullseye-slim-u-boot-compile:latest
 
 build:
+  tags:
+  - docker-amd64
   stage: build
   script:
     - ./build.sh
   artifacts:
+    expire_in: 1 week
     paths:
       - "deploy/*"
