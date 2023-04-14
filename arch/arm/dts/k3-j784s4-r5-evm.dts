@@ -5,10 +5,10 @@
 
 /dts-v1/;
 
-#include "k3-j784s4.dtsi"
-#include <dt-bindings/gpio/gpio.h>
+#include "k3-j784s4-evm.dts"
 #include "k3-j784s4-ddr-evm-lp4-4266.dtsi"
 #include "k3-j784s4-ddr.dtsi"
+#include "k3-j784s4-evm-u-boot.dtsi"
 
 / {
 	chosen {
@@ -99,28 +99,6 @@
 
 &main_pmx0 {
 	bootph-pre-ram;
-
-	main_uart8_pins_default: main-uart8-pins-default {
-		pinctrl-single,pins = <
-			J784S4_IOPAD(0x040, PIN_INPUT, 14) /* (AF37) MCASP0_AXR0.UART8_CTSn */
-			J784S4_IOPAD(0x044, PIN_OUTPUT, 14) /* (AG37) MCASP0_AXR1.UART8_RTSn */
-			J784S4_IOPAD(0x0d0, PIN_INPUT, 11) /* (AP38) SPI0_CS1.UART8_RXD */
-			J784S4_IOPAD(0x0d4, PIN_OUTPUT, 11) /* (AN38) SPI0_CLK.UART8_TXD */
-		>;
-	};
-
-	 main_mmc1_pins_default: main-mmc1-pins-default {
-		pinctrl-single,pins = <
-			J784S4_IOPAD(0x104, PIN_INPUT, 0) /* (AB38) MMC1_CLK */
-			J784S4_IOPAD(0x108, PIN_INPUT, 0) /* (AB36) MMC1_CMD */
-			J784S4_IOPAD(0x100, PIN_INPUT, 0) /* (###) MMC1_CLKLB */
-			J784S4_IOPAD(0x0fc, PIN_INPUT, 0) /* (AA33) MMC1_DAT0 */
-			J784S4_IOPAD(0x0f8, PIN_INPUT, 0) /* (AB34) MMC1_DAT1 */
-			J784S4_IOPAD(0x0f4, PIN_INPUT, 0) /* (AA32) MMC1_DAT2 */
-			J784S4_IOPAD(0x0f0, PIN_INPUT, 0) /* (AC38) MMC1_DAT3 */
-			J784S4_IOPAD(0x0e8, PIN_INPUT, 8) /* (AR38) TIMER_IO0.MMC1_SDCD */
-		>;
-	};
 };
 
 &wkup_pmx0 {
@@ -205,5 +183,3 @@
 &mcu_udmap {
 	ti,sci = <&dm_tifs>;
 };
-
-#include "k3-j784s4-evm-u-boot.dtsi"
