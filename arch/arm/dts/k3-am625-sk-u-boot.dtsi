@@ -92,6 +92,14 @@
 	bootph-pre-ram;
 };
 
+&sdhci0 {
+	bootph-pre-ram;
+};
+
+&main_mmc0_pins_default {
+	bootph-pre-ram;
+};
+
 &sdhci1 {
 	bootph-pre-ram;
 };
