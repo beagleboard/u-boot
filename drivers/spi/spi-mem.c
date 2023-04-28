@@ -762,6 +762,18 @@ ssize_t spi_mem_dirmap_write(struct spi_mem_dirmap_desc *desc,
 	return ret;
 }
 EXPORT_SYMBOL_GPL(spi_mem_dirmap_write);
+int spi_mem_do_calibration(struct spi_slave *slave, struct spi_mem_op *op)
+{
+	struct udevice *bus = slave->dev->parent;
+	struct dm_spi_ops *ops = spi_get_ops(bus);
+
+	if (!ops->mem_ops || !ops->mem_ops->do_calibration)
+		return -EOPNOTSUPP;
+
+	ops->mem_ops->do_calibration(slave, op);
+	return 0;
+}
+EXPORT_SYMBOL_GPL(spi_mem_do_calibration);
 
 #ifndef __UBOOT__
 static inline struct spi_mem_driver *to_spi_mem_drv(struct device_driver *drv)
