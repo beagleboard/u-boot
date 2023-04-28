@@ -43,6 +43,32 @@ __weak void cadence_qspi_apb_enable_linear_mode(bool enable)
 	return;
 }
 
+void cadence_qspi_apb_set_tx_dll(void *reg_base, u8 dll)
+{
+	unsigned int reg;
+
+	reg = readl(reg_base + CQSPI_REG_PHY_CONFIG);
+	reg &= ~(CQSPI_REG_PHY_CONFIG_TX_DEL_MASK <<
+		CQSPI_REG_PHY_CONFIG_TX_DEL_LSB);
+	reg |= (dll & CQSPI_REG_PHY_CONFIG_TX_DEL_MASK) <<
+		CQSPI_REG_PHY_CONFIG_TX_DEL_LSB;
+	reg |= CQSPI_REG_PHY_CONFIG_RESYNC;
+	writel(reg, reg_base + CQSPI_REG_PHY_CONFIG);
+}
+
+void cadence_qspi_apb_set_rx_dll(void *reg_base, u8 dll)
+{
+	unsigned int reg;
+
+	reg = readl(reg_base + CQSPI_REG_PHY_CONFIG);
+	reg &= ~(CQSPI_REG_PHY_CONFIG_RX_DEL_MASK <<
+		CQSPI_REG_PHY_CONFIG_RX_DEL_LSB);
+	reg |= (dll & CQSPI_REG_PHY_CONFIG_RX_DEL_MASK) <<
+		CQSPI_REG_PHY_CONFIG_RX_DEL_LSB;
+	reg |= CQSPI_REG_PHY_CONFIG_RESYNC;
+	writel(reg, reg_base + CQSPI_REG_PHY_CONFIG);
+}
+
 void cadence_qspi_apb_controller_enable(void *reg_base)
 {
 	unsigned int reg;

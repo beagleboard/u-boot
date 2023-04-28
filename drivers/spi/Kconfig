@@ -153,6 +153,14 @@ config CADENCE_OSPI_VERSAL
 	  This option is used to enable Versal OSPI DMA operations which
 	  are used for ospi flash read using cadence qspi controller.
 
+config CADENCE_QSPI_PHY
+	bool "PHY tuning for Cadence QSPI"
+	depends on CADENCE_QSPI && DM_THERMAL && SPL_THERMAL
+	help
+	 To allow running at high speeds, a PHY tuning sequence has to be
+	 performed. The tuning algorithm as of now only works for Octal DTR
+	 operation.
+
 config CF_SPI
         bool "ColdFire SPI driver"
         help
