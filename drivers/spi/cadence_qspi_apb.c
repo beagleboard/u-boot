@@ -876,7 +876,14 @@ cadence_qspi_apb_direct_read_execute(struct cadence_spi_priv *priv,
 
 	cadence_qspi_apb_enable_linear_mode(true);
 
-	if (len < 16 || !cadence_qspi_apb_use_phy(priv, op)) {
+	if (len < 16) {
+		memcpy_fromio(buf, priv->ahbbase + from, len);
+		if (!cadence_qspi_wait_idle(priv->regbase))
+			return -EIO;
+		return 0;
+	}
+
+	if (!cadence_qspi_apb_use_phy(priv, op)) {
 		if (dma_memcpy(buf, priv->ahbbase + from, len) < 0)
 			memcpy_fromio(buf, priv->ahbbase + from, len);
 
