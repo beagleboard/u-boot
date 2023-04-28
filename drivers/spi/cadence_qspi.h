@@ -49,6 +49,7 @@
 #define CQSPI_REG_CONFIG_CHIPSELECT_LSB         10
 #define CQSPI_REG_CONFIG_BAUD_LSB               19
 #define CQSPI_REG_CONFIG_DTR_PROTO		BIT(24)
+#define CQSPI_REG_CONFIG_PHY_PIPELINE		BIT(25)
 #define CQSPI_REG_CONFIG_DUAL_OPCODE		BIT(30)
 #define CQSPI_REG_CONFIG_IDLE_LSB               31
 #define CQSPI_REG_CONFIG_CHIPSELECT_MASK        0xF
@@ -162,6 +163,11 @@
 #define CQSPI_REG_OP_EXT_STIG_LSB               0
 
 #define CQSPI_REG_PHY_CONFIG                    0xB4
+#define CQSPI_REG_PHY_CONFIG_RX_DEL_LSB		0
+#define CQSPI_REG_PHY_CONFIG_RX_DEL_MASK	0x7F
+#define CQSPI_REG_PHY_CONFIG_TX_DEL_LSB		16
+#define CQSPI_REG_PHY_CONFIG_TX_DEL_MASK	0x7F
+#define CQSPI_REG_PHY_CONFIG_RESYNC		BIT(31)
 #define CQSPI_REG_PHY_CONFIG_RESET_FLD_MASK     0x40000000
 
 #define CQSPI_DMA_DST_ADDR_REG                  0x1800
@@ -239,6 +245,8 @@ struct cadence_spi_priv {
 	unsigned int	qspi_calibrated_hz;
 	unsigned int	qspi_calibrated_cs;
 	unsigned int	previous_hz;
+	int		phy_read_delay;
+	bool		use_phy;
 	u32		wr_delay;
 	int		read_delay;
 	bool		has_phy;
