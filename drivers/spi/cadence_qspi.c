@@ -940,13 +940,41 @@ static void cadence_spi_mem_do_calibration(struct spi_slave *spi,
 			 ret);
 }
 
+static int cadence_spi_ofdata_phy_pattern(ofnode flash_node)
+{
+	ofnode subnode;
+	const char *label;
+	u32 start;
+
+	subnode = ofnode_find_subnode(flash_node, "partitions");
+	if (!ofnode_valid(subnode))
+		/*
+		 * Maybe the node has legacy style partitions, listed directly
+		 * under flash node.
+		 */
+		subnode = ofnode_first_subnode(flash_node);
+	else
+		subnode = ofnode_first_subnode(subnode);
+
+	while (ofnode_valid(subnode)) {
+		label = ofnode_read_string(subnode, "label");
+		if (label && strcmp(label, "ospi.phypattern") == 0) {
+			if (!ofnode_read_u32_array(subnode, "reg", &start, 1))
+				return start;
+			break;
+		}
+		subnode = ofnode_next_subnode(subnode);
+	}
+
+	return -ENOENT;
+}
+
 static int cadence_spi_of_to_plat(struct udevice *bus)
 {
 	struct cadence_spi_plat *plat = dev_get_plat(bus);
 	struct cadence_spi_priv *priv = dev_get_priv(bus);
 	ofnode subnode;
-	const char *label;
-	u32 start;
+	int ret;
 
 	plat->regbase = (void *)devfdt_get_addr_index(bus, 0);
 	plat->ahbbase = (void *)devfdt_get_addr_size_index(bus, 1,
@@ -1001,16 +1029,11 @@ static int cadence_spi_of_to_plat(struct udevice *bus)
 						   48);
 
 	/* Find the PHY tuning pattern partition. */
-	subnode = ofnode_first_subnode(subnode);
-	while (ofnode_valid(subnode)) {
-		label = ofnode_read_string(subnode, "label");
-		if (label && strcmp(label, "ospi.phypattern") == 0) {
-			if (!ofnode_read_u32_array(subnode, "reg", &start, 1))
-				plat->phy_pattern_start = start;
-			break;
-		}
-		subnode = ofnode_next_subnode(subnode);
-	}
+	ret = cadence_spi_ofdata_phy_pattern(subnode);
+	if (ret < 0)
+		dev_dbg(bus, "Unable to find PHY pattern partition\n");
+	else
+		plat->phy_pattern_start = ret;
 
 	debug("%s: regbase=%p ahbbase=%p max-frequency=%d page-size=%d\n",
 	      __func__, plat->regbase, plat->ahbbase, plat->max_hz,
