@@ -209,6 +209,7 @@ struct cadence_spi_plat {
 	bool		use_dac_mode;
 	int		read_delay;
 	bool		has_phy;
+	u32		phy_pattern_start;
 
 	/* Flash parameters */
 	u32		page_size;
@@ -241,6 +242,7 @@ struct cadence_spi_priv {
 	u32		wr_delay;
 	int		read_delay;
 	bool		has_phy;
+	u32		phy_pattern_start;
 
 	struct reset_ctl_bulk *resets;
 	u32		page_size;
