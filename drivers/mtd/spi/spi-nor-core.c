@@ -350,23 +350,38 @@ static int spansion_write_any_reg(struct spi_nor *nor, u32 addr, u8 val)
 }
 #endif
 
-static ssize_t spi_nor_read_data(struct spi_nor *nor, loff_t from, size_t len,
-				 u_char *buf)
+/*
+ * Return a template of the spi-mem op for performing a read operation.
+ * The caller is expected to fill in the address, the data length, and
+ * the data buffer.
+ */
+static struct spi_mem_op spi_nor_read_op(struct spi_nor *nor)
 {
 	struct spi_mem_op op =
 			SPI_MEM_OP(SPI_MEM_OP_CMD(nor->read_opcode, 0),
-				   SPI_MEM_OP_ADDR(nor->addr_width, from, 0),
+				   SPI_MEM_OP_ADDR(nor->addr_width, 0, 0),
 				   SPI_MEM_OP_DUMMY(nor->read_dummy, 0),
-				   SPI_MEM_OP_DATA_IN(len, buf, 0));
-	size_t remaining = len;
-	int ret;
-
+				   SPI_MEM_OP_DATA_IN(1, NULL, 0));
 	spi_nor_setup_op(nor, &op, nor->read_proto);
 
 	/* convert the dummy cycles to the number of bytes */
 	op.dummy.nbytes = (nor->read_dummy * op.dummy.buswidth) / 8;
 	if (spi_nor_protocol_is_dtr(nor->read_proto))
 		op.dummy.nbytes *= 2;
+
+	return op;
+}
+
+static ssize_t spi_nor_read_data(struct spi_nor *nor, loff_t from, size_t len,
+				 u_char *buf)
+{
+	struct spi_mem_op op = spi_nor_read_op(nor);
+	size_t remaining = len;
+	int ret;
+
+	op.addr.val = from;
+	op.data.nbytes = len;
+	op.data.buf.in = buf;
 
 	while (remaining) {
 		op.data.nbytes = remaining < UINT_MAX ? remaining : UINT_MAX;
