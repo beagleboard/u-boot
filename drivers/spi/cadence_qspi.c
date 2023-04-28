@@ -922,7 +922,7 @@ static void cadence_spi_mem_do_calibration(struct spi_slave *spi,
 	struct cadence_spi_priv *priv = dev_get_priv(bus);
 	int ret;
 
-	if (!CONFIG_IS_ENABLED(CADENCE_QSPI_PHY) || !priv->has_phy)
+	if (!IS_ENABLED(CONFIG_CADENCE_QSPI_PHY) || !priv->has_phy)
 		return;
 
 	priv->phy_read_op = *op;
