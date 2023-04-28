@@ -3930,6 +3930,7 @@ int spi_nor_scan(struct spi_nor *nor)
 	const struct flash_info *info = NULL;
 	struct mtd_info *mtd = &nor->mtd;
 	struct spi_slave *spi = nor->spi;
+	struct spi_mem_op op;
 	int ret;
 	int cfi_mtd_nb = 0;
 
@@ -4101,6 +4102,9 @@ int spi_nor_scan(struct spi_nor *nor)
 	nor->size = mtd->size;
 	nor->erase_size = mtd->erasesize;
 	nor->sector_size = mtd->erasesize;
+
+	op = spi_nor_read_op(nor);
+	spi_mem_do_calibration(nor->spi, &op);
 
 #ifndef CONFIG_SPL_BUILD
 	printf("SF: Detected %s with page size ", nor->name);
