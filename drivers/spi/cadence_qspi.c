@@ -205,6 +205,7 @@ static int cadence_spi_probe(struct udevice *bus)
 	priv->fifo_width	= plat->fifo_width;
 	priv->trigger_address	= plat->trigger_address;
 	priv->read_delay	= plat->read_delay;
+	priv->has_phy		= plat->has_phy;
 	priv->ahbsize		= plat->ahbsize;
 	priv->max_hz		= plat->max_hz;
 
@@ -432,6 +433,7 @@ static int cadence_spi_of_to_plat(struct udevice *bus)
 	 */
 	plat->read_delay = ofnode_read_s32_default(subnode, "cdns,read-delay",
 						   -1);
+	plat->has_phy = ofnode_read_bool(subnode, "cdns,phy-mode");
 
 	debug("%s: regbase=%p ahbbase=%p max-frequency=%d page-size=%d\n",
 	      __func__, plat->regbase, plat->ahbbase, plat->max_hz,
