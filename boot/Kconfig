@@ -126,7 +126,7 @@ config FIT_IMAGE_POST_PROCESS
 	bool "Enable post-processing of FIT artifacts after loading by U-Boot"
 	depends on FIT
 	depends on TI_SECURE_DEVICE || SOCFPGA_SECURE_VAB_AUTH
-	default y if TI_SECURE_DEVICE
+	default y if TI_SECURE_DEVICE && !FIT_SIGNATURE
 	help
 	  Allows doing any sort of manipulation to blobs after they got extracted
 	  from FIT images like stripping off headers or modifying the size of the
