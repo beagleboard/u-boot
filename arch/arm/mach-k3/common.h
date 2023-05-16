@@ -35,3 +35,4 @@ void mmr_unlock(phys_addr_t base, u32 partition);
 bool is_rom_loaded_sysfw(struct rom_extended_boot_data *data);
 enum k3_device_type get_device_type(void);
 void ti_secure_image_post_process(void **p_image, size_t *p_size);
+void ti_secure_image_check_binary(void **p_image, size_t *p_size);
