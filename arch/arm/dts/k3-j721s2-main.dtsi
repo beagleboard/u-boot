@@ -5,6 +5,7 @@
  * Copyright (C) 2021 Texas Instruments Incorporated - https://www.ti.com/
  */
 #include <dt-bindings/phy/phy-ti.h>
+#include <dt-bindings/mux/ti-serdes.h>
 
 / {
 	serdes_refclk: clock-cmnrefclk {

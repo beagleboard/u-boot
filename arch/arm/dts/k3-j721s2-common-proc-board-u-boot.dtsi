@@ -140,6 +140,10 @@
 	};
 };
 
+&serdes_ln_ctrl {
+	 u-boot,mux-autoprobe;
+};
+
 &main_sdhci0 {
 	bootph-pre-ram;
 };
