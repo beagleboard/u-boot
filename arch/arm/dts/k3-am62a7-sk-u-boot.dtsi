@@ -162,3 +162,11 @@
 		bootph-pre-ram;
 	};
 };
+
+&usbss0 {
+	bootph-pre-ram;
+};
+
+&usb0 {
+	bootph-pre-ram;
+};
