@@ -15,6 +15,10 @@
 #include <fdt_support.h>
 #include <spl.h>
 
+#define CTRLMMR_USB0_PHY_CTRL  0x43004008
+#define CTRLMMR_USB1_PHY_CTRL  0x43004018
+#define CORE_VOLTAGE           0x80000000
+
 int board_init(void)
 {
 	return 0;
@@ -29,3 +33,20 @@ int dram_init_banksize(void)
 {
 	return fdtdec_setup_memory_banksize();
 }
+
+#if defined(CONFIG_SPL_BOARD_INIT)
+void spl_board_init(void)
+{
+	u32 val;
+
+	/* Set USB0 PHY core voltage to 0.85V */
+	val = readl(CTRLMMR_USB0_PHY_CTRL);
+	val &= ~(CORE_VOLTAGE);
+	writel(val, CTRLMMR_USB0_PHY_CTRL);
+
+	/* Set USB1 PHY core voltage to 0.85V */
+	val = readl(CTRLMMR_USB1_PHY_CTRL);
+	val &= ~(CORE_VOLTAGE);
+	writel(val, CTRLMMR_USB1_PHY_CTRL);
+}
+#endif
