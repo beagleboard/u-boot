@@ -97,8 +97,8 @@
 		#mbox-cells = <1>;
 		reg-names = "rt", "scfg", "target_data";
 		reg = <0x00 0x44880000 0x00 0x20000>,
-		      <0x0 0x44860000 0x0 0x20000>,
-		      <0x0 0x43600000 0x0 0x10000>;
+		      <0x00 0x44860000 0x00 0x20000>,
+		      <0x00 0x43600000 0x00 0x10000>;
 	};
 
 	sysctrler: sysctrler {
@@ -131,6 +131,7 @@
 
 &main_pmx0 {
 	bootph-pre-ram;
+
 	main_uart1_pins_default: main-uart1-pins-default {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x194, PIN_INPUT, 2) /* (B19) MCASP0_AXR3.UART1_CTSn */
