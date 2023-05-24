@@ -30,6 +30,14 @@
 	};
 };
 
+&main_i2c0 {
+	bootph-pre-ram;
+};
+
+&main_i2c0_pins_default {
+	bootph-pre-ram;
+};
+
 &dmss {
 	bootph-pre-ram;
 };
