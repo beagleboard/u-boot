@@ -11,6 +11,7 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/net/ti-dp83867.h>
 #include "k3-am62a7.dtsi"
+#include "k3-am62a-sk-binman.dtsi"
 
 / {
 	compatible =  "ti,am62a7-sk", "ti,am62a7";
