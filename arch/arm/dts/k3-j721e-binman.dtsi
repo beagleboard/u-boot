@@ -41,7 +41,7 @@
 		};
 	};
 	itb {
-		filename = "sysfw-j721e_sr1_1-hs.itb";
+		filename = "sysfw-j721e_sr1_1-hs-evm.itb";
 		fit {
 			description = "SYSFW and Config fragments";
 			#address-cells = <1>;
@@ -144,7 +144,7 @@
 		};
 	};
 	itb_fs {
-		filename = "sysfw-j721e_sr2-hs-fs.itb";
+		filename = "sysfw-j721e_sr2-hs-fs-evm.itb";
 		fit {
 			description = "SYSFW and Config fragments";
 			#address-cells = <1>;

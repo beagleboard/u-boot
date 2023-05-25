@@ -41,7 +41,7 @@
 		};
 	};
 	itb {
-		filename = "sysfw-am65x-hs.itb";
+		filename = "sysfw-am65x-hs-evm.itb";
 		fit {
 			description = "SYSFW and Config fragments";
 			#address-cells = <1>;
