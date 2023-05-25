@@ -554,7 +554,8 @@ void spl_board_init(void)
 	}
 
 #ifdef CONFIG_ESM_K3
-	if (board_ti_k3_is("J721EX-PM2-SOM")) {
+	if (board_ti_k3_is("J721EX-PM2-SOM") ||
+	    board_ti_k3_is("J7200X-PM2-SOM")) {
 		ret = uclass_get_device_by_driver(UCLASS_MISC,
 						  DM_DRIVER_GET(k3_esm), &dev);
 		if (ret)
