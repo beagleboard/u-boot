@@ -72,7 +72,7 @@
 			no-expanded;
 		};
 		ti_fs_enc: ti-fs-enc.bin {
-			filename = "ti-sysfw/ti-fs-firmware-j7200-hs-enc.bin";
+			filename = "ti-sysfw/ti-fs-firmware-j7200_sr2-hs-enc.bin";
 			type = "blob-ext";
 			optional;
 		};
@@ -81,7 +81,7 @@
 			type = "blob-ext";
 		};
 		sysfw_inner_cert: sysfw-inner-cert {
-			filename = "ti-sysfw/ti-fs-firmware-j7200-hs-cert.bin";
+			filename = "ti-sysfw/ti-fs-firmware-j7200_sr2-hs-cert.bin";
 			type = "blob-ext";
 			optional;
 		};
@@ -117,7 +117,7 @@
 			no-expanded;
 		};
 		ti_fs_enc_fs: ti-fs-enc.bin {
-			filename = "ti-sysfw/ti-fs-firmware-j7200-hs-enc.bin";
+			filename = "ti-sysfw/ti-fs-firmware-j7200_sr2-hs-fs-enc.bin";
 			type = "blob-ext";
 			optional;
 		};
@@ -126,7 +126,7 @@
 			type = "blob-ext";
 		};
 		sysfw_inner_cert_fs: sysfw-inner-cert {
-			filename = "ti-sysfw/ti-fs-firmware-j7200-hs-cert.bin";
+			filename = "ti-sysfw/ti-fs-firmware-j7200_sr2-hs-fs-cert.bin";
 			type = "blob-ext";
 			optional;
 		};
