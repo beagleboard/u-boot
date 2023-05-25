@@ -48,8 +48,8 @@
 };
 
 &binman {
-	tiboot3 {
-		filename = "tiboot3.bin";
+	tiboot3-j7200_sr2-hs-evm.bin {
+		filename = "tiboot3-j7200_sr2-hs-evm.bin";
 		ti-secure-rom {
 			content = <&u_boot_spl>, <&ti_fs_enc>, <&combined_tifs_cfg>,
 				<&combined_dm_cfg>, <&sysfw_inner_cert>;
@@ -93,8 +93,8 @@
 };
 
 &binman {
-	tiboot3_fs {
-		filename = "tiboot3.bin_fs";
+	tiboot3-j7200_sr2-hs-fs-evm.bin {
+		filename = "tiboot3-j7200_sr2-hs-fs-evm.bin";
 		ti-secure-rom {
 			content = <&u_boot_spl_fs>, <&ti_fs_enc_fs>, <&combined_tifs_cfg_fs>,
 				<&combined_dm_cfg_fs>, <&sysfw_inner_cert_fs>;
@@ -138,8 +138,9 @@
 };
 
 &binman {
-	tiboot3_unsigned {
-		filename = "tiboot3.bin_unsigned";
+	tiboot3-j7200-gp-evm.bin {
+		filename = "tiboot3-j7200-gp-evm.bin";
+		symlink = "tiboot3.bin";
 		ti-secure-rom {
 			content = <&u_boot_spl_unsigned>, <&ti_fs_gp>,
 				<&combined_tifs_cfg_gp>, <&combined_dm_cfg_gp>;
