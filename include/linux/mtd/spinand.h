@@ -245,6 +245,7 @@ struct spinand_id {
  *	    that properties of the NAND chip (spinand->base.memorg and
  *	    spinand->base.eccreq) have been filled
  * @init: initialize a SPI NAND device
+ * @change_protocol: switch the SPI NAND flash to a specific SPI protocol
  * @cleanup: cleanup a SPI NAND device
  *
  * Each SPI NAND manufacturer driver should implement this interface so that
@@ -253,6 +254,8 @@ struct spinand_id {
 struct spinand_manufacturer_ops {
 	int (*detect)(struct spinand_device *spinand);
 	int (*init)(struct spinand_device *spinand);
+	int (*change_protocol)(struct spinand_device *spinand,
+			       const enum spinand_protocol protocol);
 	void (*cleanup)(struct spinand_device *spinand);
 };
 
