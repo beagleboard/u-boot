@@ -48,14 +48,35 @@ static SPINAND_OP_VARIANTS(update_cache_variants_w25m02gv,
 		SPINAND_PROG_LOAD(false, 0, NULL, 0));
 
 static SPINAND_OP_VARIANTS(read_cache_variants_w35n01jw,
+		SPINAND_PAGE_READ_FROM_CACHE_OCTALIO_DTR_OP(0, 24, NULL, 0),
 		SPINAND_PAGE_READ_FROM_CACHE_OP(true, 0, 1, NULL, 0),
 		SPINAND_PAGE_READ_FROM_CACHE_OP(false, 0, 1, NULL, 0));
 
 static SPINAND_OP_VARIANTS(write_cache_variants_w35n01jw,
+		SPINAND_PROG_LOAD_OCTALIO_DTR(true, 0, NULL, 0),
 		SPINAND_PROG_LOAD(true, 0, NULL, 0));
 
 static SPINAND_OP_VARIANTS(update_cache_variants_w35n01jw,
+		SPINAND_PROG_LOAD_OCTALIO_DTR(false, 0, NULL, 0),
 		SPINAND_PROG_LOAD(false, 0, NULL, 0));
+
+static SPINAND_CTRL_OPS_VARIANTS(ctrl_ops_variants_w35n01jw,
+		SPINAND_CTRL_OPS(SPINAND_8D,
+				 SPINAND_RESET_OP_OCTAL_DTR,
+				 SPINAND_GET_FEATURE_OP_OCTAL_DTR(0, NULL),
+				 SPINAND_SET_FEATURE_OP_OCTAL_DTR(0, NULL),
+				 SPINAND_WR_EN_DIS_OP_OCTAL_DTR(true),
+				 SPINAND_BLK_ERASE_OP_OCTAL_DTR(0),
+				 SPINAND_PAGE_READ_OP_OCTAL_DTR(0),
+				 SPINAND_PROG_EXEC_OP_OCTAL_DTR(0)),
+		SPINAND_CTRL_OPS(SPINAND_1S,
+				 SPINAND_RESET_OP,
+				 SPINAND_GET_FEATURE_OP(0, NULL),
+				 SPINAND_SET_FEATURE_OP(0, NULL),
+				 SPINAND_WR_EN_DIS_OP(true),
+				 SPINAND_BLK_ERASE_OP(0),
+				 SPINAND_PAGE_READ_OP(0),
+				 SPINAND_PROG_EXEC_OP(0)));
 
 static int w25m02gv_ooblayout_ecc(struct mtd_info *mtd, int section,
 				  struct mtd_oob_region *region)
@@ -153,9 +174,9 @@ static const struct spinand_info winbond_spinand_table[] = {
 		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants_w35n01jw,
 					      &write_cache_variants_w35n01jw,
 					      &update_cache_variants_w35n01jw),
-		     0,
-		     SPINAND_ECCINFO(&w35n01jw_ooblayout, NULL)),
-
+		     SPINAND_HAS_OCTAL_DTR_BIT | SPINAND_HAS_CR_FEAT_BIT,
+		     SPINAND_ECCINFO(&w35n01jw_ooblayout, NULL),
+		     SPINAND_INFO_CTRL_OPS_VARIANTS(&ctrl_ops_variants_w35n01jw)),
 };
 
 /**
