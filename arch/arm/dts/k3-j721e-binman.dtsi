@@ -8,8 +8,8 @@
 #ifdef CONFIG_TARGET_J721E_R5_EVM
 
 &binman {
-	tiboot3 {
-		filename = "tiboot3.bin";
+	tiboot3-j721e_sr1_1-hs-evm.bin {
+		filename = "tiboot3-j721e_sr1_1-hs-evm.bin";
 		ti-secure-rom {
 			content = <&u_boot_spl>;
 			core = "public";
@@ -118,8 +118,8 @@
 };
 
 &binman {
-	tiboot3_fs {
-		filename = "tiboot3.bin_fs";
+	tiboot3-j721e_sr2-hs-fs-evm.bin {
+		filename = "tiboot3-j721e_sr2-hs-fs-evm.bin";
 		ti-secure-rom {
 			content = <&u_boot_spl_fs>;
 			core = "public";
@@ -205,8 +205,9 @@
 };
 
 &binman {
-	tiboot3_unsigned {
-		filename = "tiboot3.bin_unsigned";
+	tiboot3-j721e-gp-evm.bin {
+		filename = "tiboot3-j721e-gp-evm.bin";
+		symlink = "tiboot3.bin";
 		ti-secure-rom {
 			content = <&u_boot_spl_unsigned>;
 			core = "public";
