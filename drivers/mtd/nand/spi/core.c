@@ -360,7 +360,7 @@ static int spinand_write_to_cache_op(struct spinand_device *spinand,
 
 	spinand_cache_op_adjust_colum(spinand, &adjreq, &column);
 
-	op = *spinand->op_templates.write_cache;
+	op = *spinand->op_templates.update_cache;
 	op.addr.val = column;
 
 	/*
