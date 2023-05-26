@@ -17,8 +17,19 @@
 #include <linux/mtd/spinand.h>
 
 #define SPINAND_MFR_WINBOND		0xEF
+#define WINBOND_ID_LEN			3
 
 #define WINBOND_CFG_BUF_READ		BIT(3)
+
+/* Octal DTR SPI mode (8D-8D-8D) with Data Strobe output*/
+#define WINBOND_VCR_IO_MODE_OCTAL_DTR	0xE7
+#define WINBOND_VCR_IO_MODE_SINGLE_STR	0xFF
+#define WINBOND_VCR_IO_MODE_ADDR	0x00
+
+/* Use 12 dummy clk cycles for using Octal DTR SPI at max 120MHZ */
+#define WINBOND_VCR_DUMMY_CLK_COUNT	12
+#define WINBOND_VCR_DUMMY_CLK_DEFAULT	0xFF
+#define WINBOND_VCR_DUMMY_CLK_ADDR	0x01
 
 static SPINAND_OP_VARIANTS(read_cache_variants_w25m02gv,
 		SPINAND_PAGE_READ_FROM_CACHE_QUADIO_OP(0, 2, NULL, 0),
@@ -229,6 +240,84 @@ static int winbond_write_vcr_op(struct spinand_device *spinand, u8 reg, u8 val)
 	 * So, give thrice the minimum required delay.
 	 */
 	ndelay(150);
+	return 0;
+}
+
+static int winbond_spinand_octal_dtr_enable(struct spinand_device *spinand)
+{
+	int ret;
+	struct spi_mem_op op;
+
+	ret = winbond_write_vcr_op(spinand, WINBOND_VCR_DUMMY_CLK_ADDR,
+				   WINBOND_VCR_DUMMY_CLK_COUNT);
+	if (ret)
+		return ret;
+
+	ret = winbond_write_vcr_op(spinand, WINBOND_VCR_IO_MODE_ADDR,
+				   WINBOND_VCR_IO_MODE_OCTAL_DTR);
+	if (ret)
+		return ret;
+
+	/* Read flash ID to make sure the switch was successful. */
+	op = (struct spi_mem_op)
+		SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0x9f9f, 8, SPI_MEM_OP_DTR),
+			   SPI_MEM_OP_NO_ADDR,
+			   SPI_MEM_OP_DUMMY(16, 8, SPI_MEM_OP_DTR),
+			   SPI_MEM_OP_DATA_IN(SPINAND_MAX_ID_LEN,
+					      spinand->scratchbuf, 8,
+					      SPI_MEM_OP_DTR));
+
+	ret = spi_mem_exec_op(spinand->slave, &op);
+	if (ret)
+		return ret;
+
+	if (memcmp(spinand->scratchbuf, spinand->id.data + 1, WINBOND_ID_LEN))
+		return -EINVAL;
+
+	return 0;
+}
+
+static int winbond_spinand_octal_dtr_disable(struct spinand_device *spinand)
+{
+	int ret;
+	struct spi_mem_op op =
+		SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0x8181, 8, SPI_MEM_OP_DTR),
+			   SPI_MEM_OP_ADDR(4, WINBOND_VCR_IO_MODE_ADDR, 8,
+					   SPI_MEM_OP_DTR),
+			   SPI_MEM_OP_NO_DUMMY,
+			   SPI_MEM_OP_DATA_OUT(2, spinand->scratchbuf, 8,
+					       SPI_MEM_OP_DTR));
+
+	*spinand->scratchbuf = WINBOND_VCR_IO_MODE_SINGLE_STR;
+
+	ret = spinand_write_enable_op(spinand);
+	if (ret)
+		return ret;
+
+	ret = spi_mem_exec_op(spinand->slave, &op);
+	if (ret)
+		return ret;
+
+	ret = winbond_write_vcr_op(spinand, WINBOND_VCR_DUMMY_CLK_ADDR,
+				   WINBOND_VCR_DUMMY_CLK_DEFAULT);
+	if (ret)
+		return ret;
+
+	/* Read flash ID to make sure the switch was successful. */
+	op = (struct spi_mem_op)
+		SPI_MEM_OP(SPI_MEM_OP_CMD(0x9f, 1),
+			   SPI_MEM_OP_NO_ADDR,
+			   SPI_MEM_OP_DUMMY(1, 1),
+			   SPI_MEM_OP_DATA_IN(SPINAND_MAX_ID_LEN,
+					      spinand->scratchbuf, 1));
+
+	ret = spi_mem_exec_op(spinand->slave, &op);
+	if (ret)
+		return ret;
+
+	if (memcmp(spinand->scratchbuf, spinand->id.data + 1, WINBOND_ID_LEN))
+		return -EINVAL;
+
 	return 0;
 }
 
