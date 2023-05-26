@@ -207,9 +207,9 @@ static int spinand_init_quad_enable(struct spinand_device *spinand)
 	if (!(spinand->flags & SPINAND_HAS_QE_BIT))
 		return 0;
 
-	if (spinand->op_templates.read_cache->data.buswidth == 4 ||
-	    spinand->op_templates.write_cache->data.buswidth == 4 ||
-	    spinand->op_templates.update_cache->data.buswidth == 4)
+	if (spinand->data_ops.read_cache->data.buswidth == 4 ||
+	    spinand->data_ops.write_cache->data.buswidth == 4 ||
+	    spinand->data_ops.update_cache->data.buswidth == 4)
 		enable = true;
 
 	return spinand_upd_cfg(spinand, CFG_QUAD_ENABLE,
@@ -243,7 +243,7 @@ static int spinand_load_page_op(struct spinand_device *spinand,
 static int spinand_read_from_cache_op(struct spinand_device *spinand,
 				      const struct nand_page_io_req *req)
 {
-	struct spi_mem_op op = *spinand->op_templates.read_cache;
+	struct spi_mem_op op = *spinand->data_ops.read_cache;
 	struct nand_device *nand = spinand_to_nand(spinand);
 	struct mtd_info *mtd = nanddev_to_mtd(nand);
 	struct nand_page_io_req adjreq = *req;
@@ -316,7 +316,7 @@ static int spinand_read_from_cache_op(struct spinand_device *spinand,
 static int spinand_write_to_cache_op(struct spinand_device *spinand,
 				     const struct nand_page_io_req *req)
 {
-	struct spi_mem_op op = *spinand->op_templates.write_cache;
+	struct spi_mem_op op = *spinand->data_ops.write_cache;
 	struct nand_device *nand = spinand_to_nand(spinand);
 	struct mtd_info *mtd = nanddev_to_mtd(nand);
 	struct nand_page_io_req adjreq = *req;
@@ -358,7 +358,7 @@ static int spinand_write_to_cache_op(struct spinand_device *spinand,
 
 	spinand_cache_op_adjust_colum(spinand, &adjreq, &column);
 
-	op = *spinand->op_templates.update_cache;
+	op = *spinand->data_ops.update_cache;
 	op.addr.val = column;
 
 	/*
@@ -389,7 +389,7 @@ static int spinand_write_to_cache_op(struct spinand_device *spinand,
 		 */
 		if (nbytes) {
 			column = op.addr.val;
-			op = *spinand->op_templates.update_cache;
+			op = *spinand->data_ops.update_cache;
 			op.addr.val = column;
 		}
 	}
@@ -868,8 +868,8 @@ static void spinand_manufacturer_cleanup(struct spinand_device *spinand)
 }
 
 static const struct spi_mem_op *
-spinand_select_op_variant(struct spinand_device *spinand,
-			  const struct spinand_op_variants *variants)
+spinand_select_data_op_variant(struct spinand_device *spinand,
+				const struct spinand_op_variants *variants)
 {
 	struct nand_device *nand = spinand_to_nand(spinand);
 	unsigned int i;
@@ -936,23 +936,23 @@ int spinand_match_and_init(struct spinand_device *spinand,
 		spinand->flags = table[i].flags;
 		spinand->select_target = table[i].select_target;
 
-		op = spinand_select_op_variant(spinand,
-					       info->op_variants.read_cache);
+		op = spinand_select_data_op_variant(spinand,
+					info->data_ops_variants.read_cache);
 		if (!op)
 			return -ENOTSUPP;
 
-		spinand->op_templates.read_cache = op;
+		spinand->data_ops.read_cache = op;
 
-		op = spinand_select_op_variant(spinand,
-					       info->op_variants.write_cache);
+		op = spinand_select_data_op_variant(spinand,
+					info->data_ops_variants.write_cache);
 		if (!op)
 			return -ENOTSUPP;
 
-		spinand->op_templates.write_cache = op;
+		spinand->data_ops.write_cache = op;
 
-		op = spinand_select_op_variant(spinand,
-					       info->op_variants.update_cache);
-		spinand->op_templates.update_cache = op;
+		op = spinand_select_data_op_variant(spinand,
+					info->data_ops_variants.update_cache);
+		spinand->data_ops.update_cache = op;
 
 		return 0;
 	}
