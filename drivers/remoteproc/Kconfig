@@ -65,6 +65,7 @@ config REMOTEPROC_TI_K3_DSP
 config REMOTEPROC_TI_K3_R5F
 	bool "TI K3 R5F remoteproc support"
 	select REMOTEPROC
+	select MISC
 	depends on ARCH_K3
 	depends on TI_SCI_PROTOCOL
 	help
