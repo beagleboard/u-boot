@@ -1036,6 +1036,7 @@ static int spinand_init(struct spinand_device *spinand)
 	if (!spinand->scratchbuf)
 		return -ENOMEM;
 
+	spinand->protocol = SPINAND_1S;
 	ret = spinand_detect(spinand);
 	if (ret)
 		goto err_free_bufs;

@@ -174,6 +174,18 @@
 		   SPI_MEM_OP_DATA_OUT(len, buf, 4))
 
 /**
+ * enum spinand_protocol - List of SPI protocols to denote the op protocol and
+ *			   SPI NAND flash IO modes.
+ */
+enum spinand_protocol {
+	SPINAND_1S,
+	SPINAND_2S,
+	SPINAND_4S,
+	SPINAND_8S,
+	SPINAND_8D,
+};
+
+/**
  * Standard SPI NAND flash commands
  */
 #define SPINAND_CMD_PROG_LOAD_X4		0x32
@@ -382,6 +394,8 @@ struct spinand_info {
  *		   this die. Only required if your chip exposes several dies
  * @cur_target: currently selected target/die
  * @eccinfo: on-die ECC information
+ * @protocol: SPI IO protocol in operation. Update on successful transition into
+ *	      a different SPI IO protocol.
  * @cfg_cache: config register cache. One entry per die
  * @databuf: bounce buffer for data
  * @oobbuf: bounce buffer for OOB data
@@ -414,6 +428,8 @@ struct spinand_device {
 	unsigned int cur_target;
 
 	struct spinand_ecc_info eccinfo;
+
+	enum spinand_protocol protocol;
 
 	u8 *cfg_cache;
 	u8 *databuf;
