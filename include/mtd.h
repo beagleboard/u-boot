@@ -11,6 +11,7 @@
 #include <linux/mtd/mtd.h>
 
 int mtd_probe_devices(void);
+int mtd_remove(struct mtd_info *mtd);
 
 void board_mtdparts_default(const char **mtdids, const char **mtdparts);
 

@@ -46,13 +46,17 @@ static int spl_mtd_load_image(struct spl_image_info *spl_image,
 	switch (bootdev->boot_device) {
 	case BOOT_DEVICE_SPINAND:
 		mtd = get_mtd_device_nm("spi-nand0");
-		if (IS_ERR_OR_NULL(mtd))
+		if (IS_ERR_OR_NULL(mtd)) {
 			printf("MTD device %s not found, ret %ld\n", "spi-nand",
 			       PTR_ERR(mtd));
+			err = PTR_ERR(mtd);
+			goto remove_mtd_device;
+		}
 		break;
 	default:
 		puts(SPL_TPL_PROMPT "Unsupported MTD Boot Device!\n");
-		return -EINVAL;
+		err = -EINVAL;
+		goto remove_mtd_device;
 	}
 
 	header = spl_get_load_buffer(0, sizeof(*header));
@@ -60,7 +64,7 @@ static int spl_mtd_load_image(struct spl_image_info *spl_image,
 	err = mtd_read(mtd, spl_mtd_get_uboot_offs(), sizeof(*header),
 		       &ret_len, (void *)header);
 	if (err)
-		return err;
+		goto remove_mtd_device;
 
 	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
 	    image_get_magic(header) == FDT_MAGIC) {
@@ -70,25 +74,27 @@ static int spl_mtd_load_image(struct spl_image_info *spl_image,
 		load.filename = NULL;
 		load.bl_len = 1;
 		load.read = spl_mtd_fit_read;
-		return spl_load_simple_fit(spl_image, &load,
-					   spl_mtd_get_uboot_offs(), header);
+		err = spl_load_simple_fit(spl_image, &load,
+					  spl_mtd_get_uboot_offs(), header);
 	} else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER)) {
 		load.dev = mtd;
 		load.priv = NULL;
 		load.filename = NULL;
 		load.bl_len = 1;
 		load.read = spl_mtd_fit_read;
-		return spl_load_imx_container(spl_image, &load,
-					      spl_mtd_get_uboot_offs());
+		err = spl_load_imx_container(spl_image, &load,
+					     spl_mtd_get_uboot_offs());
 	} else {
 		err = spl_parse_image_header(spl_image, bootdev, header);
 		if (err)
-			return err;
-		return mtd_read(mtd, spl_mtd_get_uboot_offs(), spl_image->size,
-				&ret_len, (void *)(ulong)spl_image->load_addr);
+			goto remove_mtd_device;
+		err = mtd_read(mtd, spl_mtd_get_uboot_offs(), spl_image->size,
+			       &ret_len, (void *)(ulong)spl_image->load_addr);
 	}
 
-	return -EINVAL;
+remove_mtd_device:
+	mtd_remove(mtd);
+	return err;
 }
 
 SPL_LOAD_IMAGE_METHOD("SPINAND", 0, BOOT_DEVICE_SPINAND, spl_mtd_load_image);

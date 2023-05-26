@@ -1300,26 +1300,25 @@ err_spinand_cleanup:
 	return ret;
 }
 
-#ifndef __UBOOT__
 static int spinand_remove(struct udevice *slave)
 {
-	struct spinand_device *spinand;
+	struct spinand_device *spinand = dev_get_priv(slave);
 	struct mtd_info *mtd;
-	int ret;
 
-	spinand = spi_mem_get_drvdata(slave);
 	mtd = spinand_to_mtd(spinand);
 	free(mtd->name);
 
+#ifndef __UBOOT__
 	ret = mtd_device_unregister(mtd);
 	if (ret)
 		return ret;
-
+#endif
 	spinand_cleanup(spinand);
 
 	return 0;
 }
 
+#ifndef __UBOOT__
 static const struct spi_device_id spinand_ids[] = {
 	{ .name = "spi-nand" },
 	{ /* sentinel */ },
@@ -1361,4 +1360,6 @@ U_BOOT_DRIVER(spinand) = {
 	.of_match = spinand_ids,
 	.priv_auto	= sizeof(struct spinand_device),
 	.probe = spinand_probe,
+	.remove = spinand_remove,
+	.flags = DM_FLAG_OS_PREPARE,
 };

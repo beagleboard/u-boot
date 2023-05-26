@@ -11,6 +11,18 @@
 #include <errno.h>
 #include <mtd.h>
 
+/**
+ * mtd_remove - Remove the device @dev
+ *
+ * @dev: U-Boot device to probe
+ *
+ * @return 0 on success, an error otherwise.
+ */
+int mtd_remove(struct mtd_info *mtd)
+{
+	return device_remove(mtd->dev, DM_REMOVE_NORMAL);
+}
+
 /*
  * Implement a MTD uclass which should include most flash drivers.
  * The uclass private is pointed to mtd_info.
