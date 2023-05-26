@@ -8,8 +8,8 @@
 #ifdef CONFIG_TARGET_AM654_R5_EVM
 
 &binman {
-	tiboot3 {
-		filename = "tiboot3.bin";
+	tiboot3-am65x_sr2-hs-evm.bin {
+		filename = "tiboot3-am65x_sr2-hs-evm.bin";
 		ti-secure-rom {
 			content = <&u_boot_spl>;
 			core = "public";
@@ -117,8 +117,9 @@
 };
 
 &binman {
-	tiboot3_unsigned {
-		filename = "tiboot3.bin_unsigned";
+	tiboot3-am65x-gp-evm.bin {
+		filename = "tiboot3-am65x-gp-evm.bin";
+		symlink = "tiboot3.bin";
 		ti-secure-rom {
 			content = <&u_boot_spl_unsigned>;
 			core = "public";
