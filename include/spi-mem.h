@@ -13,44 +13,59 @@
 
 struct udevice;
 
-#define SPI_MEM_OP_CMD(__opcode, __buswidth)			\
+#define SPI_MEM_OP_DTR .dtr = 1
+
+#define SPI_MEM_OP_CMD(__opcode, __buswidth, ...)		\
 	{							\
 		.buswidth = __buswidth,				\
 		.opcode = __opcode,				\
 		.nbytes = 1,					\
+		__VA_ARGS__					\
 	}
 
-#define SPI_MEM_OP_ADDR(__nbytes, __val, __buswidth)		\
+#define SPI_MEM_OP_EXT_CMD(__nbytes, __opcode, __buswidth, ...)	\
+	{							\
+		.buswidth = __buswidth,				\
+		.opcode = __opcode,				\
+		.nbytes = __nbytes,				\
+		__VA_ARGS__					\
+	}
+
+#define SPI_MEM_OP_ADDR(__nbytes, __val, __buswidth, ...)	\
 	{							\
 		.nbytes = __nbytes,				\
 		.val = __val,					\
 		.buswidth = __buswidth,				\
+		__VA_ARGS__					\
 	}
 
 #define SPI_MEM_OP_NO_ADDR	{ }
 
-#define SPI_MEM_OP_DUMMY(__nbytes, __buswidth)			\
+#define SPI_MEM_OP_DUMMY(__nbytes, __buswidth, ...)		\
 	{							\
 		.nbytes = __nbytes,				\
 		.buswidth = __buswidth,				\
+		__VA_ARGS__					\
 	}
 
 #define SPI_MEM_OP_NO_DUMMY	{ }
 
-#define SPI_MEM_OP_DATA_IN(__nbytes, __buf, __buswidth)		\
+#define SPI_MEM_OP_DATA_IN(__nbytes, __buf, __buswidth, ...)	\
 	{							\
 		.dir = SPI_MEM_DATA_IN,				\
 		.nbytes = __nbytes,				\
 		.buf.in = __buf,				\
 		.buswidth = __buswidth,				\
+		__VA_ARGS__					\
 	}
 
-#define SPI_MEM_OP_DATA_OUT(__nbytes, __buf, __buswidth)	\
+#define SPI_MEM_OP_DATA_OUT(__nbytes, __buf, __buswidth, ...)	\
 	{							\
 		.dir = SPI_MEM_DATA_OUT,			\
 		.nbytes = __nbytes,				\
 		.buf.out = __buf,				\
 		.buswidth = __buswidth,				\
+		__VA_ARGS__					\
 	}
 
 #define SPI_MEM_OP_NO_DATA	{ }
