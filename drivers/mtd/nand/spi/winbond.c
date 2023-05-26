@@ -31,6 +31,8 @@
 #define WINBOND_VCR_DUMMY_CLK_DEFAULT	0xFF
 #define WINBOND_VCR_DUMMY_CLK_ADDR	0x01
 
+#define WINBOND_POR_DELAY_US		1000
+
 static SPINAND_OP_VARIANTS(read_cache_variants_w25m02gv,
 		SPINAND_PAGE_READ_FROM_CACHE_QUADIO_OP(0, 2, NULL, 0),
 		SPINAND_PAGE_READ_FROM_CACHE_X4_OP(0, 1, NULL, 0),
@@ -366,10 +368,36 @@ static int winbond_change_spi_protocol(struct spinand_device *spinand,
 	return -EOPNOTSUPP;
 }
 
+static void winbond_spinand_cleanup(struct spinand_device *spinand)
+{
+	struct spi_mem_op op;
+
+	/* Perform Power-On-Reset if the device is in Octal-DTR mode */
+	if (spinand->protocol == SPINAND_8D) {
+		op = (struct spi_mem_op)
+			SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0x6666, 8, SPI_MEM_OP_DTR),
+				   SPI_MEM_OP_NO_ADDR,
+				   SPI_MEM_OP_NO_DUMMY,
+				   SPI_MEM_OP_NO_DATA);
+		spi_mem_exec_op(spinand->slave, &op);
+
+		op = (struct spi_mem_op)
+			SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0x9999, 8, SPI_MEM_OP_DTR),
+				   SPI_MEM_OP_NO_ADDR,
+				   SPI_MEM_OP_NO_DUMMY,
+				   SPI_MEM_OP_NO_DATA);
+		spi_mem_exec_op(spinand->slave, &op);
+
+		/* PoR can take max 500 us to complete, so sleep for 1000 us*/
+		udelay(WINBOND_POR_DELAY_US);
+	}
+}
+
 static const struct spinand_manufacturer_ops winbond_spinand_manuf_ops = {
 	.detect = winbond_spinand_detect,
 	.init = winbond_spinand_init,
 	.change_protocol = winbond_change_spi_protocol,
+	.cleanup = winbond_spinand_cleanup,
 };
 
 const struct spinand_manufacturer winbond_spinand_manufacturer = {
