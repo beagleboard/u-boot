@@ -52,9 +52,11 @@ static void spinand_cache_op_adjust_colum(struct spinand_device *spinand,
 
 static int spinand_read_reg_op(struct spinand_device *spinand, u8 reg, u8 *val)
 {
-	struct spi_mem_op op = SPINAND_GET_FEATURE_OP(reg,
-						      spinand->scratchbuf);
 	int ret;
+	struct spi_mem_op op = spinand->ctrl_ops->ops.get_feature;
+
+	op.data.buf.out = spinand->scratchbuf;
+	memset(&op.addr.val, reg, op.addr.nbytes);
 
 	ret = spi_mem_exec_op(spinand->slave, &op);
 	if (ret)
@@ -66,10 +68,11 @@ static int spinand_read_reg_op(struct spinand_device *spinand, u8 reg, u8 *val)
 
 static int spinand_write_reg_op(struct spinand_device *spinand, u8 reg, u8 val)
 {
-	struct spi_mem_op op = SPINAND_SET_FEATURE_OP(reg,
-						      spinand->scratchbuf);
+	struct spi_mem_op op = spinand->ctrl_ops->ops.set_feature;
 
-	*spinand->scratchbuf = val;
+	op.data.buf.out = spinand->scratchbuf;
+	memset(&op.addr.val, reg, op.addr.nbytes);
+	memset(spinand->scratchbuf, val, op.data.nbytes);
 	return spi_mem_exec_op(spinand->slave, &op);
 }
 
@@ -225,7 +228,7 @@ static int spinand_ecc_enable(struct spinand_device *spinand,
 
 static int spinand_write_enable_op(struct spinand_device *spinand)
 {
-	struct spi_mem_op op = SPINAND_WR_EN_DIS_OP(true);
+	struct spi_mem_op op = spinand->ctrl_ops->ops.write_enable;
 
 	return spi_mem_exec_op(spinand->slave, &op);
 }
@@ -235,8 +238,9 @@ static int spinand_load_page_op(struct spinand_device *spinand,
 {
 	struct nand_device *nand = spinand_to_nand(spinand);
 	unsigned int row = nanddev_pos_to_row(nand, &req->pos);
-	struct spi_mem_op op = SPINAND_PAGE_READ_OP(row);
+	struct spi_mem_op op = spinand->ctrl_ops->ops.page_read;
 
+	op.addr.val = row;
 	return spi_mem_exec_op(spinand->slave, &op);
 }
 
@@ -402,8 +406,9 @@ static int spinand_program_op(struct spinand_device *spinand,
 {
 	struct nand_device *nand = spinand_to_nand(spinand);
 	unsigned int row = nanddev_pos_to_row(nand, &req->pos);
-	struct spi_mem_op op = SPINAND_PROG_EXEC_OP(row);
+	struct spi_mem_op op = spinand->ctrl_ops->ops.program_execute;
 
+	op.addr.val = row;
 	return spi_mem_exec_op(spinand->slave, &op);
 }
 
@@ -412,8 +417,9 @@ static int spinand_erase_op(struct spinand_device *spinand,
 {
 	struct nand_device *nand = &spinand->base;
 	unsigned int row = nanddev_pos_to_row(nand, pos);
-	struct spi_mem_op op = SPINAND_BLK_ERASE_OP(row);
+	struct spi_mem_op op = spinand->ctrl_ops->ops.block_erase;
 
+	op.addr.val = row;
 	return spi_mem_exec_op(spinand->slave, &op);
 }
 
@@ -464,7 +470,7 @@ static int spinand_read_id_op(struct spinand_device *spinand, u8 *buf)
 
 static int spinand_reset_op(struct spinand_device *spinand)
 {
-	struct spi_mem_op op = SPINAND_RESET_OP;
+	struct spi_mem_op op = spinand->ctrl_ops->ops.reset;
 	int ret;
 
 	ret = spi_mem_exec_op(spinand->slave, &op);
