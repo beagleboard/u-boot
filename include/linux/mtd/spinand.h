@@ -33,8 +33,21 @@
 		   SPI_MEM_OP_NO_DUMMY,					\
 		   SPI_MEM_OP_NO_DATA)
 
+#define SPINAND_RESET_OP_OCTAL_DTR					\
+	SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0xffff, 8, SPI_MEM_OP_DTR),	\
+		   SPI_MEM_OP_NO_ADDR,					\
+		   SPI_MEM_OP_NO_DUMMY,					\
+		   SPI_MEM_OP_NO_DATA)
+
 #define SPINAND_WR_EN_DIS_OP(enable)					\
 	SPI_MEM_OP(SPI_MEM_OP_CMD((enable) ? 0x06 : 0x04, 1),		\
+		   SPI_MEM_OP_NO_ADDR,					\
+		   SPI_MEM_OP_NO_DUMMY,					\
+		   SPI_MEM_OP_NO_DATA)
+
+#define SPINAND_WR_EN_DIS_OP_OCTAL_DTR(enable)				\
+	SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, (enable) ? 0x0606 : 0x0404, 8,	\
+				      SPI_MEM_OP_DTR),			\
 		   SPI_MEM_OP_NO_ADDR,					\
 		   SPI_MEM_OP_NO_DUMMY,					\
 		   SPI_MEM_OP_NO_DATA)
@@ -51,11 +64,23 @@
 		   SPI_MEM_OP_NO_DUMMY,					\
 		   SPI_MEM_OP_DATA_OUT(1, valptr, 1))
 
+#define SPINAND_SET_FEATURE_OP_OCTAL_DTR(reg, valptr)			\
+	SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0x1f1f, 8, SPI_MEM_OP_DTR),	\
+		   SPI_MEM_OP_ADDR(2, reg, 8, SPI_MEM_OP_DTR),		\
+		   SPI_MEM_OP_NO_DUMMY,					\
+		   SPI_MEM_OP_DATA_OUT(2, valptr, 8, SPI_MEM_OP_DTR))
+
 #define SPINAND_GET_FEATURE_OP(reg, valptr)				\
 	SPI_MEM_OP(SPI_MEM_OP_CMD(0x0f, 1),				\
 		   SPI_MEM_OP_ADDR(1, reg, 1),				\
 		   SPI_MEM_OP_NO_DUMMY,					\
 		   SPI_MEM_OP_DATA_IN(1, valptr, 1))
+
+#define SPINAND_GET_FEATURE_OP_OCTAL_DTR(reg, valptr)			\
+	SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0x0f0f, 8, SPI_MEM_OP_DTR),	\
+		   SPI_MEM_OP_ADDR(2, reg, 8, SPI_MEM_OP_DTR),		\
+		   SPI_MEM_OP_DUMMY(14, 8, SPI_MEM_OP_DTR),		\
+		   SPI_MEM_OP_DATA_IN(2, valptr, 8, SPI_MEM_OP_DTR))
 
 #define SPINAND_BLK_ERASE_OP(addr)					\
 	SPI_MEM_OP(SPI_MEM_OP_CMD(0xd8, 1),				\
@@ -63,9 +88,21 @@
 		   SPI_MEM_OP_NO_DUMMY,					\
 		   SPI_MEM_OP_NO_DATA)
 
+#define SPINAND_BLK_ERASE_OP_OCTAL_DTR(addr)				\
+	SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0xd8d8, 8, SPI_MEM_OP_DTR),	\
+		   SPI_MEM_OP_ADDR(2, addr, 8, SPI_MEM_OP_DTR),		\
+		   SPI_MEM_OP_NO_DUMMY,					\
+		   SPI_MEM_OP_NO_DATA)
+
 #define SPINAND_PAGE_READ_OP(addr)					\
 	SPI_MEM_OP(SPI_MEM_OP_CMD(0x13, 1),				\
 		   SPI_MEM_OP_ADDR(3, addr, 1),				\
+		   SPI_MEM_OP_NO_DUMMY,					\
+		   SPI_MEM_OP_NO_DATA)
+
+#define SPINAND_PAGE_READ_OP_OCTAL_DTR(addr)				\
+	SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0x1313, 8, SPI_MEM_OP_DTR),	\
+		   SPI_MEM_OP_ADDR(2, addr, 8, SPI_MEM_OP_DTR),		\
 		   SPI_MEM_OP_NO_DUMMY,					\
 		   SPI_MEM_OP_NO_DATA)
 
@@ -99,9 +136,21 @@
 		   SPI_MEM_OP_DUMMY(ndummy, 4),				\
 		   SPI_MEM_OP_DATA_IN(len, buf, 4))
 
+#define SPINAND_PAGE_READ_FROM_CACHE_OCTALIO_DTR_OP(addr, ndummy, buf, len) \
+	SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0x9d9d, 8, SPI_MEM_OP_DTR),	\
+		   SPI_MEM_OP_ADDR(2, addr, 8, SPI_MEM_OP_DTR),		\
+		   SPI_MEM_OP_DUMMY(ndummy, 8, SPI_MEM_OP_DTR),		\
+		   SPI_MEM_OP_DATA_IN(len, buf, 8, SPI_MEM_OP_DTR))
+
 #define SPINAND_PROG_EXEC_OP(addr)					\
 	SPI_MEM_OP(SPI_MEM_OP_CMD(0x10, 1),				\
 		   SPI_MEM_OP_ADDR(3, addr, 1),				\
+		   SPI_MEM_OP_NO_DUMMY,					\
+		   SPI_MEM_OP_NO_DATA)
+
+#define SPINAND_PROG_EXEC_OP_OCTAL_DTR(addr)				\
+	SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, 0x1010, 8, SPI_MEM_OP_DTR),	\
+		   SPI_MEM_OP_ADDR(2, addr, 8, SPI_MEM_OP_DTR),		\
 		   SPI_MEM_OP_NO_DUMMY,					\
 		   SPI_MEM_OP_NO_DATA)
 
@@ -110,6 +159,13 @@
 		   SPI_MEM_OP_ADDR(2, addr, 1),				\
 		   SPI_MEM_OP_NO_DUMMY,					\
 		   SPI_MEM_OP_DATA_OUT(len, buf, 1))
+
+#define SPINAND_PROG_LOAD_OCTALIO_DTR(reset, addr, buf, len)		\
+	SPI_MEM_OP(SPI_MEM_OP_EXT_CMD(2, reset ? 0x0202 : 0x8484, 8,	\
+				      SPI_MEM_OP_DTR),			\
+		   SPI_MEM_OP_ADDR(2, addr, 8, SPI_MEM_OP_DTR),		\
+		   SPI_MEM_OP_NO_DUMMY,					\
+		   SPI_MEM_OP_DATA_OUT(len, buf, 8, SPI_MEM_OP_DTR))
 
 #define SPINAND_PROG_LOAD_X4(reset, addr, buf, len)			\
 	SPI_MEM_OP(SPI_MEM_OP_CMD(reset ? 0x32 : 0x34, 1),		\
