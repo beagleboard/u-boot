@@ -987,6 +987,7 @@ int spinand_match_and_init(struct spinand_device *spinand,
 		spinand->eccinfo = table[i].eccinfo;
 		spinand->flags = table[i].flags;
 		spinand->select_target = table[i].select_target;
+		spinand->desc_entry = &table[i];
 
 		op = spinand_select_data_op_variant(spinand,
 					info->data_ops_variants.read_cache);
