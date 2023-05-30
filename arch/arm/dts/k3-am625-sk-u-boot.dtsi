@@ -175,3 +175,43 @@
 	/delete-property/ extcon;
 	bootph-pre-ram;
 };
+
+&main_gpio0 {
+	bootph-pre-ram;
+};
+
+&main_i2c1 {
+	bootph-pre-ram;
+};
+
+&main_i2c1_pins_default {
+	bootph-pre-ram;
+};
+
+&exp1 {
+	bootph-pre-ram;
+};
+
+&vmain_pd {
+	bootph-pre-ram;
+};
+
+&vcc_5v0 {
+	bootph-pre-ram;
+};
+
+&vcc_3v3_sys {
+	bootph-pre-ram;
+};
+
+&vdd_mmc1 {
+	bootph-pre-ram;
+};
+
+&vdd_sd_dv {
+	bootph-pre-ram;
+};
+
+&vdd_sd_dv_pins_default {
+	bootph-pre-ram;
+};
