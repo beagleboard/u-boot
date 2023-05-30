@@ -525,7 +525,7 @@
 		ti,otap-del-sel-ddr50 = <0x4>;
 		ti,itap-del-sel-legacy = <0xa>;
 		ti,itap-del-sel-sd-hs = <0x1>;
-		ti,itap-del-sel-sdr12 = <0xa>;
+		ti,itap-del-sel-sdr12 = <0xA>;
 		ti,itap-del-sel-sdr25 = <0x1>;
 		ti,clkbuf-sel = <0x7>;
 		bus-width = <4>;
@@ -546,10 +546,10 @@
 		ti,otap-del-sel-sdr25 = <0x0>;
 		ti,otap-del-sel-sdr50 = <0x8>;
 		ti,otap-del-sel-sdr104 = <0x7>;
-		ti,otap-del-sel-ddr50 = <0x8>;
+		ti,otap-del-sel-ddr50 = <0x4>;
 		ti,itap-del-sel-legacy = <0xa>;
-		ti,itap-del-sel-sd-hs = <0xa>;
-		ti,itap-del-sel-sdr12 = <0xa>;
+		ti,itap-del-sel-sd-hs = <0x1>;
+		ti,itap-del-sel-sdr12 = <0xA>;
 		ti,itap-del-sel-sdr25 = <0x1>;
 		ti,clkbuf-sel = <0x7>;
 		status = "disabled";
