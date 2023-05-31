@@ -182,7 +182,7 @@ struct mm_region *mem_map = j7200_mem_map;
 #endif /* CONFIG_SOC_K3_J721E */
 
 #ifdef CONFIG_SOC_K3_J721S2
-#define NR_MMU_REGIONS	(CONFIG_NR_DRAM_BANKS + 3)
+#define NR_MMU_REGIONS	(CONFIG_NR_DRAM_BANKS + 5)
 
 /* ToDo: Add 64bit IO */
 struct mm_region j721s2_mem_map[NR_MMU_REGIONS] = {
@@ -196,7 +196,19 @@ struct mm_region j721s2_mem_map[NR_MMU_REGIONS] = {
 	}, {
 		.virt = 0x80000000UL,
 		.phys = 0x80000000UL,
-		.size = 0x80000000UL,
+		.size = 0x20000000UL,
+		.attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL) |
+			 PTE_BLOCK_INNER_SHARE
+	}, {
+		.virt = 0xa0000000UL,
+		.phys = 0xa0000000UL,
+		.size = 0x1bc00000UL,
+		.attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL_NC) |
+			 PTE_BLOCK_NON_SHARE
+	}, {
+		.virt = 0xbbc00000UL,
+		.phys = 0xbbc00000UL,
+		.size = 0x44400000UL,
 		.attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL) |
 			 PTE_BLOCK_INNER_SHARE
 	}, {
@@ -266,7 +278,7 @@ struct mm_region *mem_map = am64_mem_map;
 #endif /* CONFIG_SOC_K3_AM642 || CONFIG_SOC_K3_AM625 || CONFIG_SOC_K3_AM62A7 */
 
 #if defined(CONFIG_SOC_K3_J784S4)
-#define NR_MMU_REGIONS	(CONFIG_NR_DRAM_BANKS + 3)
+#define NR_MMU_REGIONS	(CONFIG_NR_DRAM_BANKS + 5)
 
 struct mm_region j784s4_mem_map[NR_MMU_REGIONS] = {
 	{
@@ -279,7 +291,19 @@ struct mm_region j784s4_mem_map[NR_MMU_REGIONS] = {
 	}, {
 		.virt = 0x80000000UL,
 		.phys = 0x80000000UL,
-		.size = 0x80000000UL,
+		.size = 0x20000000UL,
+		.attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL) |
+			 PTE_BLOCK_INNER_SHARE
+	}, {
+		.virt = 0xa0000000UL,
+		.phys = 0xa0000000UL,
+		.size = 0x21000000UL,
+		.attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL_NC) |
+			 PTE_BLOCK_NON_SHARE
+	}, {
+		.virt = 0xc1000000UL,
+		.phys = 0xc1000000UL,
+		.size = 0x3f000000UL,
 		.attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL) |
 			 PTE_BLOCK_INNER_SHARE
 	}, {
