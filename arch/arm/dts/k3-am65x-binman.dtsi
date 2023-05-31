@@ -117,8 +117,8 @@
 };
 
 &binman {
-	tiboot3-am65x-gp-evm.bin {
-		filename = "tiboot3-am65x-gp-evm.bin";
+	tiboot3-am65x_sr2-gp-evm.bin {
+		filename = "tiboot3-am65x_sr2-gp-evm.bin";
 		symlink = "tiboot3.bin";
 		ti-secure-rom {
 			content = <&u_boot_spl_unsigned>;
