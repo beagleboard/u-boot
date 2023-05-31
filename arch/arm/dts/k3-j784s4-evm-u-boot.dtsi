@@ -101,6 +101,9 @@
 	bootph-pre-ram;
 };
 
+&main_usbss0_pins_default {
+	bootph-pre-ram;
+};
 &wkup_pmx0 {
 	bootph-pre-ram;
 };
@@ -135,6 +138,23 @@
 
 &main_sdhci1 {
 	bootph-pre-ram;
+};
+
+&usbss0 {
+	bootph-pre-ram;
+};
+
+&usb0 {
+	dr_mode = "peripheral";
+	bootph-pre-ram;
+};
+
+&serdes_ln_ctrl {
+	u-boot,mux-autoprobe;
+};
+
+&usb_serdes_mux {
+	u-boot,mux-autoprobe;
 };
 
 &mcu_cpsw {
