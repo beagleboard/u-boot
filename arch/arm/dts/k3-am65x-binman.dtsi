@@ -139,16 +139,15 @@
 			load = <0x40000>;
 			sw-rev = <CONFIG_K3_X509_SWRV>;
 			keyfile = "ti-degenerate-key.pem";
-			countersign;
 		};
 		ti_sci: ti-sci.bin {
-			filename = "ti-sysfw/ti-sci-firmware-am65x-gp.bin";
+			filename = "ti-sysfw/ti-sci-firmware-am65x_sr2-gp.bin";
 			type = "blob-ext";
 			optional;
 		};
 	};
 	itb_gp {
-		filename = "sysfw-am65x-gp-evm.itb";
+		filename = "sysfw-am65x_sr2-gp-evm.itb";
 		symlink = "sysfw.itb";
 		fit {
 			description = "SYSFW and Config fragments";
