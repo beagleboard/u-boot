@@ -20,6 +20,8 @@
 		i2c2 = &mcu_i2c1;
 		i2c3 = &main_i2c0;
 		ethernet0 = &cpsw_port1;
+		spi0 = &ospi0;
+		spi1 = &ospi1;
 	};
 };
 
@@ -152,6 +154,34 @@
 		compatible = "ti,am654-cpsw-phy-sel";
 		reg= <0x0 0x40f04040 0x0 0x4>;
 		reg-names = "gmii-sel";
+	};
+};
+
+&fss {
+	bootph-pre-ram;
+};
+
+&ospi0 {
+	bootph-pre-ram;
+
+	flash@0 {
+		bootph-pre-ram;
+
+		partitions {
+			bootph-pre-ram;
+
+			partition@3fc0000 {
+				bootph-pre-ram;
+			};
+		};
+	};
+};
+
+&ospi1 {
+	bootph-pre-ram;
+
+	flash@0 {
+		bootph-pre-ram;
 	};
 };
 
