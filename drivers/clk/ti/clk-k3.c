@@ -246,7 +246,7 @@ static ulong ti_clk_set_rate(struct clk *clk, ulong rate)
 	int div = 1;
 	ulong child_rate;
 	const struct clk_ops *ops;
-	ulong new_rate, rem;
+	ulong new_rate, rem, temp_rate;
 	ulong diff, new_diff;
 
 	/*
@@ -289,7 +289,7 @@ static ulong ti_clk_set_rate(struct clk *clk, ulong rate)
 	 * following directly a PLL
 	 */
 
-	if (diff > rate / div / 2) {
+	if ((diff > rate / div / 8) && clk_get_parent(clkp)) {
 		ulong pll_tgt;
 		int pll_div = 0;
 
@@ -319,9 +319,11 @@ static ulong ti_clk_set_rate(struct clk *clk, ulong rate)
 		debug("%s: pll_tgt=%u, rate=%u, div=%u\n", __func__,
 		      (u32)pll_tgt, (u32)rate, pll_div);
 
-		clk_set_rate(clkp, pll_tgt);
+		temp_rate = clk_set_rate(clkp, pll_tgt);
+		if (temp_rate == pll_tgt)
+			return clk_set_rate(clk, rate / div) * div;
 
-		return clk_set_rate(clk, rate / div) * div;
+		clkp = clk;
 	}
 
 	/*
