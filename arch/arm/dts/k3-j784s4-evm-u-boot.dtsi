@@ -171,3 +171,39 @@
 		reg-names = "gmii-sel";
 	};
 };
+
+&mcu_fss0_ospi0_pins_default {
+	bootph-pre-ram;
+};
+
+&mcu_fss0_ospi1_pins_default {
+	bootph-pre-ram;
+};
+
+&fss {
+	bootph-pre-ram;
+};
+
+&ospi0 {
+	bootph-pre-ram;
+
+	flash@0 {
+		bootph-pre-ram;
+
+		partitions {
+			bootph-pre-ram;
+
+			partition@3fc0000 {
+				bootph-pre-ram;
+			};
+		};
+	};
+};
+
+&ospi1 {
+	bootph-pre-ram;
+
+	flash@0 {
+		bootph-pre-ram;
+	};
+};
