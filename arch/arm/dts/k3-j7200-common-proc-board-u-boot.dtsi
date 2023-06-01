@@ -167,6 +167,10 @@
 	bootph-pre-ram;
 };
 
+&mcu_fss0_ospi0_pins_default {
+	bootph-pre-ram;
+};
+
 &fss {
 	bootph-pre-ram;
 };
@@ -181,6 +185,14 @@
 
 &hbmc_mux {
 	bootph-pre-ram;
+};
+
+&ospi0 {
+	bootph-pre-ram;
+
+	flash@0 {
+		bootph-pre-ram;
+	};
 };
 
 &serdes_ln_ctrl {
