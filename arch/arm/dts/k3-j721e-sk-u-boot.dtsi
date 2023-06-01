@@ -247,10 +247,12 @@
 	flash@0 {
 		bootph-pre-ram;
 
-		partition@3fc0000 {
-			label = "ospi.phypattern";
-			reg = <0x3fc0000 0x40000>;
+		partitions {
 			bootph-pre-ram;
+
+			partition@3fc0000 {
+				bootph-pre-ram;
+			};
 		};
 	};
 };

@@ -214,6 +214,14 @@
 
 	flash@0 {
 		bootph-pre-ram;
+
+		partitions {
+			bootph-pre-ram;
+
+			partition@3fc0000 {
+				bootph-pre-ram;
+			};
+		};
 	};
 };
 
