@@ -90,6 +90,75 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 }
 #endif
 
+#ifdef CONFIG_TI_I2C_BOARD_DETECT
+int do_board_detect(void)
+{
+	int ret;
+
+	if (board_ti_was_eeprom_read())
+		return 0;
+
+	ret = ti_i2c_eeprom_am6_get_base(CONFIG_EEPROM_BUS_ADDRESS,
+					 CONFIG_EEPROM_CHIP_ADDRESS);
+	if (ret) {
+		printf("EEPROM not available at 0x%02x, trying to read at 0x%02x\n",
+			CONFIG_EEPROM_CHIP_ADDRESS, CONFIG_EEPROM_CHIP_ADDRESS + 1);
+		ret = ti_i2c_eeprom_am6_get_base(CONFIG_EEPROM_BUS_ADDRESS,
+						CONFIG_EEPROM_CHIP_ADDRESS + 1);
+		if (ret)
+			pr_err("Reading on-board EEPROM at 0x%02x failed %d\n",
+				CONFIG_EEPROM_CHIP_ADDRESS + 1, ret);
+	}
+
+	return ret;
+}
+
+int checkboard(void)
+{
+	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
+
+	if (do_board_detect())
+		/* EEPROM not populated */
+		printf("Board: %s rev %s\n", "J784S4-EVM", "E1");
+	else
+		printf("Board: %s rev %s\n", ep->name, ep->version);
+
+	return 0;
+}
+
+static void setup_board_eeprom_env(void)
+{
+	char *name = "j784s4";
+
+	if (do_board_detect())
+		goto invalid_eeprom;
+
+	if (board_is_j784s4_evm())
+		name = "j784s4";
+	else
+		printf("Unidentified board claims %s in eeprom header\n",
+		       board_ti_get_name());
+
+invalid_eeprom:
+	set_board_info_env_am6(name);
+}
+
+#ifdef CONFIG_SPL_LOAD_FIT
+int board_fit_config_name_match(const char *name)
+{
+	bool eeprom_read = board_ti_was_eeprom_read();
+
+	if (!eeprom_read || board_is_j784s4_evm()) {
+		if ((!strcmp(name, "k3-j784s4-evm")) || (!strcmp(name, "k3-j784s4-r5-evm")))
+				return 0;
+	}
+
+	return -1;
+}
+#endif
+
+#endif
+
 int board_late_init(void)
 {
 	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
