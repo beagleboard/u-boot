@@ -146,9 +146,11 @@
 
 #define SPL_NODTB "spl/u-boot-spl-nodtb.bin"
 #define SPL_J784S4_EVM_DTB "spl/dts/k3-j784s4-evm.dtb"
+#define SPL_AM69_SK_DTB "spl/dts/k3-am69-sk.dtb"
 
 #define UBOOT_NODTB "u-boot-nodtb.bin"
 #define J784S4_EVM_DTB "arch/arm/dts/k3-j784s4-evm.dtb"
+#define AM69_SK_DTB "arch/arm/dts/k3-am69-sk.dtb"
 
 &binman {
 	ti-dm {
@@ -247,6 +249,20 @@
 					};
 
 				};
+				fdt-1 {
+					description = "k3-am69-sk";
+					type = "flat_dt";
+					arch = "arm";
+					compression = "none";
+					ti-secure {
+						content = <&spl_am69_sk_dtb>;
+						keyfile = "custMpk.pem";
+					};
+					spl_am69_sk_dtb: blob-ext {
+						filename = SPL_AM69_SK_DTB;
+					};
+
+				};
 			};
 
 			configurations {
@@ -257,6 +273,13 @@
 					firmware = "atf";
 					loadables = "tee", "dm", "spl";
 					fdt = "fdt-0";
+				};
+
+				conf-1 {
+					description = "k3-am69-sk";
+					firmware = "atf";
+					loadables = "tee", "dm", "spl";
+					fdt = "fdt-1";
 				};
 			};
 		};
@@ -307,6 +330,24 @@
 						algo = "crc32";
 					};
 				};
+
+				fdt-1 {
+					description = "k3-am69-sk";
+					type = "flat_dt";
+					arch = "arm";
+					compression = "none";
+					ti-secure {
+						content = <&am69_sk_dtb>;
+						keyfile = "custMpk.pem";
+					};
+					am69_sk_dtb: blob-ext {
+						filename = AM69_SK_DTB;
+					};
+
+					hash {
+						algo = "crc32";
+					};
+				};
 			};
 
 			configurations {
@@ -317,6 +358,13 @@
 					firmware = "uboot";
 					loadables = "uboot";
 					fdt = "fdt-0";
+				};
+
+				conf-1 {
+					description = "k3-am69-sk";
+					firmware = "uboot";
+					loadables = "uboot";
+					fdt = "fdt-1";
 				};
 			};
 		};
@@ -395,6 +443,16 @@
 						filename = SPL_J784S4_EVM_DTB;
 					};
 				};
+
+				fdt-1 {
+					description = "k3-am69-sk";
+					type = "flat_dt";
+					arch = "arm";
+					compression = "none";
+					blob {
+						filename = SPL_AM69_SK_DTB;
+					};
+				};
 			};
 
 			configurations {
@@ -405,6 +463,13 @@
 					firmware = "atf";
 					loadables = "tee", "dm", "spl";
 					fdt = "fdt-0";
+				};
+
+				conf-1 {
+					description = "k3-am69-sk";
+					firmware = "atf";
+					loadables = "tee", "dm", "spl";
+					fdt = "fdt-1";
 				};
 			};
 		};
@@ -447,6 +512,19 @@
 						algo = "crc32";
 					};
 				};
+
+				fdt-1 {
+					description = "k3-am69-sk";
+					type = "flat_dt";
+					arch = "arm";
+					compression = "none";
+					blob {
+						filename = AM69_SK_DTB;
+					};
+					hash {
+						algo = "crc32";
+					};
+				};
 			};
 
 			configurations {
@@ -457,6 +535,13 @@
 					firmware = "uboot";
 					loadables = "uboot";
 					fdt = "fdt-0";
+				};
+
+				conf-1 {
+					description = "k3-am69-sk";
+					firmware = "uboot";
+					loadables = "uboot";
+					fdt = "fdt-1";
 				};
 			};
 		};
