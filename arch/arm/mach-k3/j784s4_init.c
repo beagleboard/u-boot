@@ -184,6 +184,11 @@ void board_init_f(ulong dummy)
 		k3_sysfw_loader(is_rom_loaded_sysfw(&bootdata),
 				k3_mmc_stop_clock, k3_mmc_restart_clock);
 
+#ifdef CONFIG_SPL_OF_LIST
+		if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT))
+			do_board_detect();
+#endif
+
 		if (IS_ENABLED(CONFIG_SPL_CLK_K3)) {
 			/*
 			 * Force probe of clk_k3 driver here to ensure basic default clock
