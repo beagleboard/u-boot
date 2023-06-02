@@ -26,8 +26,6 @@
 
 #include "../common/board_detect.h"
 
-#define board_is_j784s4_evm()	board_ti_k3_is("J784S4-EVM")
-
 DECLARE_GLOBAL_DATA_PTR;
 
 int board_init(void)
@@ -91,6 +89,14 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 #endif
 
 #ifdef CONFIG_TI_I2C_BOARD_DETECT
+
+/*
+* Functions specific to EVM and SK designs of J784S4/AM69 family.
+*/
+#define board_is_j784s4_evm()	board_ti_k3_is("J784S4-EVM")
+
+#define board_is_am69_sk()	board_ti_k3_is("AM69-SK")
+
 int do_board_detect(void)
 {
 	int ret;
@@ -133,8 +139,8 @@ static void setup_board_eeprom_env(void)
 	if (do_board_detect())
 		goto invalid_eeprom;
 
-	if (board_is_j784s4_evm())
-		name = "j784s4";
+	if (board_is_am69_sk())
+		name = "am69-sk";
 	else
 		printf("Unidentified board claims %s in eeprom header\n",
 		       board_ti_get_name());
