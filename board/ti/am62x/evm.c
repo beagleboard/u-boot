@@ -22,7 +22,8 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define board_is_am62x_skevm()  board_ti_k3_is("AM62-SKEVM")
+#define board_is_am62x_skevm()  (board_ti_k3_is("AM62-SKEVM") || \
+				 board_ti_k3_is("AM62B-SKEVM"))
 #define board_is_am62x_lp_skevm()  board_ti_k3_is("AM62-LP-SKEVM")
 
 #if CONFIG_IS_ENABLED(SPLASH_SCREEN)
