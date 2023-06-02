@@ -177,6 +177,9 @@ int board_fit_config_name_match(const char *name)
 	if (!eeprom_read || board_is_j784s4_evm()) {
 		if ((!strcmp(name, "k3-j784s4-evm")) || (!strcmp(name, "k3-j784s4-r5-evm")))
 				return 0;
+	} else if (!eeprom_read || board_is_am69_sk()) {
+		if ((!strcmp(name, "k3-am69-sk")) || (!strcmp(name, "k3-am69-r5-sk")))
+				return 0;
 	}
 
 	return -1;
