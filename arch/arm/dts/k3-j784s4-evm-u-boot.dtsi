@@ -25,6 +25,7 @@
 
 &wkup_i2c0 {
 	bootph-pre-ram;
+	status = "okay";
 };
 
 &cbass_main {
