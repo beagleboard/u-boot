@@ -284,3 +284,11 @@
 &dss {
 	status = "disabled";
 };
+
+&main_r5fss0 {
+	ti,cluster-mode = <0>;
+};
+
+&main_r5fss1 {
+	ti,cluster-mode = <0>;
+};
