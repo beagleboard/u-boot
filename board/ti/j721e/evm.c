@@ -111,6 +111,9 @@ static void __maybe_unused detect_enable_hyperflash(void *blob)
 	struct gpio_desc desc = {0};
 	char *hypermux_sel_gpio = (board_is_j721e_som()) ? "8" : "6";
 
+	if (!board_is_j721e_som() && !board_is_j7200_som())
+		return;
+
 	if (dm_gpio_lookup_name(hypermux_sel_gpio, &desc))
 		return;
 
@@ -510,6 +513,9 @@ static int __maybe_unused detect_SW3_1_state(void)
 		struct gpio_desc desc = {0};
 		int ret;
 		char *hypermux_sel_gpio = (board_is_j721e_som()) ? "8" : "6";
+
+		if (!board_is_j721e_som() && !board_is_j7200_som())
+			return -ENODEV;
 
 		ret = dm_gpio_lookup_name(hypermux_sel_gpio, &desc);
 		if (ret) {
