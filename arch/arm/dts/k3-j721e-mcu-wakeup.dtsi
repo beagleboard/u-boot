@@ -184,7 +184,8 @@
 
 		hbmc: hyperbus@47034000 {
 			compatible = "ti,j721e-hbmc", "ti,am654-hbmc";
-			reg = <0x0 0x47034000 0x0 0x100>,
+			reg = <0x0 0x47030000 0x0 0xc>,
+				<0x0 0x47034000 0x0 0x100>,
 				<0x5 0x00000000 0x1 0x0000000>;
 			power-domains = <&k3_pds 102 TI_SCI_PD_EXCLUSIVE>;
 			#address-cells = <2>;
