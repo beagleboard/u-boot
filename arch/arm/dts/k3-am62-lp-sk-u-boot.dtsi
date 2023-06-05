@@ -6,3 +6,11 @@
 
 #include "k3-am62-lp-sk-binman.dtsi"
 #include "k3-am62x-sk-common-u-boot.dtsi"
+
+&vddshv_sdio {
+	bootph-pre-ram;
+};
+
+&vddshv_sdio_pins_default {
+	bootph-pre-ram;
+};
