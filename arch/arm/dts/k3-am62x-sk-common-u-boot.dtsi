@@ -24,9 +24,6 @@
 	bootph-pre-ram;
 
 	timer1: timer@2400000 {
-		compatible = "ti,omap5430-timer";
-		reg = <0x00 0x2400000 0x00 0x80>;
-		ti,timer-alwon;
 		clock-frequency = <25000000>;
 		bootph-pre-ram;
 	};
@@ -144,6 +141,8 @@
 	      <0x0 0x43000200 0x0 0x8>;
 	reg-names = "cpsw_nuss", "mac_efuse";
 	/delete-property/ ranges;
+	/* This is WA because MDIO driver is not DM enabled */
+	pinctrl-0 = <&main_mdio1_pins_default &main_rgmii1_pins_default>;
 	bootph-pre-ram;
 
 	cpsw-phy-sel@04044 {
@@ -191,4 +190,24 @@
 		compatible = "ti,sci-sysreset";
 		bootph-pre-ram;
 	};
+};
+
+&main_gpio0 {
+	bootph-pre-ram;
+};
+
+&main_i2c1 {
+	bootph-pre-ram;
+};
+
+&main_i2c1_pins_default {
+	bootph-pre-ram;
+};
+
+&exp1 {
+	bootph-pre-ram;
+};
+
+&vdd_mmc1 {
+	bootph-pre-ram;
 };

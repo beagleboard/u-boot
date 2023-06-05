@@ -4,123 +4,8 @@
  * Copyright (C) 2021-2022 Texas Instruments Incorporated - https://www.ti.com/
  */
 
+#include "k3-am62x-sk-common-u-boot.dtsi"
 #include "k3-am625-sk-binman.dtsi"
-
-/ {
-	chosen {
-		stdout-path = "serial2:115200n8";
-		tick-timer = &main_timer0;
-	};
-
-	aliases {
-		mmc1 = &sdhci1;
-	};
-
-	memory@80000000 {
-		bootph-pre-ram;
-	};
-};
-
-&cbass_main{
-	bootph-pre-ram;
-
-	timer@2400000 {
-		clock-frequency = <25000000>;
-		bootph-pre-ram;
-	};
-};
-
-&main_i2c0 {
-	bootph-pre-ram;
-};
-
-&main_i2c0_pins_default {
-	bootph-pre-ram;
-};
-
-&dmss {
-	bootph-pre-ram;
-};
-
-&secure_proxy_main {
-	bootph-pre-ram;
-};
-
-&dmsc {
-	bootph-pre-ram;
-};
-
-&k3_pds {
-	bootph-pre-ram;
-};
-
-&k3_clks {
-	bootph-pre-ram;
-};
-
-&k3_reset {
-	bootph-pre-ram;
-};
-
-&wkup_conf {
-	bootph-pre-ram;
-};
-
-&chipid {
-	bootph-pre-ram;
-};
-
-&main_pmx0 {
-	bootph-pre-ram;
-};
-
-&main_uart0 {
-	bootph-pre-ram;
-};
-
-&main_uart0_pins_default {
-	bootph-pre-ram;
-};
-
-&main_uart1 {
-	bootph-pre-ram;
-};
-
-&cbass_mcu {
-	bootph-pre-ram;
-};
-
-&cbass_wakeup {
-	bootph-pre-ram;
-};
-
-&mcu_pmx0 {
-	bootph-pre-ram;
-};
-
-&wkup_uart0 {
-	bootph-pre-ram;
-};
-
-&sdhci0 {
-	bootph-pre-ram;
-};
-
-&main_mmc0_pins_default {
-	bootph-pre-ram;
-};
-
-&sdhci1 {
-	bootph-pre-ram;
-};
-
-&main_mmc1_pins_default {
-	bootph-pre-ram;
-};
-
-&fss {
-	bootph-pre-ram;
-};
 
 &ospi0_pins_default {
 	bootph-pre-ram;
@@ -142,56 +27,6 @@
 	};
 };
 
-&cpsw3g {
-	reg = <0x0 0x8000000 0x0 0x200000>,
-	      <0x0 0x43000200 0x0 0x8>;
-	reg-names = "cpsw_nuss", "mac_efuse";
-	/delete-property/ ranges;
-	bootph-pre-ram;
-	pinctrl-0 = <&main_mdio1_pins_default &main_rgmii1_pins_default>;
-
-	cpsw-phy-sel@04044 {
-		compatible = "ti,am64-phy-gmii-sel";
-		reg = <0x0 0x00104044 0x0 0x8>;
-		bootph-pre-ram;
-	};
-};
-
-&cpsw_port1 {
-	bootph-pre-ram;
-};
-
-&cpsw_port2 {
-	status = "disabled";
-};
-
-&usbss0 {
-	bootph-pre-ram;
-};
-
-&usb0 {
-	dr_mode = "peripheral";
-	/* Since role switching is not supported in U-Boot */
-	/delete-property/ extcon;
-	bootph-pre-ram;
-};
-
-&main_gpio0 {
-	bootph-pre-ram;
-};
-
-&main_i2c1 {
-	bootph-pre-ram;
-};
-
-&main_i2c1_pins_default {
-	bootph-pre-ram;
-};
-
-&exp1 {
-	bootph-pre-ram;
-};
-
 &vmain_pd {
 	bootph-pre-ram;
 };
@@ -201,10 +36,6 @@
 };
 
 &vcc_3v3_sys {
-	bootph-pre-ram;
-};
-
-&vdd_mmc1 {
 	bootph-pre-ram;
 };
 

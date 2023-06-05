@@ -63,55 +63,6 @@
 	};
 };
 
-&cbass_main {
-	bootph-pre-ram;
-	timer1: timer@2400000 {
-		compatible = "ti,omap5430-timer";
-		reg = <0x00 0x2400000 0x00 0x80>;
-		ti,timer-alwon;
-		clock-frequency = <25000000>;
-		bootph-pre-ram;
-	};
-};
-
-&main_pmx0 {
-	bootph-pre-ram;
-	main_uart0_pins_default: main-uart0-pins-default {
-		bootph-pre-ram;
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x1c8, PIN_INPUT, 0) /* (D14) UART0_RXD */
-			AM62X_IOPAD(0x1cc, PIN_OUTPUT, 0) /* (E14) UART0_TXD */
-		>;
-	};
-
-	main_i2c0_pins_default: main-i2c0-pins-default {
-		bootph-pre-ram;
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x1e0, PIN_INPUT_PULLUP, 0) /* (B16) I2C0_SCL */
-			AM62X_IOPAD(0x1e4, PIN_INPUT_PULLUP, 0) /* (A16) I2C0_SDA */
-		>;
-	};
-};
-
-&main_uart0 {
-	bootph-pre-ram;
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_uart0_pins_default>;
-	clock-frequency = <48000000>;
-	/delete-property/ clocks;
-	/delete-property/ power-domains;
-};
-
-&main_i2c0 {
-	status = "okay";
-	bootph-pre-ram;
-	pinctrl-0 = <&main_i2c0_pins_default>;
-	clock-frequency = <400000>;
-	pinctrl-names = "default";
-	/delete-property/ clocks;
-	/delete-property/ power-domains;
-};
-
 &dmsc {
 	mboxes= <&secure_proxy_main 0>,
 		<&secure_proxy_main 1>,
