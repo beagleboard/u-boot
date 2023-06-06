@@ -209,6 +209,11 @@ static const char * const k3_pll_ctrl_wrap_main_0_sysclkout_clk_parents[] = {
 	"hsdiv4_16fft_main_0_hsdivout0_clk",
 };
 
+static const char * const main_pll8_sel_extwave_out0_parents[] = {
+	"pllfrac2_ssmod_16fft_main_8_foutvcop_clk",
+	"hsdiv0_16fft_main_8_hsdivout0_clk",
+};
+
 static const char * const mcu_obsclk_outmux_out0_parents[] = {
 	"mcu_obsclk_div_out0",
 	"gluelogic_hfosc0_clkout",
@@ -580,6 +585,7 @@ static const struct clk_data clk_list[] = {
 	CLK_DIV("hsdiv4_16fft_main_3_hsdivout2_clk", "pllfrac2_ssmod_16fft_main_3_foutvcop_clk", 0x683088, 0, 7, 0, 0),
 	CLK_MUX_PLLCTRL("k3_pll_ctrl_wrap_main_0_sysclkout_clk", k3_pll_ctrl_wrap_main_0_sysclkout_clk_parents, 2, 0x410000, 0),
 	CLK_DIV("k3_pll_ctrl_wrap_main_0_chip_div1_clk_clk", "k3_pll_ctrl_wrap_main_0_sysclkout_clk", 0x410118, 0, 5, 0, 0),
+	CLK_MUX("main_pll8_sel_extwave_out0", main_pll8_sel_extwave_out0_parents, 2, 0x688040, 0, 1, 0),
 	CLK_DIV("mcu_obsclk_div_out0", "wkup_obsclk_mux_out0", 0x43008000, 8, 4, 0, 0),
 	CLK_MUX("mcu_obsclk_outmux_out0", mcu_obsclk_outmux_out0_parents, 2, 0x43008000, 24, 1, 0),
 	CLK_MUX("obsclk1_mux_out0", obsclk1_mux_out0_parents, 4, 0x108004, 0, 2, 0),
@@ -779,11 +785,14 @@ static const struct dev_clk soc_dev_clk_data[] = {
 	DEV_CLK(289, 17, "board_0_hfosc1_clk_out"),
 	DEV_CLK(289, 18, "k3_pll_ctrl_wrap_main_0_chip_div1_clk_clk"),
 	DEV_CLK(289, 19, "k3_pll_ctrl_wrap_main_0_chip_div1_clk_clk"),
+	DEV_CLK(342, 0, "main_pll8_sel_extwave_out0"),
+	DEV_CLK(342, 1, "pllfrac2_ssmod_16fft_main_8_foutvcop_clk"),
+	DEV_CLK(342, 2, "hsdiv0_16fft_main_8_hsdivout0_clk"),
 };
 
 const struct ti_k3_clk_platdata j721e_clk_platdata = {
 	.clk_list = clk_list,
-	.clk_list_cnt = 157,
+	.clk_list_cnt = 158,
 	.soc_dev_clk_data = soc_dev_clk_data,
-	.soc_dev_clk_data_cnt = 173,
+	.soc_dev_clk_data_cnt = 176,
 };
