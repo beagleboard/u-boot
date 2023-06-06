@@ -935,6 +935,13 @@ __weak void spl_relocate_stack_check(void)
 	}
 	printf("SPL initial stack usage: %lu bytes\n",
 	       CONFIG_VAL(SIZE_LIMIT_PROVIDE_STACK) - i);
+
+	/*
+	 * If we used up all of the SIZE_LIMIT_PROVIDE_STACK, then here is high
+	 * possibility of stack overflow, warn the user accordingly
+	 */
+	if (!i)
+		printf("SPL possible initial stack overflow detected!!\n");
 #endif
 }
 
