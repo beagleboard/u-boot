@@ -161,6 +161,14 @@
 	bootph-pre-ram;
 };
 
+&wkup_gpio_pins_default {
+	bootph-pre-ram;
+};
+
+&wkup_gpio0 {
+	bootph-pre-ram;
+};
+
 &ospi0 {
 	bootph-pre-ram;
 
