@@ -73,6 +73,49 @@ int dram_init_banksize(void)
 	return 0;
 }
 
+#if CONFIG_IS_ENABLED(DM_GPIO) && CONFIG_IS_ENABLED(OF_LIBFDT)
+/* Enables the spi-nand dts node, if onboard mux is set to spinand */
+static void __maybe_unused detect_enable_spinand(void *blob)
+{
+	struct gpio_desc desc = {0};
+	char *ospi_mux_sel_gpio = "6";
+	int offset;
+
+	if (dm_gpio_lookup_name(ospi_mux_sel_gpio, &desc))
+		return;
+
+	if (dm_gpio_request(&desc, ospi_mux_sel_gpio))
+		return;
+
+	if (dm_gpio_set_dir_flags(&desc, GPIOD_IS_IN))
+		return;
+
+	if (dm_gpio_get_value(&desc)) {
+		offset = fdt_node_offset_by_compatible(blob, -1, "spi-nand");
+		fdt_status_okay(blob, offset);
+
+		offset = fdt_first_subnode(blob,
+					   fdt_parent_offset(blob, offset));
+		while (offset > 0) {
+			if (!fdt_node_check_compatible(blob, offset,
+						       "jedec,spi-nor"))
+				fdt_status_disabled(blob, offset);
+
+			offset = fdt_next_subnode(blob, offset);
+		}
+	}
+}
+#endif
+
+#if defined(CONFIG_SPL_BUILD) && (defined(CONFIG_TARGET_J721S2_A72_EVM) || \
+				  defined(CONFIG_TARGET_J721S2_R5_EVM))
+void spl_perform_fixups(struct spl_image_info *spl_image)
+{
+	if (IS_ENABLED(CONFIG_DM_GPIO) && IS_ENABLED(CONFIG_OF_LIBFDT))
+		detect_enable_spinand(spl_image->fdt_addr);
+}
+#endif
+
 #if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
 int ft_board_setup(void *blob, struct bd_info *bd)
 {
@@ -84,6 +127,9 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 					 "sram@70000000");
 	if (ret)
 		printf("%s: fixing up msmc ram failed %d\n", __func__, ret);
+
+	if (IS_ENABLED(CONFIG_DM_GPIO) && IS_ENABLED(CONFIG_OF_LIBFDT))
+		detect_enable_spinand(blob);
 
 	return ret;
 }
