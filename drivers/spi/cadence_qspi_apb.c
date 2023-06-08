@@ -238,6 +238,9 @@ void cadence_qspi_apb_readdata_capture(void *reg_base,
 
 	reg = readl(reg_base + CQSPI_REG_RD_DATA_CAPTURE);
 
+	/* Disable Rising edge sampling */
+	reg &= ~CQSPI_REG_RD_DATA_CAPTURE_SMPL_EDGE;
+
 	if (bypass)
 		reg |= CQSPI_REG_RD_DATA_CAPTURE_BYPASS;
 	else
