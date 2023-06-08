@@ -233,6 +233,10 @@
 	      <0x0 0x50000000 0x0 0x8000000>;
 };
 
+&ospi0_nand {
+	status = "okay";
+};
+
 &ospi1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&mcu_fss0_ospi1_pins_default>;
@@ -240,7 +244,7 @@
 	reg = <0x0 0x47050000 0x0 0x100>,
 	      <0x0 0x58000000 0x0 0x8000000>;
 
-	flash@0 {
+	ospi1_nor: flash@0 {
 		compatible = "jedec,spi-nor";
 		reg = <0x0>;
 		spi-tx-bus-width = <1>;
