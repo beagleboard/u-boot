@@ -14,3 +14,23 @@
 &vddshv_sdio_pins_default {
 	bootph-pre-ram;
 };
+
+&ospi0_pins_default {
+	bootph-pre-ram;
+};
+
+&ospi0 {
+	bootph-pre-ram;
+
+	flash@0 {
+		bootph-pre-ram;
+
+		partitions {
+			bootph-pre-ram;
+
+			partition@7fc0000 {
+				bootph-pre-ram;
+			};
+		};
+	};
+};
