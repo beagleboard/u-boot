@@ -24,7 +24,7 @@ static int console_normal_set_row(struct udevice *dev, uint row, int clr)
 	line = vid_priv->fb + row * VIDEO_FONT_HEIGHT * vid_priv->line_length;
 	switch (vid_priv->bpix) {
 	case VIDEO_BPP8:
-		if (IS_ENABLED(CONFIG_VIDEO_BPP8)) {
+		if (CONFIG_IS_ENABLED(VIDEO_BPP8)) {
 			uint8_t *dst = line;
 
 			for (i = 0; i < pixels; i++)
@@ -33,7 +33,7 @@ static int console_normal_set_row(struct udevice *dev, uint row, int clr)
 			break;
 		}
 	case VIDEO_BPP16:
-		if (IS_ENABLED(CONFIG_VIDEO_BPP16)) {
+		if (CONFIG_IS_ENABLED(VIDEO_BPP16)) {
 			uint16_t *dst = line;
 
 			for (i = 0; i < pixels; i++)
@@ -42,7 +42,7 @@ static int console_normal_set_row(struct udevice *dev, uint row, int clr)
 			break;
 		}
 	case VIDEO_BPP32:
-		if (IS_ENABLED(CONFIG_VIDEO_BPP32)) {
+		if (CONFIG_IS_ENABLED(VIDEO_BPP32)) {
 			uint32_t *dst = line;
 
 			for (i = 0; i < pixels; i++)
@@ -103,7 +103,7 @@ static int console_normal_putc_xy(struct udevice *dev, uint x_frac, uint y,
 
 		switch (vid_priv->bpix) {
 		case VIDEO_BPP8:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP8)) {
+			if (CONFIG_IS_ENABLED(VIDEO_BPP8)) {
 				uint8_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_WIDTH; i++) {
@@ -115,7 +115,7 @@ static int console_normal_putc_xy(struct udevice *dev, uint x_frac, uint y,
 				break;
 			}
 		case VIDEO_BPP16:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP16)) {
+			if (CONFIG_IS_ENABLED(VIDEO_BPP16)) {
 				uint16_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_WIDTH; i++) {
@@ -127,7 +127,7 @@ static int console_normal_putc_xy(struct udevice *dev, uint x_frac, uint y,
 				break;
 			}
 		case VIDEO_BPP32:
-			if (IS_ENABLED(CONFIG_VIDEO_BPP32)) {
+			if (CONFIG_IS_ENABLED(VIDEO_BPP32)) {
 				uint32_t *dst = line;
 
 				for (i = 0; i < VIDEO_FONT_WIDTH; i++) {
