@@ -891,7 +891,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		debug("Failed to stash bootstage: err=%d\n", ret);
 #endif
 
-#if defined(CONFIG_SPL_VIDEO)
+#if defined(CONFIG_SPL_VIDEO_REMOVE)
 	struct udevice *dev;
 	int rc;
 
