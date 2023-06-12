@@ -65,6 +65,7 @@ class Entry_ti_secure_rom(Entry_x509_cert):
         super().ReadNode()
         self.combined = fdt_util.GetBool(self._node, 'combined', False)
         self.countersign = fdt_util.GetBool(self._node, 'countersign', False)
+        self.fsstub = fdt_util.GetBool(self._node, 'fsstub', False)
         self.load_addr = fdt_util.GetInt(self._node, 'load', 0x00000000)
         self.sw_rev = fdt_util.GetInt(self._node, 'sw-rev', 1)
         self.sha = fdt_util.GetInt(self._node, 'sha', 512)
@@ -102,8 +103,13 @@ class Entry_ti_secure_rom(Entry_x509_cert):
                 self.cert_type = 3
             else:
                 self.cert_type = 2
+
+            if self.fsstub:
+                self.bootcore_opts = 0
+            else:
+                self.bootcore_opts = 32
+
             self.bootcore = 0
-            self.bootcore_opts = 32
         else:
             self.cert_type = 1
             self.bootcore = 16
