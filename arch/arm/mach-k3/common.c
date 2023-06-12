@@ -34,6 +34,9 @@ enum {
 	IMAGE_ID_OPTEE,
 	IMAGE_ID_SPL,
 	IMAGE_ID_DM_FW,
+	IMAGE_ID_FSSTUB_HS,
+	IMAGE_ID_FSSTUB_FS,
+	IMAGE_ID_FSSTUB_GP,
 	IMAGE_AMT,
 };
 
@@ -43,6 +46,9 @@ static const char *image_os_match[IMAGE_AMT] = {
 	"tee",
 	"U-Boot",
 	"DM",
+	"fsstub-hs",
+	"fsstub-fs",
+	"fsstub-gp",
 };
 #endif
 
@@ -288,8 +294,24 @@ void board_fit_image_post_process(const void *fit, int node, void **p_image,
 			break;
 		}
 	}
-#endif
 
+	if (i < IMAGE_AMT && i > IMAGE_ID_DM_FW) {
+		int device_type = get_device_type();
+
+		if ((device_type == K3_DEVICE_TYPE_HS_SE &&
+		     strcmp(os, "fsstub-hs")) ||
+		   (device_type == K3_DEVICE_TYPE_HS_FS &&
+		     strcmp(os, "fsstub-fs")) ||
+		   (device_type == K3_DEVICE_TYPE_GP &&
+		     strcmp(os, "fsstub-gp"))) {
+			*p_size = 0;
+		} else {
+			debug("fsstub-type: %s\n", os);
+		}
+
+		return;
+	}
+#endif
 	ti_secure_image_post_process(p_image, p_size);
 }
 #endif
