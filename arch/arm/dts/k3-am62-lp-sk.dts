@@ -305,3 +305,13 @@
 		};
 	};
 };
+
+&usbss0 {
+	status = "okay";
+	ti,vbus-divider;
+};
+
+&usb0 {
+	status = "okay";
+	dr_mode = "peripheral";
+};
