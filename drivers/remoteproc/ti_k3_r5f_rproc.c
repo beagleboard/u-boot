@@ -21,6 +21,7 @@
 #include <linux/kernel.h>
 #include <linux/soc/ti/ti_sci_protocol.h>
 #include "ti_sci_proc.h"
+#include <mach/security.h>
 
 /*
  * R5F's view of this address can either be for ATCM or BTCM with the other
