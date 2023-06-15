@@ -2,12 +2,13 @@
 /*
  * K3: Architecture common definitions
  *
- * Copyright (C) 2018 Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (C) 2018-2023 Texas Instruments Incorporated - https://www.ti.com/
  *	Lokesh Vutla <lokeshvutla@ti.com>
  */
 
 #include <asm/armv7_mpu.h>
 #include <asm/hardware.h>
+#include <mach/security.h>
 
 struct fwl_data {
 	const char *name;
@@ -34,4 +35,3 @@ void spl_enable_dcache(void);
 void mmr_unlock(phys_addr_t base, u32 partition);
 bool is_rom_loaded_sysfw(struct rom_extended_boot_data *data);
 enum k3_device_type get_device_type(void);
-void ti_secure_image_post_process(void **p_image, size_t *p_size);
