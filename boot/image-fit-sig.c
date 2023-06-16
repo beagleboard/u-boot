@@ -490,15 +490,24 @@ static int fit_config_verify_required_keys(const void *fit, int conf_noffset,
 	/* Work out what we need to verify */
 	key_node = fdt_subnode_offset(key_blob, 0, FIT_SIG_NODENAME);
 	if (key_node < 0) {
-		debug("%s: No signature node found: %s\n", __func__,
-		      fdt_strerror(key_node));
-		return 0;
+		if (IS_ENABLED(CONFIG_FIT_SIGNATURE_ENFORCE)) {
+			printf("%s: No signature node found: %s\n", __func__,
+			       fdt_strerror(key_node));
+			return -EPERM;
+		} else {
+			debug("%s: No signature node found: %s\n", __func__,
+			      fdt_strerror(key_node));
+			return 0;
+		}
 	}
 
 	/* Get required-mode policy property from DTB */
-	reqd_mode = fdt_getprop(key_blob, key_node, "required-mode", NULL);
-	if (reqd_mode && !strcmp(reqd_mode, "any"))
-		reqd_policy_all = false;
+	if (!IS_ENABLED(CONFIG_FIT_SIGNATURE_ENFORCE)) {
+		reqd_mode =
+			fdt_getprop(key_blob, key_node, "required-mode", NULL);
+		if (reqd_mode && !strcmp(reqd_mode, "any"))
+			reqd_policy_all = false;
+	}
 
 	debug("%s: required-mode policy set to '%s'\n", __func__,
 	      reqd_policy_all ? "all" : "any");
@@ -514,10 +523,12 @@ static int fit_config_verify_required_keys(const void *fit, int conf_noffset,
 		const char *required;
 		int ret;
 
-		required = fdt_getprop(key_blob, noffset, FIT_KEY_REQUIRED,
-				       NULL);
-		if (!required || strcmp(required, "conf"))
-			continue;
+		if (!IS_ENABLED(CONFIG_FIT_SIGNATURE_ENFORCE)) {
+			required = fdt_getprop(key_blob, noffset,
+					       FIT_KEY_REQUIRED, NULL);
+			if (!required || strcmp(required, "conf"))
+				continue;
+		}
 
 		reqd_sigs++;
 

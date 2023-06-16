@@ -78,6 +78,17 @@ config FIT_SIGNATURE
 	  format support in this case, enable it using
 	  CONFIG_LEGACY_IMAGE_FORMAT.
 
+config FIT_SIGNATURE_ENFORCE
+	bool "Enforce the signature in fit images"
+	default y if TI_SECURE_DEVICE
+	depends on FIT_SIGNATURE
+	help
+	  Enabling FIT_SIGNATURE by default doesn't enforce the U-boot DTB to be
+	  having keys and allows booting the images without having proper setup.
+	  This option enforces the fit signature mechanism to contain the keys in
+	  the DTB and enforce the nodes to be authenticated without relying on
+	  the "required" node in the DTB.
+
 config FIT_SIGNATURE_MAX_SIZE
 	hex "Max size of signed FIT structures"
 	depends on FIT_SIGNATURE
