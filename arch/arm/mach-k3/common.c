@@ -615,6 +615,8 @@ int misc_init_r(void)
 	if (get_device_type() == K3_DEVICE_TYPE_HS_SE) {
 		env_set("boot_fit", "1");
 		env_set("secure_rprocs", "1");
+	} else {
+		env_set("secure_rprocs", "0");
 	}
 
 	return 0;
