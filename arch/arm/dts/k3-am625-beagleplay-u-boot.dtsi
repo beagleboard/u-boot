@@ -1,0 +1,221 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * https://beagleboard.org/play
+ *
+ * Copyright (C) 2022-2023 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2022-2023 Robert Nelson, BeagleBoard.org Foundation
+ */
+
+#include "k3-am625-sk-binman.dtsi"
+
+/ {
+	chosen {
+		stdout-path = "serial2:115200n8";
+		tick-timer = &timer1;
+	};
+
+	aliases {
+		mmc0 = &sdhci0;
+		mmc1 = &sdhci1;
+		i2c0 = &main_i2c0;
+	};
+
+	memory@80000000 {
+		bootph-pre-ram;
+	};
+};
+
+&cbass_main {
+	bootph-pre-ram;
+
+	timer1: timer@2400000 {
+		compatible = "ti,omap5430-timer";
+		reg = <0x00 0x2400000 0x00 0x80>;
+		ti,timer-alwon;
+		clock-frequency = <25000000>;
+		bootph-pre-ram;
+	};
+};
+
+&dmss {
+	bootph-pre-ram;
+};
+
+&main_bcdma {
+	bootph-pre-ram;
+};
+
+&main_pktdma {
+	bootph-pre-ram;
+};
+
+&secure_proxy_main {
+	bootph-pre-ram;
+};
+
+&k3_pds {
+	bootph-pre-ram;
+};
+
+&k3_clks {
+	bootph-pre-ram;
+};
+
+&k3_reset {
+	bootph-pre-ram;
+};
+
+&wkup_conf {
+	bootph-pre-ram;
+};
+
+&chipid {
+	bootph-pre-ram;
+};
+
+&wkup_uart0 {
+	bootph-pre-ram;
+};
+
+&main_pmx0 {
+	bootph-pre-ram;
+};
+
+&main_uart0 {
+	bootph-pre-ram;
+};
+
+&console_pins_default {
+	bootph-pre-ram;
+};
+
+&cbass_mcu {
+	bootph-pre-ram;
+};
+
+&cbass_wakeup {
+	bootph-pre-ram;
+};
+
+&mcu_pmx0 {
+	bootph-pre-ram;
+};
+
+&main_i2c0 {
+	bootph-pre-ram;
+};
+
+&local_i2c_pins_default {
+	bootph-pre-ram;
+};
+
+&gpio0_pins_default {
+	bootph-pre-ram;
+};
+
+&main_gpio0 {
+	bootph-pre-ram;
+};
+
+&main_gpio1 {
+	bootph-pre-ram;
+};
+
+&mdio0_pins_default {
+	bootph-pre-ram;
+};
+
+&rgmii1_pins_default {
+	bootph-pre-ram;
+};
+
+&spe_pins_default {
+	bootph-pre-ram;
+};
+
+&gbe_pmx_obsclk {
+	bootph-pre-ram;
+};
+
+&cpsw3g {
+	reg = <0x0 0x8000000 0x0 0x200000>,
+	      <0x0 0x43000200 0x0 0x8>;
+	reg-names = "cpsw_nuss", "mac_efuse";
+	/delete-property/ ranges;
+	bootph-pre-ram;
+
+	cpsw-phy-sel@04044 {
+		compatible = "ti,am64-phy-gmii-sel";
+		reg = <0x0 0x00104044 0x0 0x8>;
+		bootph-pre-ram;
+	};
+};
+
+&cpsw_port1 {
+	bootph-pre-ram;
+};
+
+&cpsw_port2 {
+	status = "disabled";
+};
+
+&sdhci0 {
+	bootph-pre-ram;
+};
+
+&sdhci1 {
+	bootph-pre-ram;
+	sdhci-caps-mask = <0x00000007 0x00000000>;
+	/delete-property/ cd-gpios;
+	/delete-property/ cd-debounce-delay-ms;
+	/delete-property/ ti,fails-without-test-cd;
+	/delete-property/ no-1-8-v;
+};
+
+&emmc_pins_default {
+	bootph-pre-ram;
+};
+
+&sd_pins_default {
+	bootph-pre-ram;
+	pinctrl-single,pins = <
+		AM62X_IOPAD(0x023c, PIN_INPUT, 0) /* (A21) MMC1_CMD */
+		AM62X_IOPAD(0x0234, PIN_INPUT, 0) /* (B22) MMC1_CLK */
+		AM62X_IOPAD(0x0230, PIN_INPUT, 0) /* (A22) MMC1_DAT0 */
+		AM62X_IOPAD(0x022c, PIN_INPUT, 0) /* (B21) MMC1_DAT1 */
+		AM62X_IOPAD(0x0228, PIN_INPUT, 0) /* (C21) MMC1_DAT2 */
+		AM62X_IOPAD(0x0224, PIN_INPUT, 0) /* (D22) MMC1_DAT3 */
+		AM62X_IOPAD(0x0240, PIN_INPUT, 0) /* (D17) MMC1_SDCD.MMC1_SDCD */
+	>;
+};
+
+&dmsc {
+	bootph-pre-ram;
+	k3_sysreset: sysreset-controller {
+		compatible = "ti,sci-sysreset";
+		bootph-pre-ram;
+	};
+};
+
+#ifdef CONFIG_TARGET_AM625_A53_EVM
+
+#define SPL_AM625_BEAGLEPLAY_DTB "spl/dts/k3-am625-beagleplay.dtb"
+#define AM625_BEAGLEPLAY_DTB "arch/arm/dts/k3-am625-beagleplay.dtb"
+
+&spl_am625_sk_dtb {
+	filename = SPL_AM625_BEAGLEPLAY_DTB;
+};
+
+&am625_sk_dtb {
+	filename = AM625_BEAGLEPLAY_DTB;
+};
+
+&spl_am625_sk_dtb_unsigned {
+	filename = SPL_AM625_BEAGLEPLAY_DTB;
+};
+
+&am625_sk_dtb_unsigned {
+	filename = AM625_BEAGLEPLAY_DTB;
+};
+
+#endif

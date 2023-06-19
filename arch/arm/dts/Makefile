@@ -1282,7 +1282,10 @@ dtb-$(CONFIG_SOC_K3_AM642) += k3-am642-evm.dtb \
 dtb-$(CONFIG_SOC_K3_AM625) += k3-am625-sk.dtb \
 			      k3-am625-r5-sk.dtb \
 			      k3-am62-lp-sk.dtb \
-			      k3-am62-r5-lp-sk.dtb
+			      k3-am62-r5-lp-sk.dtb \
+			      k3-am625-beagleplay.dtb \
+			      k3-am625-r5-beagleplay.dtb
+
 
 dtb-$(CONFIG_SOC_K3_AM625) += k3-am62a7-sk.dtb \
 			      k3-am62a7-r5-sk.dtb
