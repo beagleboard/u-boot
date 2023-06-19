@@ -26,6 +26,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define board_is_am62x_skevm()  (board_ti_k3_is("AM62-SKEVM") || \
 				 board_ti_k3_is("AM62B-SKEVM"))
 #define board_is_am62x_lp_skevm()  board_ti_k3_is("AM62-LP-SKEVM")
+#define board_is_am62x_play()	board_ti_k3_is("BEAGLEPLAY-A0-")
 
 #if CONFIG_IS_ENABLED(SPLASH_SCREEN)
 static struct splash_location default_splash_locations[] = {
@@ -235,6 +236,8 @@ static void setup_board_eeprom_env(void)
 		name = "am62x_skevm";
 	else if (board_is_am62x_lp_skevm())
 		name = "am62x_lp_skevm";
+	else if (board_is_am62x_play())
+		name = "am62x_beagleplay";
 	else
 		printf("Unidentified board claims %s in eeprom header\n",
 		       board_ti_get_name());
