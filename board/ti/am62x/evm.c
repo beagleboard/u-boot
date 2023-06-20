@@ -91,6 +91,9 @@ void spl_board_init(void)
 	if (IS_ENABLED(CONFIG_SPL_SPLASH_SCREEN) && IS_ENABLED(CONFIG_SPL_BMP))
 		splash_display();
 
+	if (IS_ENABLED(CONFIG_SPL_ETH))
+		/* Init DRAM size for R5/A53 SPL */
+		dram_init_banksize();
 }
 
 #if defined(CONFIG_K3_AM64_DDRSS)
