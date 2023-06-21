@@ -7,16 +7,17 @@
  *
  */
 
+#include <common.h>
 #include <env.h>
 #include <spl.h>
 #include <init.h>
 #include <video.h>
 #include <splash.h>
+#include <cpu_func.h>
 #include <k3-ddrss.h>
 #include <fdt_support.h>
 #include <asm/io.h>
 #include <asm/arch/hardware.h>
-#include <common.h>
 #include <dm/uclass.h>
 
 #include "../common/board_detect.h"
