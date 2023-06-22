@@ -104,6 +104,10 @@
 	bootph-pre-ram;
 };
 
+&main_usbss0_pins_default {
+	bootph-pre-ram;
+};
+
 &wkup_pmx0 {
 	bootph-pre-ram;
 };
@@ -132,6 +136,15 @@
 	bootph-pre-ram;
 };
 
+&usbss0 {
+	bootph-pre-ram;
+};
+
+&usb0 {
+	dr_mode = "host";
+	bootph-pre-ram;
+};
+
 &mcu_cpsw {
 	reg = <0x0 0x46000000 0x0 0x200000>,
 	      <0x0 0x40f00200 0x0 0x8>;
@@ -143,6 +156,14 @@
 		reg= <0x0 0x40f04040 0x0 0x4>;
 		reg-names = "gmii-sel";
 	};
+};
+
+&serdes_ln_ctrl {
+	u-boot,mux-autoprobe;
+};
+
+&usb_serdes_mux {
+	u-boot,mux-autoprobe;
 };
 
 &main_sdhci0 {
