@@ -10,8 +10,6 @@
 #define __CONFIG_AM625_EVM_H
 
 #include <config_distro_bootcmd.h>
-#include <environment/ti/mmc.h>
-#include <environment/ti/k3_dfu.h>
 
 /* DDR Configuration */
 #define CFG_SYS_SDRAM_BASE1		0x880000000
@@ -39,16 +37,9 @@
 	DISTRO_BOOT_DEV_PXE(func) \
 	DISTRO_BOOT_DEV_DHCP(func)
 
-#define EXTRA_ENV_DFUARGS \
-	DFU_ALT_INFO_MMC \
-	DFU_ALT_INFO_EMMC \
-	DFU_ALT_INFO_RAM \
-	DFU_ALT_INFO_OSPI
-
 /* Incorporate settings into the U-Boot environment */
 #define CFG_EXTRA_ENV_SETTINGS					\
 	BOOTENV								\
-	EXTRA_ENV_DFUARGS
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
