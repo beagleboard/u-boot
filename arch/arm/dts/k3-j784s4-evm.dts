@@ -316,6 +316,27 @@
 		>;
 	};
 
+	mcu_uart0_pins_default: mcu-uart0-pins-default {
+		pinctrl-single,pins = <
+			J784S4_WKUP_IOPAD(0x090, PIN_INPUT, 0) /* (H37) MCU_UART0_CTSn */
+			J784S4_WKUP_IOPAD(0x094, PIN_OUTPUT, 0) /* (K37) MCU_UART0_RTSn */
+			J784S4_WKUP_IOPAD(0x08C, PIN_INPUT, 0) /* (K38) MCU_UART0_RXD */
+			J784S4_WKUP_IOPAD(0x088, PIN_OUTPUT, 0) /* (J37) MCU_UART0_TXD */
+		>;
+	};
+
+	wkup_uart0_pins_default: wkup-uart0-pins-default {
+		pinctrl-single,pins = <
+			J784S4_WKUP_IOPAD(0x070, PIN_INPUT, 0) /* (E25) WKUP_UART0_CTSn */
+			J784S4_WKUP_IOPAD(0x074, PIN_OUTPUT, 0) /* (F28) WKUP_UART0_RTSn */
+			J784S4_WKUP_IOPAD(0x048, PIN_INPUT, 0) /* (K35) WKUP_UART0_RXD */
+			J784S4_WKUP_IOPAD(0x04c, PIN_OUTPUT, 0) /* (K34) WKUP_UART0_TXD */
+		>;
+	};
+
+};
+
+&wkup_pmx0 {
 	typec_dir_gpio_pins_default: typec-dir-gpio-pins-default {
 		pinctrl-single,pins = <
 			/* (A33) MCU_OSPI0_CSn1.WKUP_GPIO0_28 */
