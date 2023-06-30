@@ -17,6 +17,7 @@
 #include <linux/mtd/omap_gpmc.h>
 #include <linux/ioport.h>
 #include <linux/io.h>
+#include <linux/sizes.h>
 #include "ti-gpmc.h"
 
 enum gpmc_clk_domain {

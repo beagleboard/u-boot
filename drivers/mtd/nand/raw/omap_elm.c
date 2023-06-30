@@ -199,8 +199,7 @@ void elm_init(void)
 }
 #endif
 
-#if CONFIG_IS_ENABLED(SYS_NAND_SELF_INIT)
-
+#ifdef CONFIG_SYS_NAND_SELF_INIT
 static int elm_probe(struct udevice *dev)
 {
 #ifndef ELM_BASE
