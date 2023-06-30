@@ -6,6 +6,7 @@
 
 #include "k3-am62-lp-sk-binman.dtsi"
 #include "k3-am62x-sk-common-u-boot.dtsi"
+#include "k3-am62-lp-sk-nand.dtsi"
 
 &vddshv_sdio {
 	bootph-pre-ram;
