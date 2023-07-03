@@ -237,7 +237,9 @@ shaValue = FORMAT:HEX,OCT:{hashval_dm_data}"""
             return self.NonCombinedGetCertificate(required)
 
     def ObtainContents(self):
-        data = self.GetCertificate(False)
+        data = self.data
+        if data is None:
+            data = self.GetCertificate(False)
         if data is None:
             return False
         self.SetContents(data)
@@ -245,7 +247,9 @@ shaValue = FORMAT:HEX,OCT:{hashval_dm_data}"""
 
     def ProcessContents(self):
         # The blob may have changed due to WriteSymbols()
-        data = self.GetCertificate(True)
+        data = self.data
+        if data is None:
+            data = self.GetCertificate(True)
         return self.ProcessContentsUpdate(data)
 
     def AddBintools(self, btools):

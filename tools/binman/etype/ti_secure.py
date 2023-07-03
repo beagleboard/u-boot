@@ -60,7 +60,9 @@ class Entry_ti_secure(Entry_x509_cert):
         return super().GetCertificate(required=required, type='sysfw')
 
     def ObtainContents(self):
-        data = self.GetCertificate(False)
+        data = self.data
+        if data is None:
+            data = self.GetCertificate(False)
         if data is None:
             return False
         self.SetContents(data)
@@ -68,7 +70,9 @@ class Entry_ti_secure(Entry_x509_cert):
 
     def ProcessContents(self):
         # The blob may have changed due to WriteSymbols()
-        data = self.GetCertificate(True)
+        data = self.data
+        if data is None:
+            data = self.GetCertificate(True)
         return self.ProcessContentsUpdate(data)
 
     def AddBintools(self, btools):
