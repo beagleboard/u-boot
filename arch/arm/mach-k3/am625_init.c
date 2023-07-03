@@ -213,7 +213,7 @@ void board_init_f(ulong dummy)
 		panic("DRAM init failed: %d\n", ret);
 #endif
 
-	if (IS_ENABLED(CONFIG_SPL_ETH_SUPPORT) && IS_ENABLED(CONFIG_TI_AM65_CPSW_NUSS) &&
+	if (IS_ENABLED(CONFIG_SPL_ETH) && IS_ENABLED(CONFIG_TI_AM65_CPSW_NUSS) &&
 	    spl_boot_device() == BOOT_DEVICE_ETHERNET) {
 		struct udevice *cpswdev;
 
