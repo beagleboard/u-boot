@@ -114,7 +114,6 @@ tifs-rm-cfg:
                     allowed_orderid : 0xAAAAAAAA
                     allowed_priority : 0xAAAA
                     allowed_sched_priority : 0xAA
-
                 - #15
                     host_id: 0
                     allowed_atype : 0
@@ -245,7 +244,7 @@ tifs-rm-cfg:
             subhdr:
                 magic: 0x7B25
                 size : 8
-            resasg_entries_size: 3744
+            resasg_entries_size: 3208
             reserved : 0
     resasg_entries:
         -

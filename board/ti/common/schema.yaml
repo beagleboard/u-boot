@@ -225,10 +225,15 @@ properties:
                                 $ref: "#/definitions/u16"
                     rsvd:
                         type: array
-                        minItems: 4
+                        minItems: 2
                         maxItems: 4
                         items:
                             $ref: "#/definitions/u8"
+                    enable_saul_psil_global_config_writes:
+                        $ref: "#/definitions/u8"
+                    auth_resource_owner:
+                        $ref: "#/definitions/u8"
+
             sec_dbg_config:
                 type: object
                 properties:

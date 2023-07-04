@@ -357,13 +357,17 @@ sec-cfg:
         subhdr:
             magic: 0x23BE
             size : 0
-        rsvd: [0, 0, 0, 0]
+        auth_resource_owner: 0
+        enable_saul_psil_global_config_writes: 0x5A
+        rsvd: [0, 0]
     sec_dbg_config:
         subhdr:
             magic: 0x42AF
             size: 16
         allow_jtag_unlock : 0x5A
         allow_wildcard_unlock : 0x5A
+        allowed_debug_level_rsvd: 0
+        rsvd: 0
         min_cert_rev : 0x0
         jtag_unlock_hosts: [0, 0, 0, 0]
     sec_handover_cfg:
