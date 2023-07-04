@@ -7,6 +7,10 @@
 
 #ifdef CONFIG_TARGET_AM62A7_R5_EVM
 
+&rcfg_yaml_tifs {
+	config = "tifs-rm-cfg.yaml";
+};
+
 &binman {
 	tiboot3-am62ax-hs-evm.bin {
 		filename = "tiboot3-am62ax-hs-evm.bin";
