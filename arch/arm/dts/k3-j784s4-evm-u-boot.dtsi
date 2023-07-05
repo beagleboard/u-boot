@@ -109,6 +109,10 @@
 	bootph-pre-ram;
 };
 
+&wkup_pmx1 {
+	bootph-pre-ram;
+};
+
 &wkup_pmx2 {
 	bootph-pre-ram;
 };
