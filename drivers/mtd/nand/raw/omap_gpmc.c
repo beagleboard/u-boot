@@ -1215,7 +1215,9 @@ static int gpmc_nand_probe(struct udevice *dev)
 	struct mtd_info *mtd = nand_to_mtd(nand);
 	int ret;
 
-	gpmc_nand_init(nand);
+	ret = gpmc_nand_init(nand);
+	if (ret)
+		return ret;
 
 	ret = nand_scan(mtd, CONFIG_SYS_NAND_MAX_CHIPS);
 	if (ret)
