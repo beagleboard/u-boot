@@ -191,4 +191,9 @@
 	ti,sci = <&dm_tifs>;
 };
 
+&ospi0 {
+	reg = <0x0 0x47040000 0x0 0x100>,
+	      <0x0 0x50000000 0x0 0x8000000>;
+};
+
 #include "k3-am68-sk-base-board-u-boot.dtsi"

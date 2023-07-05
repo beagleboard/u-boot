@@ -21,6 +21,7 @@
 		i2c3 = &main_i2c0;
 		ethernet0 = &cpsw_port1;
 		mmc1 = &main_sdhci1;
+		spi0 = &ospi0;
 	};
 };
 
@@ -154,6 +155,30 @@
 		reg= <0x0 0x40f04040 0x0 0x4>;
 		reg-names = "gmii-sel";
 	};
+};
+
+&fss {
+	bootph-pre-ram;
+};
+
+&mcu_fss0_ospi0_pins_default {
+	bootph-pre-ram;
+};
+
+&ospi0 {
+	bootph-pre-ram;
+
+	ospi0_nor: flash@0 {
+		bootph-pre-ram;
+
+		partition@3fc0000 {
+			bootph-pre-ram;
+		};
+	};
+};
+
+&ospi0_nor {
+	bootph-pre-ram;
 };
 
 &serdes_ln_ctrl {
