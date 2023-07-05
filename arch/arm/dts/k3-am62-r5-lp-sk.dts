@@ -12,7 +12,25 @@
 #include "k3-am62x-r5-sk-common.dtsi"
 #include "k3-am62-lp-sk-binman.dtsi"
 
+/ {
+	dummy_133mhz_clk: clock {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <133333333>;
+		bootph-pre-ram;
+	};
+};
+
 &ospi0 {
 	reg = <0x00 0x0fc40000 0x00 0x100>,
 	      <0x00 0x60000000 0x00 0x08000000>;
+};
+
+&gpmc0 {
+	/delete-property/ power-domains;
+	clocks = <&dummy_133mhz_clk>;
+};
+
+&elm0 {
+	/delete-property/ power-domains;
 };
