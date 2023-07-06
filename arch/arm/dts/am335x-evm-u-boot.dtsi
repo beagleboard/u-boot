@@ -23,10 +23,6 @@
 	status = "disabled";
 };
 
-&usb0 {
-	dr_mode = "peripheral";
-};
-
 &i2c0 {
 	bootph-all;
 };
