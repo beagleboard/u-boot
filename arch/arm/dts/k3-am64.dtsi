@@ -32,6 +32,7 @@
 		ethernet1 = &cpsw_port2;
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
+		spi0 = &ospi0;
 	};
 
 	chosen { };

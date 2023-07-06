@@ -471,6 +471,9 @@
 		cdns,tchsh-ns = <60>;
 		cdns,tslch-ns = <60>;
 		cdns,read-delay = <4>;
+		cdns,phy-mode;
+		#address-cells = <1>;
+		#size-cells = <1>;
 
 		partitions {
 			compatible = "fixed-partitions";

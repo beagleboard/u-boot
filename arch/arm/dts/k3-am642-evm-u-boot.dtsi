@@ -165,3 +165,30 @@
 	reg-names = "gcfg", "rchanrt", "tchanrt", "ringrt", "cfg",
 		    "tchan", "rchan", "rflow";
 };
+
+&ospi0_pins_default {
+	bootph-pre-ram;
+};
+
+&fss {
+	bootph-pre-ram;
+};
+
+&ospi0 {
+	bootph-pre-ram;
+
+	flash@0 {
+		bootph-pre-ram;
+
+		partitions {
+			bootph-pre-ram;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@3fc0000 {
+				bootph-pre-ram;
+				reg = <0x3fc0000 0x40000>;
+			};
+		};
+	};
+};
