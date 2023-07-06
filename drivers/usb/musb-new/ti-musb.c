@@ -302,6 +302,7 @@ static int ti_musb_wrapper_bind(struct udevice *parent)
 		dr_mode = usb_get_dr_mode(node);
 		switch (dr_mode) {
 		case USB_DR_MODE_PERIPHERAL:
+		case USB_DR_MODE_OTG:
 			/* Bind MUSB device */
 			ret = device_bind_driver_to_node(parent,
 							 "ti-musb-peripheral",
