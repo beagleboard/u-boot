@@ -51,6 +51,15 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_i2c0_pins_default>;
 	clock-frequency = <400000>;
+
+	tca9554: gpio@38 {
+		/* TCA9554 */
+		bootph-pre-ram;
+		compatible = "nxp,pca9554";
+		reg = <0x38>;
+		gpio-controller;
+		#gpio-cells = <2>;
+	 };
 };
 
 &main_uart0 {
