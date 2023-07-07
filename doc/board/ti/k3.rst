@@ -385,3 +385,30 @@ and the same can be extended to other platforms
    The devices now also have distroboot enabled so if the fit image doesn't
    work then the fallback to normal distroboot will be there on hs devices,
    this will need to be explicitly disabled by changing the boot_targets.
+
+Saving environment
+------------------
+
+SAVEENV is disabled by default and for the new flow uses Uenv.txt as the default
+way for saving the environments. This has been done as Uenv.txt is more granular
+then the saveenv command and can be used across various bootmodes too.
+
+**Writing to MMC/EMMC**
+
+.. code-block::
+
+  => env export -t $loadaddr <list of variables>
+  => fatwrite mmc ${mmcdev} ${loadaddr} ${bootenvfile} ${filesize}
+
+**Reading from MMC/EMMC**
+
+By default run envboot will read it from the MMC/EMMC partition ( based on
+mmcdev) and set the environments.
+
+If manually needs to be done then the environment can be read from the
+filesystem and then imported
+
+.. code-block::
+
+  => fatload mmc ${mmcdev} ${loadaddr} ${bootenvfile}
+  => env import -t ${loadaddr} ${filesize}
