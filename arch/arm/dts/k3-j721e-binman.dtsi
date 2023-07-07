@@ -590,7 +590,7 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
-					blob {
+					spl_j721e_evm_dtb_unsigned: blob {
 						filename = SPL_J721E_EVM_DTB;
 					};
 				};
@@ -656,7 +656,7 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
-					blob {
+					j721e_evm_dtb_unsigned: blob {
 						filename = J721E_EVM_DTB;
 					};
 					hash {
