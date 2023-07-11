@@ -218,7 +218,7 @@
 		partitions {
 			bootph-pre-ram;
 
-			partition@3fc0000 {
+			partition@3fe0000 {
 				bootph-pre-ram;
 			};
 		};
