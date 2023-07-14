@@ -8,22 +8,13 @@
 #ifdef CONFIG_TARGET_AM625_A53_EVM
 
 #define SPL_AM62_LP_SK_DTB "spl/dts/k3-am62-lp-sk.dtb"
-#define AM62_LP_SK_DTB "arch/arm/dts/k3-am62-lp-sk.dtb"
 
 &spl_am625_sk_dtb {
 	filename = SPL_AM62_LP_SK_DTB;
 };
 
-&am625_sk_dtb {
-	filename = AM62_LP_SK_DTB;
-};
-
 &spl_am625_sk_dtb_unsigned {
 	filename = SPL_AM62_LP_SK_DTB;
-};
-
-&am625_sk_dtb_unsigned {
-	filename = AM62_LP_SK_DTB;
 };
 
 #endif
