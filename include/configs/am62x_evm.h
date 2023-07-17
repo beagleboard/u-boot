@@ -17,6 +17,11 @@
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
 
+/* include Android related settings */
+#if CONFIG_CMD_ABOOTIMG
+#include <configs/am62x_evm_android.h>
+#endif
+
 /* NAND Driver config */
 #define CFG_SYS_NAND_BASE            0x51000000
 
