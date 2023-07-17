@@ -39,6 +39,10 @@
 
 &dmsc {
 	bootph-pre-ram;
+	k3_sysreset: sysreset-controller {
+		compatible = "ti,sci-sysreset";
+		bootph-pre-ram;
+	};
 };
 
 &k3_pds {
