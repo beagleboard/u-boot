@@ -170,7 +170,6 @@
 
 #ifdef CONFIG_CMD_MMC
 #define BOOT_TARGET_MMC(func) \
-	func(TI_MMC, ti_mmc, na) \
 	func(MMC, mmc, 0) \
 	func(MMC, mmc, 1)
 #else
