@@ -453,7 +453,7 @@ void configure_serdes_sierra(void)
 #ifdef CONFIG_BOARD_LATE_INIT
 static void setup_board_eeprom_env(void)
 {
-	char *name = "j721e";
+	char *name = "BBONEAI-64-B0-";
 
 	if (do_board_detect())
 		goto invalid_eeprom;
@@ -467,7 +467,8 @@ static void setup_board_eeprom_env(void)
 	else if (board_is_j7200_som())
 		name = "j7200";
 	else
-		name = "BBONEAI-64-B0-";
+		printf("Unidentified board claims %s in eeprom header\n",
+		       board_ti_get_name());
 
 invalid_eeprom:
 	set_board_info_env_am6(name);
