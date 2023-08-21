@@ -236,9 +236,10 @@ u32 spl_mmc_boot_mode(struct mmc *mmc, const u32 boot_device)
 
 	switch (bootmode) {
 	case BOOT_DEVICE_EMMC:
-		return MMCSD_MODE_FS;
+		return MMCSD_MODE_EMMCBOOT;
 	case BOOT_DEVICE_MMC:
-		return MMCSD_MODE_FS;
+		if (bootmode_cfg & MAIN_DEVSTAT_PRIMARY_MMC_FS_RAW_MASK)
+			return MMCSD_MODE_RAW;
 	default:
 		return MMCSD_MODE_FS;
 	}
