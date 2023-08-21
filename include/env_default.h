@@ -112,12 +112,12 @@ const char default_environment[] = {
 #ifdef CONFIG_MTDPARTS_DEFAULT
 	"mtdparts="	CONFIG_MTDPARTS_DEFAULT		"\0"
 #endif
+#ifdef	CFG_EXTRA_ENV_SETTINGS
+	CFG_EXTRA_ENV_SETTINGS
+#endif
 #ifdef CONFIG_EXTRA_ENV_TEXT
 	/* This is created in the Makefile */
 	CONFIG_EXTRA_ENV_TEXT
-#endif
-#ifdef	CFG_EXTRA_ENV_SETTINGS
-	CFG_EXTRA_ENV_SETTINGS
 #endif
 	"\0"
 #else /* CONFIG_USE_DEFAULT_ENV_FILE */
