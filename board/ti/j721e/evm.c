@@ -467,8 +467,7 @@ static void setup_board_eeprom_env(void)
 	else if (board_is_j7200_som())
 		name = "j7200";
 	else
-		printf("Unidentified board claims %s in eeprom header\n",
-		       board_ti_get_name());
+		name = "BBONEAI-64-B0-";
 
 invalid_eeprom:
 	set_board_info_env_am6(name);
