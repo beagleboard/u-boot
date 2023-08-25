@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * AM62x SIP SKEVM dts file for R5 SPL
+ * Copyright (C) 2023 Texas Instruments Incorporated - https://www.ti.com/
+ */
+
+#include "k3-am625-sk.dts"
+#include "k3-am62x-sip-ddr-lp4-50-800.dtsi"
+#include "k3-am62-ddr.dtsi"
+
+#include "k3-am625-sk-u-boot.dtsi"
+#include "k3-am62x-r5-sk-common.dtsi"
+#include "k3-am625-sk-binman.dtsi"
+
+/ {
+	memory@80000000 {
+		device_type = "memory";
+		/* 512M RAM */
+		reg = <0x00000000 0x80000000 0x00000000 0x20000000>;
+
+		bootph-pre-ram;
+	};
+};
