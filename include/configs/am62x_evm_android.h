@@ -138,6 +138,8 @@
 #define BOOTENV_DEV_RECOVERY(devtypeu, devtypel, instance) \
 	"bootcmd_recovery=" \
 		"setenv run_recovery 0;" \
+		"setenv ramdisk_addr_r 0xe9000000;" \
+		"setenv vloadaddr 0xe0000000;" \
 		"if bcb load " __stringify(CONFIG_FASTBOOT_FLASH_MMC_DEV) " " \
 		CONTROL_PARTITION "; then " \
 			"if bcb test command = boot-recovery; then; " \
@@ -163,10 +165,15 @@
 			"run avb_verify_cmd;" \
 			"part start mmc ${mmcdev} " RECOVERY_PARTITION "${slot_suffix} boot_start;" \
 			"part size mmc ${mmcdev} " RECOVERY_PARTITION "${slot_suffix} boot_size;" \
+			"part start mmc ${mmcdev} vendor_boot${slot_suffix} vendor_boot_start;" \
+			"part size  mmc ${mmcdev} vendor_boot${slot_suffix} vendor_boot_size;" \
 			"if mmc read ${loadaddr} ${boot_start} ${boot_size}; then " \
-				"run prepare_fdt_cmd;" \
-				"echo Running Android Recovery...;" \
-				BOOT_CMD \
+				"if mmc read $vloadaddr ${vendor_boot_start} ${vendor_boot_size}; then " \
+					"abootimg addr $loadaddr $vloadaddr;" \
+					"run prepare_fdt_cmd;" \
+					"echo Running Android Recovery...;" \
+					BOOT_CMD \
+				"fi;" \
 			"fi;" \
 			"echo Failed to boot Android...;" \
 			"reset;" \
@@ -182,13 +189,20 @@
 		"setenv bootargs ${bootargs} androidboot.serialno=${serial#};" \
 		"run ab_select_slot_cmd;" \
 		"run avb_verify_cmd;" \
+		"setenv ramdisk_addr_r 0xe9000000;" \
+		"setenv vloadaddr 0xe0000000;" \
 		"part start mmc ${mmcdev} " BOOT_PARTITION "${slot_suffix} boot_start;" \
 		"part size mmc ${mmcdev} " BOOT_PARTITION "${slot_suffix} boot_size;" \
+		"part start mmc ${mmcdev} vendor_boot${slot_suffix} vendor_boot_start;" \
+		"part size  mmc ${mmcdev} vendor_boot${slot_suffix} vendor_boot_size;" \
 		"if mmc read ${loadaddr} ${boot_start} ${boot_size}; then " \
-			"run prepare_fdt_cmd;" \
-			"setenv bootargs \"${bootargs} " AB_BOOTARGS "\"  ; " \
-			"echo Running Android...;" \
-			BOOT_CMD \
+			"if mmc read $vloadaddr ${vendor_boot_start} ${vendor_boot_size}; then " \
+				"abootimg addr $loadaddr $vloadaddr;" \
+				"run prepare_fdt_cmd;" \
+				"setenv bootargs \"${bootargs} " AB_BOOTARGS "\"  ; " \
+				"echo Running Android...;" \
+				BOOT_CMD \
+			"fi;" \
 		"fi;" \
 		"echo Failed to boot Android...\0"
 
