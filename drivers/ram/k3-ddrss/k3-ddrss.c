@@ -667,9 +667,6 @@ int k3_ddrss_ddr_fdt_fixup(struct udevice *dev, void *blob, struct bd_info *bd)
 	u64 size[CONFIG_NR_DRAM_BANKS];
 	int bank;
 
-	if (ddrss->ecc_reserved_space == 0)
-		return 0;
-
 	for (bank = CONFIG_NR_DRAM_BANKS - 1; bank >= 0; bank--) {
 		if (ddrss->ecc_reserved_space > bd->bi_dram[bank].size) {
 			ddrss->ecc_reserved_space -= bd->bi_dram[bank].size;
