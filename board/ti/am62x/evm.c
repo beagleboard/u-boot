@@ -45,7 +45,7 @@ static struct gpio_desc board_det_gpios[AM62X_LPSK_BRD_DET_COUNT];
 #define board_is_am62x_skevm()  (board_ti_k3_is("AM62-SKEVM") || \
 				 board_ti_k3_is("AM62B-SKEVM"))
 #define board_is_am62x_lp_skevm()  board_ti_k3_is("AM62-LP-SKEVM")
-#define board_is_am62x_sip_skevm()  board_ti_k3_is("AM62-SIP-SKEVM")
+#define board_is_am62x_sip_skevm()  board_ti_k3_is("AM62SIP-SKEVM")
 #define board_is_am62x_play()	board_ti_k3_is("BEAGLEPLAY-A0-")
 
 #if CONFIG_IS_ENABLED(SPLASH_SCREEN)
