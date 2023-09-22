@@ -23,6 +23,8 @@
 #include <asm/gpio.h>
 #include <cpu_func.h>
 
+#include <linux/sizes.h>
+
 #include "../common/board_detect.h"
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -84,6 +86,16 @@ int dram_init(void)
 int dram_init_banksize(void)
 {
 	return fdtdec_setup_memory_banksize();
+}
+
+phys_size_t get_effective_memsize(void)
+{
+	/*
+	 * Just below 512MB are TF-A and OPTEE reserve regions, thus
+	 * SPL/U-Boot RAM has to start below that. Leave 256MB space for
+	 * all reserved memories.
+	 */
+	return gd->ram_size == SZ_512M ?  SZ_256M : gd->ram_size;
 }
 
 #if defined(CONFIG_SPL_BUILD)
