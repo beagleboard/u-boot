@@ -79,7 +79,7 @@ static void __maybe_unused detect_enable_spinand(void *blob)
 {
 	struct gpio_desc desc = {0};
 	char *ospi_mux_sel_gpio = "6";
-	int offset;
+	int nand_offset, nor_offset;
 
 	if (dm_gpio_lookup_name(ospi_mux_sel_gpio, &desc))
 		return;
@@ -90,19 +90,16 @@ static void __maybe_unused detect_enable_spinand(void *blob)
 	if (dm_gpio_set_dir_flags(&desc, GPIOD_IS_IN))
 		return;
 
+	nand_offset = fdt_node_offset_by_compatible(blob, -1, "spi-nand");
+	nor_offset = fdt_node_offset_by_compatible(blob,
+						   fdt_parent_offset(blob, nand_offset),
+						   "jedec,spi-nor");
+
 	if (dm_gpio_get_value(&desc)) {
-		offset = fdt_node_offset_by_compatible(blob, -1, "spi-nand");
-		fdt_status_okay(blob, offset);
-
-		offset = fdt_first_subnode(blob,
-					   fdt_parent_offset(blob, offset));
-		while (offset > 0) {
-			if (!fdt_node_check_compatible(blob, offset,
-						       "jedec,spi-nor"))
-				fdt_status_disabled(blob, offset);
-
-			offset = fdt_next_subnode(blob, offset);
-		}
+		fdt_status_okay(blob, nand_offset);
+		fdt_del_node(blob, nor_offset);
+	} else {
+		fdt_del_node(blob, nand_offset);
 	}
 }
 #endif
