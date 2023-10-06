@@ -155,6 +155,7 @@ authInPlace = INTEGER:2
             C, ST, L, O, OU, CN and emailAddress
             cert_type (int): Certification type
             bootcore (int): Booting core
+            bootcore_opts(int): Booting core option (split/lockstep mode)
             load_addr (int): Load address of image
             sha (int): Hash function
 
