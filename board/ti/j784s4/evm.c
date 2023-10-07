@@ -133,7 +133,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 /*
 * Functions specific to EVM and SK designs of J784S4/AM69 family.
 */
-#define board_is_j784s4_evm()	board_ti_k3_is("J784S4-EVM")
+#define board_is_j784s4_evm()	board_ti_k3_is("J784S4X-EVM")
 
 #define board_is_am69_sk()	board_ti_k3_is("AM69-SK")
 
@@ -181,7 +181,7 @@ static void setup_board_eeprom_env(void)
 
 	if (board_is_am69_sk())
 		name = "am69-sk";
-	else
+	else if (!board_is_j784s4_evm())
 		printf("Unidentified board claims %s in eeprom header\n",
 		       board_ti_get_name());
 
