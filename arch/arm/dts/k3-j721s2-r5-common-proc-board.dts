@@ -333,15 +333,6 @@
 
 		regulators: regulators {
 			bootph-pre-ram;
-			buck1234_reg: buck1234 {
-				/*VDD_CPU_AVS*/
-				regulator-name = "buck1234";
-				regulator-min-microvolt = <600000>;
-				regulator-max-microvolt = <900000>;
-				regulator-always-on;
-				regulator-boot-on;
-				bootph-pre-ram;
-			};
 		};
 
 	esm: esm {
