@@ -238,7 +238,7 @@ emailAddress           = {req_dist_name_dict['emailAddress']}
                   imagesize_sbl, hashval_sbl, load_addr_sysfw, imagesize_sysfw,
                   hashval_sysfw, load_addr_sysfw_data, imagesize_sysfw_data,
                   hashval_sysfw_data, sysfw_inner_cert_ext_boot_block,
-                  dm_data_ext_boot_block):
+                  dm_data_ext_boot_block, bootcore_opts):
         """Create a certificate
 
         Args:
@@ -254,6 +254,7 @@ emailAddress           = {req_dist_name_dict['emailAddress']}
             bootcore (int): Booting core
             load_addr (int): Load address of image
             sha (int): Hash function
+            bootcore_opts (int): Boot core option (split/lockstep mode)
 
         Returns:
             str: Tool output
@@ -298,7 +299,7 @@ sysfw_data=SEQUENCE:sysfw_data
 [sbl]
 compType = INTEGER:1
 bootCore = INTEGER:16
-compOpts = INTEGER:0
+compOpts = INTEGER:{bootcore_opts}
 destAddr = FORMAT:HEX,OCT:{load_addr:08x}
 compSize = INTEGER:{imagesize_sbl}
 shaType  = OID:{sha_type}
