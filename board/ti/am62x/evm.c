@@ -92,10 +92,10 @@ phys_size_t get_effective_memsize(void)
 {
 	/*
 	 * Just below 512MB are TF-A and OPTEE reserve regions, thus
-	 * SPL/U-Boot RAM has to start below that. Leave 256MB space for
+	 * SPL/U-Boot RAM has to start below that. Leave 64MB space for
 	 * all reserved memories.
 	 */
-	return gd->ram_size == SZ_512M ?  SZ_256M : gd->ram_size;
+	return gd->ram_size == SZ_512M ? SZ_512M - SZ_64M  : gd->ram_size;
 }
 
 #if defined(CONFIG_SPL_BUILD)
