@@ -20,6 +20,7 @@
 #include <linux/err.h>
 #include <linux/sizes.h>
 #include <linux/soc/ti/ti_sci_protocol.h>
+#include <mach/security.h>
 #include "ti_sci_proc.h"
 
 #define KEYSTONE_RPROC_LOCAL_ADDRESS_MASK	(SZ_16M - 1)
