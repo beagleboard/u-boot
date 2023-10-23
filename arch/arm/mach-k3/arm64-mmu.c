@@ -235,7 +235,7 @@ struct mm_region *mem_map = j721s2_mem_map;
 #endif /* CONFIG_SOC_K3_J721S2 */
 
 #if defined(CONFIG_SOC_K3_AM642) || defined(CONFIG_SOC_K3_AM625) || \
-	defined(CONFIG_SOC_K3_AM62A7)
+	defined(CONFIG_SOC_K3_AM62A7) || defined(CONFIG_SOC_K3_AM62P5)
 
 /* NR_DRAM_BANKS + 32bit IO + 64bit IO + terminator */
 #define NR_MMU_REGIONS	(CONFIG_NR_DRAM_BANKS + 3)
@@ -275,7 +275,7 @@ struct mm_region am64_mem_map[NR_MMU_REGIONS] = {
 };
 
 struct mm_region *mem_map = am64_mem_map;
-#endif /* CONFIG_SOC_K3_AM642 || CONFIG_SOC_K3_AM625 || CONFIG_SOC_K3_AM62A7 */
+#endif /* CONFIG_SOC_K3_AM642 || CONFIG_SOC_K3_AM625 || CONFIG_SOC_K3_AM62A7 || ... */
 
 #if defined(CONFIG_SOC_K3_J784S4)
 #define NR_MMU_REGIONS	(CONFIG_NR_DRAM_BANKS + 5)
