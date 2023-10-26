@@ -39,19 +39,16 @@ static size_t ti_secure_cert_length(void *p_image)
 	return seq_length + 4;
 }
 
-void ti_secure_image_post_process(void **p_image, size_t *p_size)
+void ti_secure_image_check_binary(void **p_image, size_t *p_size)
 {
-	struct ti_sci_handle *ti_sci = get_ti_sci_handle();
-	struct ti_sci_proc_ops *proc_ops = &ti_sci->ops.proc_ops;
-	size_t cert_length;
-	u64 image_addr;
 	u32 image_size;
-	int ret;
-
+	size_t cert_length;
 	image_size = *p_size;
 
-	if (!image_size)
+	if (!image_size) {
+		debug("%s: Image size is %d\n", __func__, image_size);
 		return;
+	}
 
 	if (get_device_type() == K3_DEVICE_TYPE_GP) {
 		if (ti_secure_cert_detected(*p_image)) {
@@ -71,6 +68,24 @@ void ti_secure_image_post_process(void **p_image, size_t *p_size)
 
 		return;
 	}
+}
+
+void ti_secure_image_post_process(void **p_image, size_t *p_size)
+{
+	struct ti_sci_handle *ti_sci = get_ti_sci_handle();
+	struct ti_sci_proc_ops *proc_ops = &ti_sci->ops.proc_ops;
+	u64 image_addr;
+	u32 image_size;
+	int ret;
+
+	image_size = *p_size;
+	if (!image_size) {
+		debug("%s: Image size is %d\n", __func__, image_size);
+		return;
+	}
+
+	if (get_device_type() == K3_DEVICE_TYPE_GP)
+		return;
 
 	if (get_device_type() != K3_DEVICE_TYPE_HS_SE &&
 	    !ti_secure_cert_detected(*p_image)) {

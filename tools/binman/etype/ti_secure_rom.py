@@ -32,6 +32,7 @@ class Entry_ti_secure_rom(Entry_x509_cert):
         - core: core on which bootloader runs, valid cores are 'secure' and 'public'
         - content: phandle of SPL in case of legacy bootflow or phandles of component binaries
           in case of combined bootflow
+        - core-opts (optional): split-mode (0) or lockstep mode (1) set to 0 by default
 
     The following properties are only for generating a combined bootflow binary:
         - sysfw-inner-cert: boolean if binary contains sysfw inner certificate
@@ -70,6 +71,7 @@ class Entry_ti_secure_rom(Entry_x509_cert):
         self.sw_rev = fdt_util.GetInt(self._node, 'sw-rev', 1)
         self.sha = fdt_util.GetInt(self._node, 'sha', 512)
         self.core = fdt_util.GetString(self._node, 'core', 'secure')
+        self.bootcore_opts = fdt_util.GetInt(self._node, 'core-opts')
         self.key_fname = self.GetEntryArgsOrProps([
             EntryArg('keyfile', str)], required=True)[0]
         if self.combined:
@@ -98,22 +100,19 @@ class Entry_ti_secure_rom(Entry_x509_cert):
             bytes content of the entry, which is the certificate binary for the
                 provided data
         """
+        if self.bootcore_opts is None:
+            self.bootcore_opts = 0
+
         if self.core == 'secure':
             if self.countersign:
                 self.cert_type = 3
             else:
                 self.cert_type = 2
-
-            if self.fsstub:
-                self.bootcore_opts = 0
-            else:
-                self.bootcore_opts = 32
-
             self.bootcore = 0
         else:
             self.cert_type = 1
             self.bootcore = 16
-            self.bootcore_opts = 0
+
         return super().GetCertificate(required=required, type='rom')
 
     def CombinedGetCertificate(self, required):
@@ -131,6 +130,9 @@ class Entry_ti_secure_rom(Entry_x509_cert):
 
         self.num_comps = 3
         self.sha_type = SHA_OIDS[self.sha]
+
+        if self.bootcore_opts is None:
+            self.bootcore_opts = 0
 
         # sbl
         self.content = fdt_util.GetPhandleList(self._node, 'content-sbl')

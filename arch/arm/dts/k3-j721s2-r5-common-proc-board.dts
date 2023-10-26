@@ -139,6 +139,14 @@
 		>;
 	};
 
+	wkup_i2c0_pins_default: wkup-i2c0-pins-default {
+		bootph-pre-ram;
+		pinctrl-single,pins = <
+			J721S2_WKUP_IOPAD(0x100, PIN_INPUT, 0) /* (H24) WKUP_I2C0_SCL */
+			J721S2_WKUP_IOPAD(0x104, PIN_INPUT, 0) /* (H27) WKUP_I2C0_SDA */
+		>;
+	};
+
 	wkup_uart0_pins_default: wkup-uart0-pins-default {
 		bootph-pre-ram;
 		pinctrl-single,pins = <
@@ -310,6 +318,28 @@
 
 &mcu_udmap {
 	ti,sci = <&dm_tifs>;
+};
+
+&wkup_i2c0 {
+	bootph-pre-ram;
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_i2c0_pins_default>;
+	clock-frequency = <400000>;
+
+	tps659413: tps659413@48 {
+		compatible = "ti,tps659413";
+		reg = <0x48>;
+		bootph-pre-ram;
+
+		regulators: regulators {
+			bootph-pre-ram;
+		};
+
+	esm: esm {
+			compatible = "ti,tps659413-esm";
+			bootph-pre-ram;
+		};
+	};
 };
 
 #include "k3-j721s2-common-proc-board-u-boot.dtsi"

@@ -339,7 +339,7 @@
 
 	mcu_r5fss0: r5fss@41000000 {
 		compatible = "ti,j7200-r5fss";
-		ti,cluster-mode = <1>;
+		ti,cluster-mode = <0>;
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges = <0x41000000 0x00 0x41000000 0x20000>,
@@ -347,7 +347,7 @@
 		power-domains = <&k3_pds 249 TI_SCI_PD_EXCLUSIVE>;
 
 		mcu_r5fss0_core0: r5f@41000000 {
-			compatible = "ti,j7200-r5f";
+			compatible = "ti,j7200-mcu-r5f";
 			reg = <0x41000000 0x00010000>,
 			      <0x41010000 0x00010000>;
 			reg-names = "atcm", "btcm";
@@ -362,7 +362,7 @@
 		};
 
 		mcu_r5fss0_core1: r5f@41400000 {
-			compatible = "ti,j7200-r5f";
+			compatible = "ti,j7200-mcu-r5f";
 			reg = <0x41400000 0x00008000>,
 			      <0x41410000 0x00008000>;
 			reg-names = "atcm", "btcm";
@@ -375,5 +375,12 @@
 			ti,btcm-enable = <1>;
 			ti,loczrama = <1>;
 		};
+	};
+
+	mcu_esm: esm@40800000 {
+		compatible = "ti,j721e-esm";
+		reg = <0x00 0x40800000 0x00 0x1000>;
+		ti,esm-pins = <95>;
+		bootph-pre-ram;
 	};
 };

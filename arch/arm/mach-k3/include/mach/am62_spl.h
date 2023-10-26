@@ -19,6 +19,7 @@
 #define BOOT_DEVICE_UART		0x07
 #define BOOT_DEVICE_MMC			0x08
 #define BOOT_DEVICE_EMMC		0x09
+#define BOOT_DEVICE_SPINAND		0x10
 
 #define BOOT_DEVICE_USB			0x2A
 #define BOOT_DEVICE_DFU			0x0A
@@ -29,7 +30,6 @@
 
 /* U-Boot used aliases */
 #define BOOT_DEVICE_ETHERNET		0x04
-#define BOOT_DEVICE_SPINAND		0x07
 #define BOOT_DEVICE_MMC2		0x08
 #define BOOT_DEVICE_MMC1		0x09
 #define BOOT_DEVICE_RAM                 0x0F

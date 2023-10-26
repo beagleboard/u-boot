@@ -571,10 +571,13 @@ void spl_board_init(void)
 	if (board_ti_k3_is("J721EX-PM2-SOM") ||
 	    board_ti_k3_is("J7200X-PM2-SOM") ||
 	    board_is_bboneai_64_b0()) {
-		ret = uclass_get_device_by_driver(UCLASS_MISC,
-						  DM_DRIVER_GET(k3_esm), &dev);
+		ret = uclass_get_device_by_name(UCLASS_MISC, "esm@700000", &dev);
 		if (ret)
-			printf("ESM init failed: %d\n", ret);
+			printf("MISC init for esm@700000 failed: %d\n", ret);
+
+		ret = uclass_get_device_by_name(UCLASS_MISC, "esm@40800000", &dev);
+		if (ret)
+			printf("MISC init for esm@40800000 failed: %d\n", ret);
 	}
 #endif
 

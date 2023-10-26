@@ -1739,6 +1739,7 @@ Properties / Entry arguments:
     - core: core on which bootloader runs, valid cores are 'secure' and 'public'
     - content: phandle of SPL in case of legacy bootflow or phandles of component binaries
       in case of combined bootflow
+    - core-opts (optional): split-mode (0) or lockstep mode (1) set to 0 by default
 
 The following properties are only for generating a combined bootflow binary:
     - sysfw-inner-cert: boolean if binary contains sysfw inner certificate
