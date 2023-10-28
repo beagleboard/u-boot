@@ -405,6 +405,7 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+					optional;
 					ti-secure {
 						content = <&spl_j721e_sk_dtb>;
 						keyfile = "custMpk.pem";
@@ -487,6 +488,7 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+					optional;
 					ti-secure {
 						content = <&j721e_sk_dtb>;
 						keyfile = "custMpk.pem";
@@ -600,6 +602,7 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+					optional;
 					blob {
 						filename = SPL_J721E_SK_DTB;
 					};
@@ -669,6 +672,7 @@
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
+					optional;
 					blob {
 						filename = J721E_SK_DTB;
 					};
