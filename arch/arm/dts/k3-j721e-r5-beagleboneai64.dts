@@ -17,13 +17,10 @@
 	aliases {
 		remoteproc0 = &sysctrler;
 		remoteproc1 = &a72_0;
-		serial0 = &wkup_uart0;
-		serial3 = &main_uart1;
 	};
 
 	chosen {
-		stdout-path = "serial2:115200n8";
-		tick-timer = &timer1;
+		tick-timer = &mcu_timer0;
 	};
 
 	a72_0: a72@0 {
@@ -42,55 +39,38 @@
 		bootph-pre-ram;
 	};
 
-};
-
-&cbass_mcu_wakeup {
-	mcu_secproxy: secproxy@28380000 {
-		bootph-pre-ram;
-		compatible = "ti,am654-secure-proxy";
-		reg = <0x0 0x2a380000 0x0 0x80000>,
-		      <0x0 0x2a400000 0x0 0x80000>,
-		      <0x0 0x2a480000 0x0 0x80000>;
-		reg-names = "rt", "scfg", "target_data";
-		#mbox-cells = <1>;
-	};
-
-	sysctrler: sysctrler {
-		bootph-pre-ram;
-		compatible = "ti,am654-system-controller";
-		mboxes= <&mcu_secproxy 4>, <&mcu_secproxy 5>;
-		mbox-names = "tx", "rx";
-	};
-
-	wkup_vtm0: wkup_vtm@42040000 {
-		compatible = "ti,am654-vtm", "ti,j721e-avs";
-		reg = <0x0 0x42040000 0x0 0x330>;
-		power-domains = <&k3_pds 154 TI_SCI_PD_EXCLUSIVE>;
-		#thermal-sensor-cells = <1>;
-	};
-
 	dm_tifs: dm-tifs {
 		compatible = "ti,j721e-dm-sci";
 		ti,host-id = <3>;
 		ti,secure-host;
 		mbox-names = "rx", "tx";
-		mboxes= <&mcu_secproxy 21>,
-				<&mcu_secproxy 23>;
+		mboxes= <&secure_proxy_mcu 21>,
+				<&secure_proxy_mcu 23>;
 		bootph-pre-ram;
 	};
 };
 
-&cbass_main {
-	main_esm: esm@700000 {
-		compatible = "ti,j721e-esm";
-		reg = <0x0 0x700000 0x0 0x1000>;
-		ti,esm-pins = <344>, <345>;
+&mcu_timer0 {
+	status = "okay";
+	bootph-pre-ram;
+};
+
+&secure_proxy_mcu {
+	bootph-pre-ram;
+	status = "okay";
+};
+
+&cbass_mcu_wakeup {
+	sysctrler: sysctrler {
 		bootph-pre-ram;
+		compatible = "ti,am654-system-controller";
+		mboxes= <&secure_proxy_mcu 4>, <&secure_proxy_mcu 5>;
+		mbox-names = "tx", "rx";
 	};
 };
 
 &dmsc {
-	mboxes= <&mcu_secproxy 8>, <&mcu_secproxy 6>, <&mcu_secproxy 5>;
+	mboxes= <&secure_proxy_mcu 8>, <&secure_proxy_mcu 6>, <&secure_proxy_mcu 5>;
 	mbox-names = "tx", "rx", "notify";
 	ti,host-id = <4>;
 	ti,secure-host;
@@ -104,7 +84,9 @@
 	ti,sci = <&dm_tifs>;
 };
 
-/* EEPROM might be read before SYSFW is available */
+&wkup_uart0_pins_default {
+	bootph-pre-ram;
+};
 &wkup_i2c0 {
-	/delete-property/ power-domains;
+	bootph-pre-ram;
 };
