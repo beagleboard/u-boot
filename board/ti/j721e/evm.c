@@ -35,6 +35,8 @@
 #define board_is_j7200_som()	(board_ti_k3_is("J7200X-PM1-SOM") || \
 				 board_ti_k3_is("J7200X-PM2-SOM"))
 
+#define board_is_bboneai_64_b0()	(board_ti_k3_is("BBONEAI-64-B0-"))
+
 /* Max number of MAC addresses that are parsed/processed per daughter card */
 #define DAUGHTER_CARD_NO_OF_MAC_ADDR	8
 
@@ -96,6 +98,10 @@ int board_fit_config_name_match(const char *name)
 	} else if (board_is_j721e_sk()) {
 		if (!strcmp(name, "k3-j721e-sk") ||
 		    !strcmp(name, "k3-j721e-r5-sk"))
+			return 0;
+	} else if (board_is_bboneai_64_b0()) {
+		if (!strcmp(name, "k3-j721e-beagleboneai64") ||
+		    !strcmp(name, "k3-j721e-r5-beagleboneai64"))
 			return 0;
 	}
 
@@ -445,6 +451,8 @@ static void setup_board_eeprom_env(void)
 		name = "j721e-sk";
 	else if (board_is_j7200_som())
 		name = "j7200";
+	else if (board_is_bboneai_64_b0())
+		name = "BBONEAI-64-B0-";
 	else
 		printf("Unidentified board claims %s in eeprom header\n",
 		       board_ti_get_name());
@@ -544,7 +552,8 @@ void spl_board_init(void)
 	}
 
 #ifdef CONFIG_ESM_K3
-	if (board_ti_k3_is("J721EX-PM2-SOM")) {
+	if (board_ti_k3_is("J721EX-PM2-SOM") ||
+	    board_is_bboneai_64_b0()) {
 		ret = uclass_get_device_by_driver(UCLASS_MISC,
 						  DM_DRIVER_GET(k3_esm), &dev);
 		if (ret)
