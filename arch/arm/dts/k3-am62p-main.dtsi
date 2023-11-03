@@ -576,7 +576,9 @@
 		clock-names = "clk_ahb", "clk_xin";
 		assigned-clocks = <&k3_clks 57 2>;
 		assigned-clock-parents = <&k3_clks 57 4>;
+		bus-width = <8>;
 		ti,otap-del-sel-legacy = <0x0>;
+		ti,trm-icp = <0x8>;
 		status = "disabled";
 	};
 
@@ -588,7 +590,9 @@
 		clocks = <&k3_clks 58 5>, <&k3_clks 58 6>;
 		clock-names = "clk_ahb", "clk_xin";
 		ti,otap-del-sel-legacy = <0x8>;
+		bus-width = <4>;
 		status = "disabled";
+		no-1-8-v;
 	};
 
 	sdhci2: mmc@fa20000 {
@@ -1012,8 +1016,13 @@
 		compatible = "ti,am62p-pvr", "img,pvr-bxs64";
 		reg = <0x00 0x0fd80000 0x00 0x80000>;
 		interrupts = <GIC_SPI 241 IRQ_TYPE_LEVEL_HIGH>;
-		power-domains = <&k3_pds 243 TI_SCI_PD_EXCLUSIVE>;
+		power-domains = <&k3_pds 237 TI_SCI_PD_EXCLUSIVE>,
+				<&k3_pds 242 TI_SCI_PD_EXCLUSIVE>;
+		assigned-clocks = <&k3_clks 237 3>;
+		assigned-clock-rates = <720000000>;
+		power-domain-names = "firmware", "dust";
 		clocks = <&k3_clks 237 3>;
+		clock-names = "core";
 	};
 
 	ti_csi2rx0: ticsi2rx@30102000 {
