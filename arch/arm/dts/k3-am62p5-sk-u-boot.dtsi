@@ -25,3 +25,16 @@
 	reg-names = "gcfg", "rchanrt", "tchanrt", "ringrt",
 		    "cfg", "tchan", "rchan", "rflow";
 };
+
+&usbss0 {
+	bootph-pre-ram;
+};
+
+&usb0 {
+	/* Enable peripheral mode only during bootup
+	 * to support DFU while allowing Linux to stay
+	 * in OTG mode
+	 */
+	dr_mode = "peripheral";
+	bootph-pre-ram;
+};
