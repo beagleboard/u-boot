@@ -14,8 +14,13 @@
 #include <fdt_support.h>
 #include <spl.h>
 
+#include "../common/rtc.c"
+
 int board_init(void)
 {
+	if (IS_ENABLED(CONFIG_BOARD_HAS_32K_RTC_CRYSTAL))
+		board_rtc_init();
+
 	return 0;
 }
 
