@@ -27,6 +27,8 @@
 
 #include "../common/board_detect.h"
 
+#include "../common/rtc.c"
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define AM62X_MAX_DAUGHTER_CARDS	8
@@ -75,6 +77,9 @@ int splash_screen_prepare(void)
 
 int board_init(void)
 {
+	if (IS_ENABLED(CONFIG_BOARD_HAS_32K_RTC_CRYSTAL))
+		board_rtc_init();
+
 	return 0;
 }
 
