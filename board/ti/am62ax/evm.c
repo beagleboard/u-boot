@@ -15,12 +15,17 @@
 #include <fdt_support.h>
 #include <spl.h>
 
+#include "../common/rtc.c"
+
 #define CTRLMMR_USB0_PHY_CTRL  0x43004008
 #define CTRLMMR_USB1_PHY_CTRL  0x43004018
 #define CORE_VOLTAGE           0x80000000
 
 int board_init(void)
 {
+	if (IS_ENABLED(CONFIG_BOARD_HAS_32K_RTC_CRYSTAL))
+		board_rtc_init();
+
 	return 0;
 }
 
