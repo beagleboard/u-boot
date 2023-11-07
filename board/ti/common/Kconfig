@@ -1,3 +1,11 @@
+config BOARD_HAS_32K_RTC_CRYSTAL
+	bool "Enable the 32k crystial for RTC"
+	help
+	   Some of Texas Instrument's Starter-Kit boards have
+	   an onboard 32k crystal. Select this option if you wish Uboot
+	   to enable this crystal for Linux
+	default n
+
 config TI_I2C_BOARD_DETECT
 	bool "Support for Board detection for TI platforms"
 	help
