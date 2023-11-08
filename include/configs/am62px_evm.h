@@ -14,4 +14,9 @@
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
 
+/* include Android related settings */
+#if CONFIG_CMD_ABOOTIMG
+#include <configs/am62x_evm_android.h>
+#endif
+
 #endif /* __CONFIG_AM62PX_EVM_H */

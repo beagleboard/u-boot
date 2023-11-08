@@ -80,6 +80,9 @@
 	"elif test $board_name =  am62x_beagleplay; then " \
 		"echo \"  Reading DTB for am62x_beagleplay...\"; " \
 		"setenv dtb_index 2;" \
+	"elif test $board_name =  am62px; then " \
+		"echo \"  Reading DTB for am62px...\"; " \
+		"setenv dtb_index 3;" \
 	"else " \
 		"echo Error: Android boot is not supported for $board_name; " \
 		"exit; " \
