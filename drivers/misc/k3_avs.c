@@ -473,6 +473,27 @@ static struct vd_data j721e_vd_data[] = {
 	{ .id = -1 },
 };
 
+static struct vd_data j721s2_vd_data[] = {
+	{
+		.id = J721E_VDD_MPU,
+		.opp = AM6_OPP_NOM,
+		.dev_id = 202, /* J721S2_DEV_A72SS0_CORE0 */
+		.clk_id = 0, /* ARM clock */
+		.opps = {
+			[AM6_OPP_NOM] = {
+				.volt = 880000, /* TBD in DM */
+				.freq = 2000000000,
+			},
+		},
+	},
+	{ .id = -1 },
+};
+
+static struct vd_config j721s2_vd_config = {
+	.efuse_xlate = am6_efuse_xlate,
+	.vds = j721s2_vd_data,
+};
+
 static struct vd_config j721e_vd_config = {
 	.efuse_xlate = am6_efuse_xlate,
 	.vds = j721e_vd_data,
@@ -486,6 +507,7 @@ static struct vd_config am654_vd_config = {
 static const struct udevice_id k3_avs_ids[] = {
 	{ .compatible = "ti,am654-avs", .data = (ulong)&am654_vd_config },
 	{ .compatible = "ti,j721e-avs", .data = (ulong)&j721e_vd_config },
+	{ .compatible = "ti,j721s2-avs", .data = (ulong)&j721s2_vd_config },
 	{}
 };
 
