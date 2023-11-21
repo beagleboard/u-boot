@@ -74,6 +74,9 @@
 	"if test $board_name = am62x_skevm; then " \
 		"echo \"  Reading DTB for am62x_skevm...\"; " \
 		"setenv dtb_index 0;" \
+	"elif test $board_name = am62b_p1_skevm; then " \
+		"echo \"  Reading DTB for am62b_p1_skevm...\"; " \
+		"setenv dtb_index 0;" \
 	"elif test $board_name = am62x_lp_skevm; then " \
 		"echo \"  Reading DTB for am62x_lp_skevm...\"; " \
 		"setenv dtb_index 1;" \
