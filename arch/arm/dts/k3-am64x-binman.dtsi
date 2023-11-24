@@ -126,6 +126,8 @@
 #define AM642_EVM_DTB "u-boot.dtb"
 #define AM642_SK_DTB "arch/arm/dts/k3-am642-sk.dtb"
 
+#define AM642_EVM_NAND_DTBO "arch/arm/dts/k3-am642-evm-nand.dtbo"
+
 &binman {
 	ti-spl {
 		filename = "tispl.bin";
@@ -229,6 +231,20 @@
 					};
 
 				};
+
+				fdt-2 {
+					description = "k3-am642-evm-nand overlay";
+					type = "flat_dt";
+					arch = "arm";
+					compression = "none";
+					ti-secure {
+						content = <&spl_am64x_evm_nand_dtb>;
+						keyfile = "custMpk.pem";
+					};
+					spl_am64x_evm_nand_dtb: blob-ext {
+						filename = AM642_EVM_NAND_DTBO;
+					};
+				};
 			};
 
 			configurations {
@@ -246,6 +262,13 @@
 					firmware = "atf";
 					loadables = "tee", "dm", "spl";
 					fdt = "fdt-1";
+				};
+
+				conf-2 {
+					description = "k3-am642-evm-nand";
+					firmware = "atf";
+					loadables = "tee", "dm", "spl";
+					fdt = "fdt-0", "fdt-2";
 				};
 			};
 		};
@@ -315,6 +338,23 @@
 					};
 				};
 
+				fdt-2 {
+					description = "k3-am642-evm-nand overlay";
+					type = "flat_dt";
+					arch = "arm";
+					compression = "none";
+					ti-secure {
+						content = <&am64x_evm_nand_dtb>;
+						keyfile = "custMpk.pem";
+
+					};
+					am64x_evm_nand_dtb: blob-ext {
+						filename = AM642_EVM_NAND_DTBO;
+					};
+					hash {
+						algo = "crc32";
+					};
+				};
 			};
 
 			configurations {
@@ -332,6 +372,13 @@
 					firmware = "uboot";
 					loadables = "uboot";
 					fdt = "fdt-1";
+				};
+
+				conf-2 {
+					description = "k3-am642-evm-nand";
+					firmware = "uboot";
+					loadables = "uboot";
+					fdt = "fdt-0", "fdt-2";
 				};
 			};
 		};
@@ -418,6 +465,16 @@
 						filename = SPL_AM642_SK_DTB;
 					};
 				};
+
+				fdt-2 {
+					description = "k3-am642-evm-nand overlay";
+					type = "flat_dt";
+					arch = "arm";
+					compression = "none";
+					blob {
+						filename = AM642_EVM_NAND_DTBO;
+					};
+				};
 			};
 
 			configurations {
@@ -435,6 +492,13 @@
 					firmware = "atf";
 					loadables = "tee", "dm", "spl";
 					fdt = "fdt-1";
+				};
+
+				conf-2 {
+					description = "k3-am642-evm-nand";
+					firmware = "atf";
+					loadables = "tee", "dm", "spl";
+					fdt = "fdt-0", "fdt-2";
 				};
 			};
 		};
@@ -490,6 +554,19 @@
 						algo = "crc32";
 					};
 				};
+
+				fdt-2 {
+					description = "k3-am642-evm-nand overlay";
+					type = "flat_dt";
+					arch = "arm";
+					compression = "none";
+					blob {
+						filename = AM642_EVM_NAND_DTBO;
+					};
+					hash {
+						algo = "crc32";
+					};
+				};
 			};
 
 			configurations {
@@ -507,6 +584,13 @@
 					firmware = "uboot";
 					loadables = "uboot";
 					fdt = "fdt-1";
+				};
+
+				conf-2 {
+					description = "k3-am642-evm-nand";
+					firmware = "uboot";
+					loadables = "uboot";
+					fdt = "fdt-0", "fdt-2";
 				};
 			};
 		};
