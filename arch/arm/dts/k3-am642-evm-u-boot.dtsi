@@ -180,3 +180,15 @@
 		};
 	};
 };
+
+&gpmc0 {
+	bootph-pre-ram;
+};
+
+&elm0 {
+	bootph-pre-ram;
+};
+
+&main_gpio0 {
+	bootph-pre-ram;
+};
