@@ -35,6 +35,10 @@ enum {
 	AM64X_EVM_BRD_DET_COUNT,
 };
 
+#define AM642_NAND_DTBO		"k3-am642-evm-nand.dtbo"
+
+static struct gpio_desc board_det_gpios[AM64X_EVM_BRD_DET_COUNT];
+
 /* Max number of MAC addresses that are parsed/processed per daughter card */
 #define DAUGHTER_CARD_NO_OF_MAC_ADDR	8
 
@@ -67,14 +71,20 @@ int dram_init_banksize(void)
 	return ret;
 }
 
+static bool is_nand;
 #if defined(CONFIG_SPL_LOAD_FIT)
 int board_fit_config_name_match(const char *name)
 {
 	bool eeprom_read = board_ti_was_eeprom_read();
 
 	if (!eeprom_read || board_is_am64x_gpevm()) {
-		if (!strcmp(name, "k3-am642-r5-evm") || !strcmp(name, "k3-am642-evm"))
-			return 0;
+		if (is_nand) {
+			if (!strcmp(name, "k3-am642-r5-evm") || !strcmp(name, "k3-am642-evm-nand"))
+				return 0;
+		} else {
+			if (!strcmp(name, "k3-am642-r5-evm") || !strcmp(name, "k3-am642-evm"))
+				return 0;
+		}
 	} else if (board_is_am64x_skevm()) {
 		if (!strcmp(name, "k3-am642-r5-sk") || !strcmp(name, "k3-am642-sk"))
 			return 0;
@@ -236,7 +246,6 @@ static void setup_serial(void)
 #endif
 #endif
 
-#ifdef CONFIG_BOARD_LATE_INIT
 static const char *k3_dtbo_list[AM64X_MAX_DAUGHTER_CARDS] = {NULL};
 
 static int init_daughtercard_det_gpio(char *gpio_name, struct gpio_desc *desc)
@@ -264,7 +273,6 @@ static int init_daughtercard_det_gpio(char *gpio_name, struct gpio_desc *desc)
 static int probe_daughtercards(void)
 {
 	struct ti_am6_eeprom ep;
-	struct gpio_desc board_det_gpios[AM64X_EVM_BRD_DET_COUNT];
 	char mac_addr[DAUGHTER_CARD_NO_OF_MAC_ADDR][TI_EEPROM_HDR_ETH_ALEN];
 	u8 mac_addr_cnt;
 	char name_overlays[1024] = { 0 };
@@ -292,7 +300,7 @@ static int probe_daughtercards(void)
 		{
 			AM64X_EVM_HSE_BRD_DET,
 			"TMDS64DC02EVM",
-			"k3-am642-evm-nand.dtbo",
+			AM642_NAND_DTBO,
 			0,
 		},
 	};
@@ -373,6 +381,9 @@ static int probe_daughtercards(void)
 		dtboname = cards[i].dtbo_name;
 		k3_dtbo_list[nb_dtbos++] = dtboname;
 
+		if (!strcmp(dtboname, AM642_NAND_DTBO))
+			is_nand = true;
+
 		/*
 		 * Make sure we are not running out of buffer space by checking
 		 * if we can fit the new overlay, a trailing space to be used
@@ -396,6 +407,7 @@ static int probe_daughtercards(void)
 	return 0;
 }
 
+#ifdef CONFIG_BOARD_LATE_INIT
 int board_late_init(void)
 {
 	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
@@ -434,5 +446,9 @@ void spl_board_init(void)
 
 	/* Init DRAM size for R5/A53 SPL */
 	dram_init_banksize();
+
+	/* Check for and probe any plugged-in daughtercards */
+	if (board_is_am64x_gpevm())
+		probe_daughtercards();
 }
 #endif
