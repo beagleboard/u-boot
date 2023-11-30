@@ -101,7 +101,7 @@
 	"dtbo_idx=''; " \
 	"for index in $dtbo_index; do " \
 		"adtimg get dt --index=$index dtbo_addr; " \
-		"fdt resize; " \
+		"fdt resize 4096; " \
 		"fdt apply $dtbo_addr; " \
 		"if test $dtbo_idx = ''; then " \
 			"dtbo_idx=${index}; " \
