@@ -9,6 +9,7 @@ obj-$(CONFIG_SOC_K3_AM625) += am62x/
 obj-$(CONFIG_SOC_K3_AM62A7) += am62ax/
 obj-$(CONFIG_SOC_K3_J784S4) += j784s4/
 obj-$(CONFIG_SOC_K3_AM62P5) += am62px/
+obj-$(CONFIG_SOC_K3_J722S) += j722s/
 obj-$(CONFIG_ARM64) += arm64-mmu.o
 obj-$(CONFIG_CPU_V7R) += r5_mpu.o lowlevel_init.o
 obj-$(CONFIG_ARM64) += cache.o
@@ -21,6 +22,7 @@ obj-$(CONFIG_SOC_K3_AM625) += am625_init.o
 obj-$(CONFIG_SOC_K3_AM62A7) += am62a7_init.o
 obj-$(CONFIG_SOC_K3_J784S4) += j784s4_init.o
 obj-$(CONFIG_SOC_K3_AM62P5) += am62p5_init.o
+obj-$(CONFIG_SOC_K3_J722S) += j722s_init.o
 obj-$(CONFIG_K3_LOAD_SYSFW) += sysfw-loader.o
 endif
 obj-y += common.o security.o
