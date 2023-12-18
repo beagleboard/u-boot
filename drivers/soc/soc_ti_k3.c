@@ -51,6 +51,9 @@ static const char *get_family_string(u32 idreg)
 	case JTAG_ID_PARTNO_AM62PX:
 		family = "AM62PX";
 		break;
+	case JTAG_ID_PARTNO_J722S:
+		family = "J722S";
+		break;
 	default:
 		family = "Unknown Silicon";
 	};
