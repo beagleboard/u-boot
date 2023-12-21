@@ -216,7 +216,7 @@
 						content = <&dm>;
 						keyfile = "custMpk.pem";
 					};
-					dm: blob-ext {
+					dm: ti-dm {
 						filename = "ti-dm.bin";
 					};
 				};
@@ -419,7 +419,7 @@
 					os = "DM";
 					load = <0x89000000>;
 					entry = <0x89000000>;
-					blob-ext {
+					ti-dm {
 						filename = "ti-dm.bin";
 					};
 				};
