@@ -278,6 +278,12 @@ use the `lite` option.
         BL31=<path/to/atf/bl31.bin \
         TEE=<path/to/optee/tee-pager_v2.bin
 
+.. note::
+   It is also possible to pick up a custom DM binary by adding TI_DM argument
+   pointing to the file. If not provided, it defaults to picking up the DM
+   binary from BINMAN_INDIRS. This is only applicable to devices that utilize
+   split firmware.
+
 At this point you should have every binary needed initialize both the
 wakeup and main domain and to boot to the U-Boot prompt
 
