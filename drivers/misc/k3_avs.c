@@ -194,6 +194,29 @@ static int match_opp(struct vd_data *vd, u32 freq)
 }
 
 /**
+ * k3_check_opp: Check for presence of opp efuse
+ * @opp_id: opp id to check if voltage is present
+ *
+ * Checks to see if an opp has voltage. k3_avs probe will populate
+ * votlage data if efuse is present. Returns 0 if data is valid.
+ */
+int k3_check_opp(int opp_id)
+{
+	struct vd_data *vd;
+	struct k3_avs_privdata *priv = k3_avs_priv;
+	int volt;
+
+	vd = priv->vd_config->vds;
+	volt = vd->opps[opp_id].volt;
+
+	if (volt)
+		return 0;
+
+	printf("No efuse found for opp_%d\n", opp_id);
+	return -EINVAL;
+}
+
+/**
  * k3_avs_notify_freq: Notify clock rate change towards AVS subsystem
  * @dev_id: Device ID for the clock to be changed
  * @clk_id: Clock ID for the clock to be changed
