@@ -257,7 +257,7 @@
 			buck1_reg: buck1 {
 				/*VDD_CPU_AVS_REG*/
 				regulator-name = "buck1";
-				regulator-min-microvolt = <800000>;
+				regulator-min-microvolt = <760000>;
 				regulator-max-microvolt = <1250000>;
 				regulator-always-on;
 				regulator-boot-on;
