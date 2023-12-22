@@ -100,6 +100,12 @@ config SYS_K3_BOOT_CORE_ID
 	int
 	default 16
 
+config K3_OPP_LOW
+	bool "Enable OPP_LOW on supported TI K3 SoCs"
+	help
+	  Enabling this will allow Socs with the proper efuse to run
+	  at a lower MPU core voltage and adjust freqrency according to SoC trm
+
 config K3_EARLY_CONS
 	bool "Activate to allow for an early console during SPL"
 	depends on SPL
