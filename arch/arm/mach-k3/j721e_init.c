@@ -23,6 +23,7 @@
 #include <fdtdec.h>
 #include <mmc.h>
 #include <remoteproc.h>
+#include <k3-avs.h>
 
 #ifdef CONFIG_K3_LOAD_SYSFW
 struct fwl_data cbass_hc_cfg0_fwls[] = {
@@ -124,6 +125,32 @@ void k3_mmc_restart_clock(void)
 	}
 }
 #endif
+
+int fix_freq(const void *fdt)
+{
+		int node, ret;
+		u32 opp_low_freq[3];
+
+		node = fdt_node_offset_by_compatible(fdt, -1, "ti,am654-rproc");
+			if (node < 0) {
+				printf("%s: A72 not found\n", __func__);
+				return node;
+			}
+
+		/* j7200 opp low values according to data sheet */
+		opp_low_freq[0] = cpu_to_fdt32(1000000000); /* 202-2 -> A72SS0_CORE0_0_ARM_CLK */
+		opp_low_freq[1] = cpu_to_fdt32(200000000); /* 61-1 -> GTC0_GTC_CLK */
+		opp_low_freq[2] = cpu_to_fdt32(500000000); /* 4-1 -> A72SS0_CORE0_MSMC_CLK */
+
+		ret = fdt_setprop((void *)fdt, node, "assigned-clock-rates",
+				  opp_low_freq, sizeof(opp_low_freq));
+			if (ret) {
+				printf("%s: Can not set value\n", __func__);
+				return ret;
+			}
+
+		return 0;
+}
 
 /*
  * This uninitialized global variable would normal end up in the .bss section,
@@ -280,8 +307,24 @@ void board_init_f(ulong dummy)
 #if defined(CONFIG_CPU_V7R) && defined(CONFIG_K3_AVS0)
 	ret = uclass_get_device_by_driver(UCLASS_MISC, DM_DRIVER_GET(k3_avs),
 					  &dev);
-	if (ret)
+	if (!ret) {
+		if (IS_ENABLED(CONFIG_K3_OPP_LOW)) {
+			ret = k3_check_opp(AM6_OPP_LOW);
+			if (!ret) {
+				ret = fix_freq(gd->fdt_blob);
+				if (ret)
+					printf("Failed to set OPP_LOW frequency\n");
+
+				ret = k3_avs_set_opp(dev, J721E_VDD_MPU, AM6_OPP_LOW);
+				if (ret)
+					printf("Failed to set OPP_LOW voltage\n");
+			} else {
+				printf("Failed to enable K3_OPP_LOW\n");
+			}
+		}
+	} else {
 		printf("AVS init failed: %d\n", ret);
+	}
 #endif
 
 #if defined(CONFIG_K3_J721E_DDRSS)
