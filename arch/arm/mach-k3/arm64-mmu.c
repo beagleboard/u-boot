@@ -53,7 +53,7 @@ struct mm_region am654_mem_map[NR_MMU_REGIONS] = {
 	}, {
 		.virt = 0x500000000UL,
 		.phys = 0x500000000UL,
-		.size = 0x400000000UL,
+		.size = 0x380000000UL,
 		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
 			 PTE_BLOCK_NON_SHARE |
 			 PTE_BLOCK_PXN | PTE_BLOCK_UXN
@@ -108,7 +108,7 @@ struct mm_region j721e_mem_map[NR_MMU_REGIONS] = {
 	}, {
 		.virt = 0x500000000UL,
 		.phys = 0x500000000UL,
-		.size = 0x400000000UL,
+		.size = 0x380000000UL,
 		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
 			 PTE_BLOCK_NON_SHARE |
 			 PTE_BLOCK_PXN | PTE_BLOCK_UXN
@@ -166,7 +166,7 @@ struct mm_region j7200_mem_map[NR_MMU_REGIONS] = {
 	}, {
 		.virt = 0x500000000UL,
 		.phys = 0x500000000UL,
-		.size = 0x400000000UL,
+		.size = 0x380000000UL,
 		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
 			 PTE_BLOCK_NON_SHARE |
 			 PTE_BLOCK_PXN | PTE_BLOCK_UXN
@@ -220,7 +220,7 @@ struct mm_region j721s2_mem_map[NR_MMU_REGIONS] = {
 	}, {
 		.virt = 0x500000000UL,
 		.phys = 0x500000000UL,
-		.size = 0x400000000UL,
+		.size = 0x380000000UL,
 		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
 			 PTE_BLOCK_NON_SHARE |
 			 PTE_BLOCK_PXN | PTE_BLOCK_UXN
@@ -264,7 +264,7 @@ struct mm_region am64_mem_map[NR_MMU_REGIONS] = {
 	}, {
 		.virt = 0x500000000UL,
 		.phys = 0x500000000UL,
-		.size = 0x400000000UL,
+		.size = 0x380000000UL,
 		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
 			 PTE_BLOCK_NON_SHARE |
 			 PTE_BLOCK_PXN | PTE_BLOCK_UXN
@@ -305,7 +305,7 @@ struct mm_region j722s_mem_map[NR_MMU_REGIONS] = {
 	}, {
 		.virt = 0x500000000UL,
 		.phys = 0x500000000UL,
-		.size = 0x400000000UL,
+		.size = 0x380000000UL,
 		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
 			 PTE_BLOCK_NON_SHARE |
 			 PTE_BLOCK_PXN | PTE_BLOCK_UXN
@@ -364,7 +364,7 @@ struct mm_region j784s4_mem_map[NR_MMU_REGIONS] = {
 	}, {
 		.virt = 0x500000000UL,
 		.phys = 0x500000000UL,
-		.size = 0x400000000UL,
+		.size = 0x380000000UL,
 		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
 			 PTE_BLOCK_NON_SHARE |
 			 PTE_BLOCK_PXN | PTE_BLOCK_UXN
