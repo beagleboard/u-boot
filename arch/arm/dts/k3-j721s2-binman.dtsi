@@ -220,6 +220,16 @@
 											FWPERM_SECURE_PRIV_RWCD |
 											FWPERM_SECURE_USER_RWCD |
 											FWPERM_NON_SECURE_PRIV_RWCD |
+											FWPERM_NON_SECURE_USER_RWCD)>,
+											<((FWPRIVID_ALL << FWPRIVID_SHIFT) |
+											FWPERM_SECURE_PRIV_RWCD |
+											FWPERM_SECURE_USER_RWCD |
+											FWPERM_NON_SECURE_PRIV_RWCD |
+											FWPERM_NON_SECURE_USER_RWCD)>,
+											<((FWPRIVID_ALL << FWPRIVID_SHIFT) |
+											FWPERM_SECURE_PRIV_RWCD |
+											FWPERM_SECURE_USER_RWCD |
+											FWPERM_NON_SECURE_PRIV_RWCD |
 											FWPERM_NON_SECURE_USER_RWCD)>;
 							start_address = <0x0 0x0>;
 							end_address = <0xff 0xffffffff>;
@@ -330,6 +340,16 @@
 											FWPERM_SECURE_PRIV_RWCD |
 											FWPERM_SECURE_USER_RWCD |
 											FWPERM_NON_SECURE_PRIV_RWCD |
+											FWPERM_NON_SECURE_USER_RWCD)>,
+											<((FWPRIVID_ALL << FWPRIVID_SHIFT) |
+											FWPERM_SECURE_PRIV_RWCD |
+											FWPERM_SECURE_USER_RWCD |
+											FWPERM_NON_SECURE_PRIV_RWCD |
+											FWPERM_NON_SECURE_USER_RWCD)>,
+											<((FWPRIVID_ALL << FWPRIVID_SHIFT) |
+											FWPERM_SECURE_PRIV_RWCD |
+											FWPERM_SECURE_USER_RWCD |
+											FWPERM_NON_SECURE_PRIV_RWCD |
 											FWPERM_NON_SECURE_USER_RWCD)>;
 							start_address = <0x0 0x0>;
 							end_address = <0xff 0xffffffff>;
@@ -358,7 +378,18 @@
 											FWPERM_SECURE_PRIV_RWCD |
 											FWPERM_SECURE_USER_RWCD |
 											FWPERM_NON_SECURE_PRIV_RWCD |
+											FWPERM_NON_SECURE_USER_RWCD)>,
+											<((FWPRIVID_ALL << FWPRIVID_SHIFT) |
+											FWPERM_SECURE_PRIV_RWCD |
+											FWPERM_SECURE_USER_RWCD |
+											FWPERM_NON_SECURE_PRIV_RWCD |
+											FWPERM_NON_SECURE_USER_RWCD)>,
+											<((FWPRIVID_ALL << FWPRIVID_SHIFT) |
+											FWPERM_SECURE_PRIV_RWCD |
+											FWPERM_SECURE_USER_RWCD |
+											FWPERM_NON_SECURE_PRIV_RWCD |
 											FWPERM_NON_SECURE_USER_RWCD)>;
+
 							start_address = <0x0 0x0>;
 							end_address = <0xff 0xffffffff>;
 						};
@@ -383,6 +414,16 @@
 							control = <(FWCTRL_EN | FWCTRL_LOCK |
 										FWCTRL_BG | FWCTRL_CACHE)>;
 							permissions = <((FWPRIVID_ALL << FWPRIVID_SHIFT) |
+											FWPERM_SECURE_PRIV_RWCD |
+											FWPERM_SECURE_USER_RWCD |
+											FWPERM_NON_SECURE_PRIV_RWCD |
+											FWPERM_NON_SECURE_USER_RWCD)>,
+											<((FWPRIVID_ALL << FWPRIVID_SHIFT) |
+											FWPERM_SECURE_PRIV_RWCD |
+											FWPERM_SECURE_USER_RWCD |
+											FWPERM_NON_SECURE_PRIV_RWCD |
+											FWPERM_NON_SECURE_USER_RWCD)>,
+											<((FWPRIVID_ALL << FWPRIVID_SHIFT) |
 											FWPERM_SECURE_PRIV_RWCD |
 											FWPERM_SECURE_USER_RWCD |
 											FWPERM_NON_SECURE_PRIV_RWCD |
