@@ -158,37 +158,37 @@
 		};
 	};
 
-	fsstub-hs {
-		filename = "fsstub.bin_hs";
+	tifsstub-hs {
+		filename = "tifsstub.bin_hs";
 		ti-secure-rom {
-			content = <&fsstub_hs_cert>;
+			content = <&tifsstub_hs_cert>;
 			core = "secure";
 			load = <0x60000>;
 			sw-rev = <CONFIG_K3_X509_SWRV>;
 			keyfile = "custMpk.pem";
 			countersign;
-			fsstub;
+			tifsstub;
 		};
-		fsstub_hs_cert: fsstub-hs-cert.bin {
+		tifsstub_hs_cert: tifsstub-hs-cert.bin {
 			filename = "ti-sysfw/ti-fs-stub-firmware-am62ax-hs-cert.bin";
 			type = "blob-ext";
 			optional;
 		};
-		fsstub_hs_enc: fsstub-hs-enc.bin {
+		tifsstub_hs_enc: tifsstub-hs-enc.bin {
 			filename = "ti-sysfw/ti-fs-stub-firmware-am62ax-hs-enc.bin";
 			type = "blob-ext";
 			optional;
 		};
 	};
 
-	fsstub-fs {
-		filename = "fsstub.bin_fs";
-		fsstub_fs_cert: fsstub-fs-cert.bin {
+	tifsstub-fs {
+		filename = "tifsstub.bin_fs";
+		tifsstub_fs_cert: tifsstub-fs-cert.bin {
 			filename = "ti-sysfw/ti-fs-stub-firmware-am62ax-hs-cert.bin";
 			type = "blob-ext";
 			optional;
 		};
-		fsstub_fs_enc: fsstub-fs-enc.bin {
+		tifsstub_fs_enc: tifsstub-fs-enc.bin {
 			filename = "ti-sysfw/ti-fs-stub-firmware-am62ax-hs-enc.bin";
 			type = "blob-ext";
 			optional;
@@ -196,17 +196,17 @@
 
 	};
 
-	fsstub-gp {
-		filename = "fsstub.bin_gp";
+	tifsstub-gp {
+		filename = "tifsstub.bin_gp";
 		ti-secure-rom {
-			content = <&fsstub_gp>;
+			content = <&tifsstub_gp>;
 			core = "secure";
 			load = <0x60000>;
 			sw-rev = <CONFIG_K3_X509_SWRV>;
 			keyfile = "ti-degenerate-key.pem";
-			fsstub;
+			tifsstub;
 		};
-		fsstub_gp: fsstub-gp.bin {
+		tifsstub_gp: tifsstub-gp.bin {
 			filename = "ti-sysfw/ti-fs-stub-firmware-am62ax-gp.bin";
 			type = "blob-ext";
 			optional;
@@ -255,42 +255,42 @@
 					};
 				};
 
-				fsstub-hs {
-					description = "FSSTUB";
+				tifsstub-hs {
+					description = "TIFSSTUB";
 					type = "firmware";
 					arch = "arm32";
 					compression = "none";
-					os = "fsstub-hs";
+					os = "tifsstub-hs";
 					load = <0x9ca00000>;
 					entry = <0x9ca00000>;
 					blob-ext {
-						filename = "fsstub.bin_hs";
+						filename = "tifsstub.bin_hs";
 					};
 				};
 
-				fsstub-fs {
-					description = "FSSTUB";
+				tifsstub-fs {
+					description = "TIFSSTUB";
 					type = "firmware";
 					arch = "arm32";
 					compression = "none";
-					os = "fsstub-fs";
+					os = "tifsstub-fs";
 					load = <0x9ca00000>;
 					entry = <0x9ca00000>;
 					blob-ext {
-						filename = "fsstub.bin_fs";
+						filename = "tifsstub.bin_fs";
 					};
 				};
 
-				fsstub-gp {
-					description = "FSSTUB";
+				tifsstub-gp {
+					description = "TIFSSTUB";
 					type = "firmware";
 					arch = "arm32";
 					compression = "none";
-					os = "fsstub-gp";
+					os = "tifsstub-gp";
 					load = <0x9ca00000>;
 					entry = <0x9ca00000>;
 					blob-ext {
-						filename = "fsstub.bin_gp";
+						filename = "tifsstub.bin_gp";
 					};
 				};
 
@@ -351,8 +351,8 @@
 				conf-0 {
 					description = "k3-am62a7-sk";
 					firmware = "atf";
-					loadables = "tee", "fsstub-hs", "fsstub-fs",
-						  "fsstub-gp", "dm", "spl";
+					loadables = "tee", "tifsstub-hs", "tifsstub-fs",
+						  "tifsstub-gp", "dm", "spl";
 					fdt = "fdt-0";
 				};
 			};
@@ -457,42 +457,42 @@
 					};
 				};
 
-				fsstub-hs {
-					description = "FSSTUB";
+				tifsstub-hs {
+					description = "TIFSSTUB";
 					type = "firmware";
 					arch = "arm32";
 					compression = "none";
-					os = "fsstub-hs";
+					os = "tifsstub-hs";
 					load = <0x9ca00000>;
 					entry = <0x9ca00000>;
 					blob-ext {
-						filename = "fsstub.bin_hs";
+						filename = "tifsstub.bin_hs";
 					};
 				};
 
-				fsstub-fs {
-					description = "FSSTUB";
+				tifsstub-fs {
+					description = "TIFSSTUB";
 					type = "firmware";
 					arch = "arm32";
 					compression = "none";
-					os = "fsstub-fs";
+					os = "tifsstub-fs";
 					load = <0x9ca00000>;
 					entry = <0x9ca00000>;
 					blob-ext {
-						filename = "fsstub.bin_fs";
+						filename = "tifsstub.bin_fs";
 					};
 				};
 
-				fsstub-gp {
-					description = "FSSTUB";
+				tifsstub-gp {
+					description = "TIFSSTUB";
 					type = "firmware";
 					arch = "arm32";
 					compression = "none";
-					os = "fsstub-gp";
+					os = "tifsstub-gp";
 					load = <0x9ca00000>;
 					entry = <0x9ca00000>;
 					blob-ext {
-						filename = "fsstub.bin_gp";
+						filename = "tifsstub.bin_gp";
 					};
 				};
 
@@ -539,8 +539,8 @@
 				conf-0 {
 					description = "k3-am62a7-sk";
 					firmware = "atf";
-					loadables = "tee", "fsstub-hs", "fsstub-fs",
-						  "fsstub-gp", "dm", "spl";
+					loadables = "tee", "tifsstub-hs", "tifsstub-fs",
+						  "tifsstub-gp", "dm", "spl";
 					fdt = "fdt-0";
 				};
 			};

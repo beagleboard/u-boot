@@ -49,9 +49,9 @@ static const char *image_os_match[IMAGE_AMT] = {
 	"tee",
 	"U-Boot",
 	"DM",
-	"fsstub-hs",
-	"fsstub-fs",
-	"fsstub-gp",
+	"tifsstub-hs",
+	"tifsstub-fs",
+	"tifsstub-gp",
 };
 #endif
 
@@ -380,14 +380,14 @@ void board_fit_image_post_process(const void *fit, int node, void **p_image,
 		int device_type = get_device_type();
 
 		if ((device_type == K3_DEVICE_TYPE_HS_SE &&
-		     strcmp(os, "fsstub-hs")) ||
+		     strcmp(os, "tifsstub-hs")) ||
 		   (device_type == K3_DEVICE_TYPE_HS_FS &&
-		     strcmp(os, "fsstub-fs")) ||
+		     strcmp(os, "tifsstub-fs")) ||
 		   (device_type == K3_DEVICE_TYPE_GP &&
-		     strcmp(os, "fsstub-gp"))) {
+		     strcmp(os, "tifsstub-gp"))) {
 			*p_size = 0;
 		} else {
-			debug("fsstub-type: %s\n", os);
+			debug("tifsstub-type: %s\n", os);
 		}
 
 		return;
