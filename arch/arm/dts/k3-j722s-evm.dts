@@ -8,7 +8,9 @@
 
 /dts-v1/;
 
+#include <dt-bindings/leds/common.h>
 #include "k3-j722s.dtsi"
+#include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/net/ti-dp83867.h>
 
 / {
@@ -38,6 +40,14 @@
 		#address-cells = <2>;
 		#size-cells = <2>;
 		ranges;
+
+		/* global cma region */
+		linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x00 0x38000000>;
+			linux,cma-default;
+		};
 
 		secure_tfa_ddr: tfa@9e780000 {
 			reg = <0x00 0x9e780000 0x00 0x80000>;
@@ -182,6 +192,27 @@
 		regulator-always-on;
 		regulator-boot-on;
 	};
+
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&led_pins_default>;
+
+		led-0 {
+			label = "j722s-evm:red:heartbeat";
+			gpios = <&main_gpio1 49 GPIO_ACTIVE_HIGH>;
+			function = LED_FUNCTION_HEARTBEAT;
+			linux,default-trigger = "heartbeat";
+		};
+
+		led-1 {
+			label = "j722s-evm:green:disk-activity";
+			gpios = <&exp1 16 GPIO_ACTIVE_HIGH>;
+			function = LED_FUNCTION_DISK_ACTIVITY;
+			linux,default-trigger = "mmc1";
+			default-state = "off";
+		};
+	};
 };
 
 &main_pmx0 {
@@ -246,6 +277,12 @@
 		>;
 		bootph-all;
 	};
+
+	led_pins_default: led-default-pins {
+		pinctrl-single,pins = <
+			J722S_IOPAD(0x0244, PIN_INPUT, 7) /* (A24) MMC1_SDWP */
+		>;
+	};
 };
 
 &main_gpio1 {
@@ -301,6 +338,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_i2c0_pins_default>;
 	clock-frequency = <400000>;
+	bootph-all;
 
 	exp1: gpio@23 {
 		compatible = "ti,tca6424";
@@ -321,6 +359,14 @@
 				  "ENET1_EXP_SPARE2", "ENET1_EXP_PWRDN",
 				  "PD_I2ENET1_I2CMUX_SELC_IRQ", "ENET1_EXP_RESETZ";
 	};
+};
+
+&sdhci0 {
+	/*eMMC*/
+	status = "okay";
+	ti,driver-strength-ohm = <50>;
+	disable-wp;
+	bootph-all;
 };
 
 &sdhci1 {
