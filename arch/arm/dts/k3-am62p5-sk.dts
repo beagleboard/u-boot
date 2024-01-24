@@ -744,6 +744,41 @@
 			};
 		};
 	};
+
+	panel_lvds: panel-lvds {
+		bootph-pre-ram;
+		compatible = "simple-panel";
+		status= "okay";
+		width-mm = <217>;
+		height-mm = <136>;
+		data-mapping = "vesa-24";
+		panel-timings {
+				bootph-pre-ram;
+				clock-frequency = <150274>;
+				hactive = <1920>;
+				vactive = <1200>;
+				hback-porch = <32>;
+				hfront-porch = <52>;
+				vback-porch = <24>;
+				vfront-porch = <8>;
+				hsync-len = <24>;
+				vsync-len = <3>;
+				de-active = <1>;
+		};
+		port@0 {
+			dual-lvds-odd-pixels;
+			lcd_in0: endpoint {
+				remote-endpoint = <&oldi_out0>;
+			};
+		};
+
+		port@1 {
+			dual-lvds-even-pixels;
+			lcd_in1: endpoint {
+				remote-endpoint = <&oldi_out1>;
+			};
+		};
+	};
 };
 
 &mailbox0_cluster0 {
@@ -818,6 +853,7 @@
 };
 
 &dss0 {
+	bootph-pre-ram;
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_dpi_pins_default>;
@@ -825,10 +861,26 @@
 
 &dss0_ports {
 	/* DSS0-VP2: DPI/HDMI Output */
+	/* VP1: LVDS Output (OLDI TX 0) */
+	port@0 {
+		reg = <0>;
+		oldi_out0: endpoint {
+			remote-endpoint = <&lcd_in0>;
+		};
+	};
+
 	port@1 {
 		reg = <1>;
 		dss0_dpi1_out: endpoint {
 			remote-endpoint = <&sii9022_in>;
+		};
+	};
+
+	/* VP1: LVDS Output (OLDI TX 1) */
+	port@2 {
+		reg = <2>;
+		oldi_out1: endpoint {
+			remote-endpoint = <&lcd_in1>;
 		};
 	};
 };

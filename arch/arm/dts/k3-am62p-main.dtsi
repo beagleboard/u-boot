@@ -42,6 +42,7 @@
 
 	main_conf: bus@100000 {
 		compatible = "simple-bus";
+		bootph-pre-ram;
 		reg = <0x00 0x00100000 0x00 0x20000>;
 		#address-cells = <1>;
 		#size-cells = <1>;
@@ -60,6 +61,7 @@
 		};
 
 		dss_oldi_io_ctrl: dss-oldi-io-ctrl@8600 {
+			bootph-pre-ram;
 			compatible = "syscon";
 			reg = <0x8600 0x200>;
 		};
@@ -1017,7 +1019,7 @@
 	};
 
 	dss0: dss@30200000 {
-		compatible = "ti,am62p51-dss";
+		compatible = "ti,am625-dss";
 		reg = <0x00 0x30200000 0x00 0x1000>, /* common */
 		      <0x00 0x30202000 0x00 0x1000>, /* vidl1 */
 		      <0x00 0x30206000 0x00 0x1000>, /* vid */
