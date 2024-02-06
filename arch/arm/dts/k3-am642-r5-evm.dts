@@ -382,4 +382,22 @@
 	};
 };
 
+#include "k3-am642-evm-nand.dtsi"
+
+&gpmc0_pins_default {
+	bootph-all;
+};
+
+&gpmc0 {
+	bootph-all;
+};
+
+&main_gpio0 {
+	bootph-all;
+};
+
+&nand0_0 {
+	bootph-all;
+};
+
 #include "k3-am642-evm-u-boot.dtsi"
