@@ -12,8 +12,9 @@
 	memory@80000000 {
 		device_type = "memory";
 		/* 16 GB RAM */
-		reg = <0x00 0x80000000 0x00 0x80000000>,
-		      <0x08 0x80000000 0x03 0x80000000>;
+		reg = <0x00000000 0x80000000 0x00000000 0x80000000>,
+		      <0x00000008 0x80000000 0x00000003 0x80000000>;
+		bootph-pre-ram;
 	};
 
 	/* Reserving memory regions still pending */

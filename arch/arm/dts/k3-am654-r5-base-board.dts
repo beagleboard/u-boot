@@ -24,6 +24,14 @@
 		tick-timer = &timer1;
 	};
 
+	memory@80000000 {
+		device_type = "memory";
+		/* 4G RAM */
+		reg = <0x00000000 0x80000000 0x00000000 0x80000000>,
+		      <0x00000008 0x80000000 0x00000000 0x80000000>;
+		bootph-pre-ram;
+	};
+
 	aliases {
 		remoteproc0 = &sysctrler;
 		remoteproc1 = &a53_0;
