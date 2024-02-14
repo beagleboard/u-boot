@@ -15,6 +15,7 @@
 #include <spl.h>
 
 #include "../common/board_detect.h"
+#include "../common/k3-ddr-init.h"
 
 #ifdef CONFIG_TI_I2C_BOARD_DETECT
 /*
@@ -58,14 +59,4 @@ int checkboard(void)
 int board_init(void)
 {
 	return 0;
-}
-
-int dram_init(void)
-{
-	return fdtdec_setup_mem_size_base();
-}
-
-int dram_init_banksize(void)
-{
-	return fdtdec_setup_memory_banksize();
 }

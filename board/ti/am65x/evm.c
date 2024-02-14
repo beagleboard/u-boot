@@ -24,6 +24,7 @@
 #include <asm/arch/sys_proto.h>
 
 #include "../common/board_detect.h"
+#include "../common/k3-ddr-init.h"
 
 #define board_is_am65x_base_board()	board_ti_is("AM6-COMPROCEVM")
 
@@ -50,17 +51,6 @@ int board_init(void)
 	return 0;
 }
 
-int dram_init(void)
-{
-#ifdef CONFIG_PHYS_64BIT
-	gd->ram_size = 0x100000000;
-#else
-	gd->ram_size = 0x80000000;
-#endif
-
-	return 0;
-}
-
 phys_size_t board_get_usable_ram_top(phys_size_t total_size)
 {
 #ifdef CONFIG_PHYS_64BIT
@@ -70,23 +60,6 @@ phys_size_t board_get_usable_ram_top(phys_size_t total_size)
 #endif
 
 	return gd->ram_top;
-}
-
-int dram_init_banksize(void)
-{
-	/* Bank 0 declares the memory available in the DDR low region */
-	gd->bd->bi_dram[0].start = CFG_SYS_SDRAM_BASE;
-	gd->bd->bi_dram[0].size = 0x80000000;
-	gd->ram_size = 0x80000000;
-
-#ifdef CONFIG_PHYS_64BIT
-	/* Bank 1 declares the memory available in the DDR high region */
-	gd->bd->bi_dram[1].start = CFG_SYS_SDRAM_BASE1;
-	gd->bd->bi_dram[1].size = 0x80000000;
-	gd->ram_size = 0x100000000;
-#endif
-
-	return 0;
 }
 
 #ifdef CONFIG_SPL_LOAD_FIT

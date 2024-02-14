@@ -16,6 +16,7 @@
 #include <spl.h>
 
 #include "../common/rtc.c"
+#include "../common/k3-ddr-init.h"
 
 #define CTRLMMR_USB0_PHY_CTRL  0x43004008
 #define CTRLMMR_USB1_PHY_CTRL  0x43004018
@@ -29,15 +30,15 @@ int board_init(void)
 	return 0;
 }
 
-int dram_init(void)
+#if defined(CONFIG_SPL_BUILD)
+void spl_perform_fixups(struct spl_image_info *spl_image)
 {
-	return fdtdec_setup_mem_size_base();
+	if (IS_ENABLED(CONFIG_K3_INLINE_ECC))
+		fixup_ddr_driver_for_ecc(spl_image);
+	else
+		fixup_memory_node(spl_image);
 }
-
-int dram_init_banksize(void)
-{
-	return fdtdec_setup_memory_banksize();
-}
+#endif
 
 #if defined(CONFIG_SPL_BOARD_INIT)
 void spl_board_init(void)

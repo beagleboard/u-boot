@@ -25,22 +25,12 @@
 #include <dm/uclass-internal.h>
 
 #include "../common/board_detect.h"
+#include "../common/k3-ddr-init.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
 int board_init(void)
 {
-	return 0;
-}
-
-int dram_init(void)
-{
-#ifdef CONFIG_PHYS_64BIT
-	gd->ram_size = 0x100000000;
-#else
-	gd->ram_size = 0x80000000;
-#endif
-
 	return 0;
 }
 
@@ -53,23 +43,6 @@ phys_size_t board_get_usable_ram_top(phys_size_t total_size)
 #endif
 
 	return gd->ram_top;
-}
-
-int dram_init_banksize(void)
-{
-	/* Bank 0 declares the memory available in the DDR low region */
-	gd->bd->bi_dram[0].start = CFG_SYS_SDRAM_BASE;
-	gd->bd->bi_dram[0].size = 0x7fffffff;
-	gd->ram_size = 0x80000000;
-
-#ifdef CONFIG_PHYS_64BIT
-	/* Bank 1 declares the memory available in the DDR high region */
-	gd->bd->bi_dram[1].start = CFG_SYS_SDRAM_BASE1;
-	gd->bd->bi_dram[1].size = 0x77fffffff;
-	gd->ram_size = 0x800000000;
-#endif
-
-	return 0;
 }
 
 /* Enables the spi-nand dts node, if onboard mux is set to spinand */
@@ -107,6 +80,8 @@ static void __maybe_unused detect_enable_spinand(void *blob)
 void spl_perform_fixups(struct spl_image_info *spl_image)
 {
 	detect_enable_spinand(spl_image->fdt_addr);
+	if (IS_ENABLED(CONFIG_K3_INLINE_ECC))
+		fixup_ddr_driver_for_ecc(spl_image);
 }
 #endif
 

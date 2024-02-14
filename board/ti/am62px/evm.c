@@ -17,6 +17,7 @@
 #include <splash.h>
 
 #include "../common/rtc.c"
+#include "../common/k3-ddr-init.h"
 
 #if CONFIG_IS_ENABLED(SPLASH_SCREEN)
 static struct splash_location default_splash_locations[] = {
@@ -49,17 +50,15 @@ int board_init(void)
 	return 0;
 }
 
-int dram_init(void)
-{
-	return fdtdec_setup_mem_size_base();
-}
-
-int dram_init_banksize(void)
-{
-	return fdtdec_setup_memory_banksize();
-}
-
 #if defined(CONFIG_SPL_BUILD)
+void spl_perform_fixups(struct spl_image_info *spl_image)
+{
+	if (IS_ENABLED(CONFIG_K3_INLINE_ECC))
+		fixup_ddr_driver_for_ecc(spl_image);
+	else
+		fixup_memory_node(spl_image);
+}
+
 static int video_setup(void)
 {
 	if (CONFIG_IS_ENABLED(VIDEO)) {
