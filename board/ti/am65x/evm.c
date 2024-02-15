@@ -65,10 +65,11 @@ phys_size_t board_get_usable_ram_top(phys_size_t total_size)
 #ifdef CONFIG_SPL_LOAD_FIT
 int board_fit_config_name_match(const char *name)
 {
-#ifdef CONFIG_TARGET_AM654_A53_EVM
-	if (!strcmp(name, "k3-am654-base-board"))
+	if (IS_ENABLED(CONFIG_TI_ICSSG_PRUETH) && !strcmp(name, "k3-am654-icssg2"))
 		return 0;
-#endif
+
+	if (IS_ENABLED(CONFIG_TARGET_AM654_A53_EVM) && !strcmp(name, "k3-am654-base-board"))
+		return 0;
 
 	return -1;
 }
