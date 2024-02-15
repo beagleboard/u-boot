@@ -27,6 +27,50 @@
 	};
 };
 
+&pru0_0 {
+	remoteproc-name = "pru0_0";
+};
+
+&rtu0_0 {
+	remoteproc-name = "rtu0_0";
+};
+
+&tx_pru0_0 {
+	remoteproc-name = "tx_pru0_0";
+};
+
+&pru0_1 {
+	remoteproc-name = "pru0_1";
+};
+
+&rtu0_1 {
+	remoteproc-name = "rtu0_1";
+};
+
+&tx_pru0_1 {
+	remoteproc-name = "tx_pru0_1";
+};
+
+&pru1_0 {
+	remoteproc-name = "pru1_0";
+};
+
+&rtu1_0 {
+	remoteproc-name = "rtu1_0";
+};
+
+&tx_pru1_0 {
+	remoteproc-name = "tx_pru1_0";
+};
+
+&pru1_1 {
+	remoteproc-name = "pru1_1";
+};
+
+&rtu1_1 {
+	remoteproc-name = "rtu1_1";
+};
+
 &main_conf {
 	bootph-pre-ram;
 	chipid@14 {
