@@ -354,7 +354,6 @@
 		ti,clkbuf-sel = <0x7>;
 		ti,otap-del-sel-legacy = <0x0>;
 		ti,otap-del-sel-mmc-hs = <0x0>;
-		ti,otap-del-sel-ddr52 = <0x9>;
 		ti,otap-del-sel-hs200 = <0x6>;
 	};
 
@@ -373,11 +372,10 @@
 		ti,otap-del-sel-sdr50 = <0xc>;
 		ti,otap-del-sel-sdr104 = <0x6>;
 		ti,otap-del-sel-ddr50 = <0x9>;
-		ti,itap-del-sel-legacy = <0xA>;
-		ti,itap-del-sel-sd-hs = <0x1>;
-		ti,itap-del-sel-sdr12 = <0xA>;
-		ti,itap-del-sel-sdr25 = <0x1>;
-		ti,itap-del-sel-ddr50 = <0x0>;
+		ti,itap-del-sel-legacy = <0x0>;
+		ti,itap-del-sel-sd-hs = <0x0>;
+		ti,itap-del-sel-sdr12 = <0x0>;
+		ti,itap-del-sel-sdr25 = <0x0>;
 		ti,clkbuf-sel = <0x7>;
 		bus-width = <4>;
 		no-1-8-v;
