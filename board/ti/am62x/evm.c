@@ -26,8 +26,7 @@
 #include <linux/sizes.h>
 
 #include "../common/board_detect.h"
-
-#include "../common/rtc.c"
+#include "../common/rtc.h"
 
 #include "../common/k3-ddr-init.h"
 

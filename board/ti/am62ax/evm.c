@@ -15,7 +15,7 @@
 #include <fdt_support.h>
 #include <spl.h>
 
-#include "../common/rtc.c"
+#include "../common/rtc.h"
 #include "../common/k3-ddr-init.h"
 
 #define CTRLMMR_USB0_PHY_CTRL  0x43004008

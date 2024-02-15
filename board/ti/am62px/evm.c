@@ -16,7 +16,7 @@
 #include <video.h>
 #include <splash.h>
 
-#include "../common/rtc.c"
+#include "../common/rtc.h"
 #include "../common/k3-ddr-init.h"
 
 #if CONFIG_IS_ENABLED(SPLASH_SCREEN)
