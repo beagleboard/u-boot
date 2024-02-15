@@ -843,7 +843,7 @@ static int k3_ddrss_get_info(struct udevice *dev, struct ram_info *info)
 	return 0;
 }
 
-static struct ram_ops k3_ddrss_ops = {
+static const struct ram_ops k3_ddrss_ops = {
 	.get_info = k3_ddrss_get_info,
 };
 
