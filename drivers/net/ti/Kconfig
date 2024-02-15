@@ -53,6 +53,7 @@ config TI_AM65_CPSW_NUSS
 config TI_ICSSG_PRUETH
 	bool "TI Gigabit PRU Ethernet driver"
 	depends on ARCH_K3
+	imply DM_MDIO
 	select PHYLIB
 	help
 	  Support Gigabit Ethernet ports over the ICSSG PRU Subsystem
