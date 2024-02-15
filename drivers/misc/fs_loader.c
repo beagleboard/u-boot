@@ -153,7 +153,10 @@ static int fw_get_filesystem_firmware(struct udevice *dev)
 	char *storage_interface, *dev_part, *ubi_mtdpart, *ubi_volume;
 	int ret;
 
-	storage_interface = env_get("storage_interface");
+	storage_interface = env_get("fw_storage_interface");
+	if (!storage_interface)
+		storage_interface = env_get("storage_interface");
+
 	dev_part = env_get("fw_dev_part");
 	ubi_mtdpart = env_get("fw_ubi_mtdpart");
 	ubi_volume = env_get("fw_ubi_volume");

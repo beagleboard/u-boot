@@ -98,8 +98,11 @@ through the U-boot environment variable during run time.
 
 For examples:
 
+fw_storage_interface:
+  Firmware storage interface, it can be "mmc", "usb", "sata" or "ubi".
 storage_interface:
-  Storage interface, it can be "mmc", "usb", "sata" or "ubi".
+  Storage interface, it can be "mmc", "usb", "sata" or "ubi". This acts
+  as a fallback if fw_storage_interface is not set.
 fw_dev_part:
   Block device number and its partition, it can be "0:1".
 fw_ubi_mtdpart:
