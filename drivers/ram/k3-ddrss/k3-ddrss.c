@@ -781,11 +781,11 @@ static int k3_ddrss_probe(struct udevice *dev)
 	if (ret)
 		return ret;
 
-#ifdef CONFIG_K3_AM64_DDRSS
-	/* AM64x supports only up to 2 GB SDRAM */
-	writel(0x000001EF, ddrss->ddrss_ss_cfg + DDRSS_V2A_CTL_REG);
-	writel(0x0, ddrss->ddrss_ss_cfg + DDRSS_ECC_CTRL_REG);
-#endif
+	if (IS_ENABLED(CONFIG_SOC_K3_AM642)) {
+		/* AM64x supports only up to 2 GB SDRAM */
+		writel(0x000001EF, ddrss->ddrss_ss_cfg + DDRSS_V2A_CTL_REG);
+		writel(0x0, ddrss->ddrss_ss_cfg + DDRSS_ECC_CTRL_REG);
+	}
 
 	ddrss->driverdt = lpddr4_getinstance();
 
