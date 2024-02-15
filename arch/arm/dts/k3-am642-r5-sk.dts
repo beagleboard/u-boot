@@ -224,7 +224,6 @@
 	/delete-property/ power-domains;
 	clocks = <&clk_200mhz>;
 	clock-names = "clk_xin";
-	ti,driver-strength-ohm = <50>;
 	disable-wp;
 	pinctrl-0 = <&main_mmc1_pins_default>;
 };
