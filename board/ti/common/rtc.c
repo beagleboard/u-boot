@@ -8,12 +8,7 @@
 #include <asm/io.h>
 #include <log.h>
 
-#define WKUP_CTRLMMR_DBOUNCE_CFG1 0x04504084
-#define WKUP_CTRLMMR_DBOUNCE_CFG2 0x04504088
-#define WKUP_CTRLMMR_DBOUNCE_CFG3 0x0450408c
-#define WKUP_CTRLMMR_DBOUNCE_CFG4 0x04504090
-#define WKUP_CTRLMMR_DBOUNCE_CFG5 0x04504094
-#define WKUP_CTRLMMR_DBOUNCE_CFG6 0x04504098
+#include "rtc.h"
 
 void board_rtc_init(void)
 {
