@@ -105,8 +105,6 @@ void spl_perform_fixups(struct spl_image_info *spl_image)
 {
 	if (IS_ENABLED(CONFIG_K3_INLINE_ECC))
 		fixup_ddr_driver_for_ecc(spl_image);
-	else
-		fixup_memory_node(spl_image);
 
 #if CONFIG_IS_ENABLED(USB_STORAGE)
 	fixup_usb_boot(spl_image->fdt_addr);
