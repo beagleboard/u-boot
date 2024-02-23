@@ -9,13 +9,13 @@
 #include <asm/arch/hardware.h>
 #include <asm/io.h>
 #include <common.h>
+#include <cpu_func.h>
 #include <dm/uclass.h>
 #include <env.h>
 #include <fdt_support.h>
 #include <spl.h>
-#include <video.h>
 #include <splash.h>
-
+#include <video.h>
 #include "../common/rtc.h"
 #include "../common/k3-ddr-init.h"
 
