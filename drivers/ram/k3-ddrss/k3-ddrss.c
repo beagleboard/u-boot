@@ -781,9 +781,13 @@ static int k3_ddrss_probe(struct udevice *dev)
 	if (ret)
 		return ret;
 
-	if (IS_ENABLED(CONFIG_SOC_K3_AM642)) {
+	k3_ddrss_ddr_bank_base_size_calc(ddrss);
+
+	if (IS_ENABLED(CONFIG_SOC_K3_AM625) || IS_ENABLED(CONFIG_SOC_K3_AM642)) {
+		/* AM62x SIP supports only up to 512 MB SDRAM */
 		/* AM64x supports only up to 2 GB SDRAM */
-		writel(0x000001EF, ddrss->ddrss_ss_cfg + DDRSS_V2A_CTL_REG);
+		writel((((ilog2(ddrss->ddr_ram_size) - 16) << 5) | 0xF),
+			  ddrss->ddrss_ss_cfg + DDRSS_V2A_CTL_REG);
 		writel(0x0, ddrss->ddrss_ss_cfg + DDRSS_ECC_CTRL_REG);
 	}
 
@@ -798,8 +802,6 @@ static int k3_ddrss_probe(struct udevice *dev)
 		return ret;
 
 	k3_lpddr4_start(ddrss);
-
-	k3_ddrss_ddr_bank_base_size_calc(ddrss);
 
 	if (ddrss->ti_ecc_enabled) {
 		if (!ddrss->ddrss_ss_cfg) {
