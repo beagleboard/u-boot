@@ -15,6 +15,7 @@
 #include <splash.h>
 #include <cpu_func.h>
 #include <k3-ddrss.h>
+#include <fdt_simplefb.h>
 #include <fdt_support.h>
 #include <asm/io.h>
 #include <asm/arch/hardware.h>
@@ -395,6 +396,26 @@ int board_late_init(void)
 		if (board_is_am62x_lp_skevm())
 			probe_daughtercards();
 #endif
+	}
+
+	return 0;
+}
+#endif
+
+#if defined(CONFIG_OF_BOARD_SETUP)
+int ft_board_setup(void *blob, struct bd_info *bd)
+{
+	int ret = -1;
+
+	if (IS_ENABLED(CONFIG_VIDEO)) {
+		if (IS_ENABLED(CONFIG_FDT_SIMPLEFB))
+			ret = fdt_simplefb_enable_and_mem_rsv(blob);
+
+		/* If simplefb is not enabled and video is active, then at least reserve
+		 * the framebuffer region to preserve the splash screen while OS is booting
+		 */
+		if (ret && video_is_active())
+			fdt_add_fb_mem_rsv(blob);
 	}
 
 	return 0;

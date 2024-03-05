@@ -12,6 +12,7 @@
 #include <cpu_func.h>
 #include <dm/uclass.h>
 #include <env.h>
+#include <fdt_simplefb.h>
 #include <fdt_support.h>
 #include <spl.h>
 #include <splash.h>
@@ -81,5 +82,25 @@ void spl_board_init(void)
 	enable_caches();
 	if (IS_ENABLED(CONFIG_SPL_SPLASH_SCREEN) && IS_ENABLED(CONFIG_SPL_BMP))
 		splash_display();
+}
+#endif
+
+#if defined(CONFIG_OF_BOARD_SETUP)
+int ft_board_setup(void *blob, struct bd_info *bd)
+{
+	int ret = -1;
+
+	if (IS_ENABLED(CONFIG_VIDEO)) {
+		if (IS_ENABLED(CONFIG_FDT_SIMPLEFB))
+			ret = fdt_simplefb_enable_and_mem_rsv(blob);
+
+		/* If simplefb is not enabled and video is active, then at least reserve
+		 * the framebuffer region to preserve the splash screen while OS is booting
+		 */
+		if (ret && video_is_active())
+			fdt_add_fb_mem_rsv(blob);
+	}
+
+	return 0;
 }
 #endif
