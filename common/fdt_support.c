@@ -21,6 +21,9 @@
 #include <exports.h>
 #include <fdtdec.h>
 #include <version.h>
+#include <video.h>
+
+DECLARE_GLOBAL_DATA_PTR;
 
 /**
  * fdt_getprop_u32_default_node - Return a node's property or a default
@@ -1969,6 +1972,24 @@ int fdt_setup_simplefb_node(void *fdt, int node, u64 base_address, u32 width,
 
 	return 0;
 }
+
+#if IS_ENABLED(CONFIG_VIDEO)
+int fdt_add_fb_mem_rsv(void *blob)
+{
+	struct fdt_memory mem;
+
+	/* nothing to do when the frame buffer is not defined */
+	if (gd->video_bottom == gd->video_top)
+		return 0;
+
+	/* reserved with no-map tag the video buffer */
+	mem.start = gd->video_bottom;
+	mem.end = gd->video_top - 1;
+
+	return fdtdec_add_reserved_memory(blob, "framebuffer", &mem, NULL, 0, NULL,
+			FDTDEC_RESERVED_MEMORY_NO_MAP);
+}
+#endif
 
 /*
  * Update native-mode in display-timings from display environment variable.
