@@ -324,6 +324,10 @@ bool video_is_active(void)
 {
 	struct udevice *dev;
 
+	if (IS_ENABLED(CONFIG_SPL_VIDEO) && spl_phase() > PHASE_SPL &&
+	    CONFIG_IS_ENABLED(BLOBLIST))
+		return true;
+
 	for (uclass_find_first_device(UCLASS_VIDEO, &dev);
 	     dev;
 	     uclass_find_next_device(&dev)) {
