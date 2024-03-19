@@ -416,8 +416,10 @@ static int reserve_video(void)
 		struct video_handoff *ho;
 
 		ho = bloblist_find(BLOBLISTT_U_BOOT_VIDEO, sizeof(*ho));
-		if (!ho)
-			return log_msg_ret("blf", -ENOENT);
+		if (!ho) {
+			printf("no bloblist found!");
+			return 0;
+		}
 		video_reserve_from_bloblist(ho);
 		gd->relocaddr = ho->fb;
 	} else if (CONFIG_IS_ENABLED(VIDEO)) {
