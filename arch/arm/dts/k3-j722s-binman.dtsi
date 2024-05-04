@@ -102,7 +102,9 @@
 #ifdef CONFIG_TARGET_J722S_A53_EVM
 
 #define SPL_NODTB "spl/u-boot-spl-nodtb.bin"
+#ifndef SPL_J722S_EVM_DTB
 #define SPL_J722S_EVM_DTB "spl/dts/k3-j722s-evm.dtb"
+#endif
 
 #define UBOOT_NODTB "u-boot-nodtb.bin"
 #define J722S_EVM_DTB "u-boot.dtb"
