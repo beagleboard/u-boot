@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/*
+ * DONOT UPSTREAM -EVT ONLY
+ *
+ * Copyright (C) 2024 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2024 Robert Nelson, BeagleBoard.org Foundation
+ */
+
+#define BEAGLEY_EVT 1
+#include "k3-am67a-r5-beagley-ai.dts"
+
+#include "k3-j722s-ddr-lp4-50-3733.dtsi"
+#include "k3-am62a-ddr.dtsi"
+

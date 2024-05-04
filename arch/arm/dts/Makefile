@@ -1277,7 +1277,11 @@ dtb-$(CONFIG_SOC_K3_J721S2) += k3-am68-sk-base-board.dtb\
 			       k3-j721s2-r5-common-proc-board.dtb
 
 dtb-$(CONFIG_SOC_K3_J722S) +=	k3-j722s-evm.dtb \
-				k3-j722s-r5-evm.dtb
+				k3-j722s-r5-evm.dtb \
+				k3-j722s-beagley-ai-evt.dtb \
+				k3-j722s-r5-beagley-ai-evt.dtb \
+				k3-am67a-beagley-ai.dtb \
+				k3-am67a-r5-beagley-ai.dtb
 
 dtb-$(CONFIG_SOC_K3_J784S4) +=	k3-am69-sk.dtb \
 				k3-am69-r5-sk.dtb \

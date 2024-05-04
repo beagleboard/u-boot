@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/*
+ * DONOT UPSTREAM - EVT ONLY
+ *
+ * Copyright (C) 2024 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2024 Robert Nelson, BeagleBoard.org Foundation
+ */
+
+/*
+ *  The changes between DVT and EVT are trivial and nothing that impacts
+ * U-boot itself at this point (other than DDR - which is r5 dts headache).
+ * Just use the DVT configuration for evt
+ */
+
+#include "k3-am67a-beagley-ai.dts"
+
+/ {
+	compatible = "beagle,j722s-beagley-ai", "ti,j722s";
+	model = "BeagleBoard.org BeagleY-AI-evt";
+};
