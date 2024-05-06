@@ -25,7 +25,7 @@
 		serial2 = &main_uart0;
 		serial3 = &main_uart1;
 		serial6 = &main_uart6;
-		mmc0 = &sdhci1;
+		mmc1 = &sdhci1;
 		mmc2 = &sdhci2;
 		rtc0 = &rtc;
 		usb0 = &usb0;
