@@ -29,10 +29,6 @@
 	};
 
 	memory@80000000 {
-		/* 2G RAM */
-		//reg = <0x00000000 0x80000000 0x00000000 0x80000000>;
-		/* 1G RAM */
-		//reg = <0x00000000 0x80000000 0x00000000 0x40000000>;
 		/* 512MB RAM */
 		reg = <0x00000000 0x80000000 0x00000000 0x20000000>;
 		device_type = "memory";
@@ -111,9 +107,49 @@
 			 <3300000 0x1>;
 		bootph-all;
 	};
+
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&led_pins_default>;
+
+		led-0 {
+			gpios = <&main_gpio0 3 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+			function = LED_FUNCTION_HEARTBEAT;
+		};
+
+		led-1 {
+			gpios = <&main_gpio0 4 GPIO_ACTIVE_HIGH>;
+			function = LED_FUNCTION_DISK_ACTIVITY;
+			linux,default-trigger = "mmc0";
+		};
+
+		led-2 {
+			gpios = <&main_gpio0 5 GPIO_ACTIVE_HIGH>;
+			function = LED_FUNCTION_CPU;
+			linux,default-trigger = "cpu";
+		};
+
+		led-3 {
+			gpios = <&main_gpio0 6 GPIO_ACTIVE_HIGH>;
+			function = LED_FUNCTION_DISK_ACTIVITY;
+			linux,default-trigger = "mmc1";
+		};
+	};
 };
 
 &main_pmx0 {
+	led_pins_default: led-default-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x000c, PIN_OUTPUT, 7) /* (E25) OSPI0_D0.GPIO0_3 */
+			AM62X_IOPAD(0x0010, PIN_OUTPUT, 7) /* (G24) OSPI0_D1.GPIO0_4 */
+			AM62X_IOPAD(0x0014, PIN_OUTPUT, 7) /* (F25) OSPI0_D2.GPIO0_5 */
+			AM62X_IOPAD(0x0018, PIN_OUTPUT, 7) /* (F24) OSPI0_D3.GPIO0_6 */
+		>;
+		bootph-all;
+	};
+
 	/* First pad number is ALW package and second is AMC package */
 	main_uart0_pins_default: main-uart0-default-pins {
 		pinctrl-single,pins = <
@@ -164,7 +200,7 @@
 
 	vdd_sd_dv_pins_default: vdd-sd-dv-default-pins {
 		pinctrl-single,pins = <
-			AM62X_IOPAD(0x07c, PIN_OUTPUT, 7) /* (P25) GPMC0_CLK.GPIO0_31 */
+			AM62X_IOPAD(0x0244, PIN_OUTPUT, 7) /* (P25) GPMC0_CLK.GPIO1_49 */
 		>;
 		bootph-all;
 	};
@@ -182,14 +218,108 @@
 		>;
 		bootph-all;
 	};
+
+	main_gpio0_pins_default: main-gpio0-default-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x00c8, PIN_INPUT, 7) /* (Y25) VOUT0_DATA4.GPIO0_49 */
+			AM62X_IOPAD(0x00cc, PIN_INPUT, 7) /* (Y24) VOUT0_DATA5.GPIO0_50 */
+			AM62X_IOPAD(0x00d0, PIN_INPUT, 7) /* (Y23) VOUT0_DATA6.GPIO0_51 */
+			AM62X_IOPAD(0x00d4, PIN_INPUT, 7) /* (AA25) VOUT0_DATA7.GPIO0_52 */
+			AM62X_IOPAD(0x00d8, PIN_INPUT, 7) /* (V21) VOUT0_DATA8.GPIO0_53 */
+			AM62X_IOPAD(0x0100, PIN_INPUT, 7) /* (AC25) VOUT0_VSYNC.GPIO0_63 */
+		>;
+	};
+
+	main_gpio1_pins_default: main-gpio1-default-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x01a0, PIN_INPUT, 7) /* (E18) MCASP0_AXR0.GPIO1_10 */
+			AM62X_IOPAD(0x01a8, PIN_INPUT, 7) /* (D20) MCASP0_AFSX.GPIO1_12 */
+			AM62X_IOPAD(0x0180, PIN_INPUT, 7) /* (AD23) RGMII2_RXC.GPIO1_2 */
+		>;
+	};
+
+	main_spi2_pins_gpio: main-spi2-gpio-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x0194, PIN_INPUT, 7) /* (B19) MCASP0_AXR3.GPIO1_7 */
+			AM62X_IOPAD(0x0198, PIN_INPUT, 7) /* (A19) MCASP0_AXR2.GPIO1_8 */
+			AM62X_IOPAD(0x01ac, PIN_INPUT, 7) /* (E19) MCASP0_AFSR.GPIO1_13 */
+			AM62X_IOPAD(0x01b0, PIN_INPUT, 7) /* (A20) MCASP0_ACLKR.GPIO1_14 */
+		>;
+	};
 };
 
 &main_gpio0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_gpio0_pins_default>;
 	status = "okay";
+	gpio-line-names = "", "", "",	/* 0-2 */
+			  "", "", "",	/* 3-5 */
+			  "", "", "",	/* 6-8 */
+			  "", "", "",	/* 9-11 */
+			  "", "", "",	/* 12-14 */
+			  "", "", "",	/* 15-17 */
+			  "", "", "",	/* 18-20 */
+			  "", "", "",	/* 21-23 */
+			  "", "", "",	/* 24-26 */
+			  "", "", "",	/* 27-29 */
+			  "", "", "",	/* 30-32 */
+			  "", "", "",	/* 33-35 */
+			  "", "", "",	/* 36-38 */
+			  "", "", "",	/* 39-41 */
+			  "", "", "",	/* 42-44 */
+			  "", "", "",	/* 45-47 */
+			  "", "P2_20", "P1_20",	/* 48-50 */
+			  "P2_24", "P2_33", "P2_18",	/* 51-53 */
+			  "", "", "",	/* 54-56 */
+			  "", "", "",	/* 57-59 */
+			  "", "", "",	/* 60-62 */
+			  "P2_22", "", "",	/* 63-65 */
+			  "", "", "",	/* 66-68 */
+			  "", "", "",	/* 69-71 */
+			  "", "", "",	/* 72-74 */
+			  "", "", "",	/* 75-77 */
+			  "", "", "",	/* 78-80 */
+			  "", "", "",	/* 81-83 */
+			  "", "", "",	/* 84-86 */
+			  "", "", "",	/* 87-89 */
+			  "", "";	/* 90-91 */
 };
 
 &main_gpio1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_gpio1_pins_default>;
 	status = "okay";
+	gpio-line-names = "", "", "P1_34",	/* 0-2 */
+			  "", "", "",	/* 3-5 */
+			  "", "P1_10", "P1_12",	/* 6-8 */
+			  "", "P1_2", "",	/* 9-11 */
+			  "P1_4", "P1_6", "P1_8",	/* 12-14 */
+			  "", "", "",	/* 15-17 */
+			  "", "", "",	/* 18-20 */
+			  "", "", "",	/* 21-23 */
+			  "", "", "",	/* 24-26 */
+			  "", "", "",	/* 27-29 */
+			  "", "", "",	/* 30-32 */
+			  "", "", "",	/* 33-35 */
+			  "", "", "",	/* 36-38 */
+			  "", "", "",	/* 39-41 */
+			  "", "", "",	/* 42-44 */
+			  "", "", "",	/* 45-47 */
+			  "", "", "",	/* 48-50 */
+			  "", "", "",	/* 51-53 */
+			  "", "", "",	/* 54-56 */
+			  "", "", "",	/* 57-59 */
+			  "", "", "",	/* 60-62 */
+			  "", "", "",	/* 63-65 */
+			  "", "", "",	/* 66-68 */
+			  "", "", "",	/* 69-71 */
+			  "", "", "",	/* 72-74 */
+			  "", "", "",	/* 75-77 */
+			  "", "", "",	/* 78-80 */
+			  "", "", "",	/* 81-83 */
+			  "", "", "",	/* 84-86 */
+			  "", "", "",	/* 87-89 */
+			  "", "";	/* 90-91 */
 };
 
 &main_uart0 {
