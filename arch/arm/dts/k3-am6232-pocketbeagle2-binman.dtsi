@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
+ * https://beagleboard.org/play
+ *
  * Copyright (C) 2022-2023 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2022-2024 Robert Nelson, BeagleBoard.org Foundation
  */
 
 #include "k3-binman.dtsi"
@@ -139,8 +142,8 @@
 
 #include "k3-binman-capsule-r5.dtsi"
 
-// Capsule update GUIDs in string form.  See am62x_evm.h
-#define AM6232_POCKETBEAGLE2_TIBOOT3_IMAGE_GUID_STR "abcb83d2-9cb6-4351-b8f1-6494bbe3700a"
+// Capsule update GUIDs in string form.  See pocketbeagle2.h
+#define AM6232_POCKETBEAGLE2_TIBOOT3_IMAGE_GUID_STR "06c681e6-f50e-4d32-b3cf-fe1ba90e627b"
 
 &capsule_tiboot3 {
 	efi-capsule {
@@ -467,9 +470,9 @@
 
 #include "k3-binman-capsule.dtsi"
 
-// Capsule update GUIDs in string form.  See am62x_evm.h
-#define AM6232_POCKETBEAGLE2_SPL_IMAGE_GUID_STR "aee355fc-bf97-4264-8c82-437255efdc1d"
-#define AM6232_POCKETBEAGLE2_UBOOT_IMAGE_GUID_STR "28ab8c6c-fca8-41d3-8ea1-5f171b7d2929"
+// Capsule update GUIDs in string form.  See pocketbeagle2.h
+#define AM6232_POCKETBEAGLE2_SPL_IMAGE_GUID_STR "a2e584af-2b2a-4fe0-add9-e0a64f844065"
+#define AM6232_POCKETBEAGLE2_UBOOT_IMAGE_GUID_STR "cd3055fe-0437-438e-b291-f8e24b0e2833"
 
 &capsule_tispl {
 	efi-capsule {
