@@ -14,7 +14,7 @@
 #include "k3-am625.dtsi"
 
 / {
-	compatible = "beagle,am625-pocketbeagle2", "ti,am625";
+	compatible = "beagle,am6232-pocketbeagle2", "ti,am625";
 	model = "BeagleBoard.org PocketBeagle2";
 
 	aliases {

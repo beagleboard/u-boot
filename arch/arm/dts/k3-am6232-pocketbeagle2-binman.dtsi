@@ -5,7 +5,7 @@
 
 #include "k3-binman.dtsi"
 
-#ifdef CONFIG_TARGET_AM625_R5_POCKETBEAGLE2
+#ifdef CONFIG_TARGET_AM6232_R5_POCKETBEAGLE2
 
 &binman {
 	tiboot3-am62x-hs-evm.bin {
@@ -150,10 +150,10 @@
 
 #endif
 
-#ifdef CONFIG_TARGET_AM625_A53_POCKETBEAGLE2
+#ifdef CONFIG_TARGET_AM6232_A53_POCKETBEAGLE2
 
-#define SPL_AM625_POCKETBEAGLE2_DTB "spl/dts/ti/k3-am625-pocketbeagle2.dtb"
-#define AM625_POCKETBEAGLE2_DTB "u-boot.dtb"
+#define SPL_AM6232_POCKETBEAGLE2_DTB "spl/dts/ti/k3-am6232-pocketbeagle2.dtb"
+#define AM6232_POCKETBEAGLE2_DTB "u-boot.dtb"
 
 &binman {
 	ti-dm {
@@ -275,16 +275,16 @@
 				};
 
 				fdt-0 {
-					description = "k3-am625-pocketbeagle2";
+					description = "k3-am6232-pocketbeagle2";
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
 					ti-secure {
-						content = <&spl_am625_pb2_dtb>;
+						content = <&spl_am6232_pb2_dtb>;
 						keyfile = "custMpk.pem";
 					};
-					spl_am625_pb2_dtb: blob-ext {
-						filename = SPL_AM625_POCKETBEAGLE2_DTB;
+					spl_am6232_pb2_dtb: blob-ext {
+						filename = SPL_AM6232_POCKETBEAGLE2_DTB;
 					};
 
 				};
@@ -295,7 +295,7 @@
 				default = "conf-0";
 
 				conf-0 {
-					description = "k3-am625-pocketbeagle2";
+					description = "k3-am6232-pocketbeagle2";
 					firmware = "atf";
 					loadables = "tee", "tifsstub-hs", "tifsstub-fs",
 					"tifsstub-gp", "dm", "spl";
@@ -313,20 +313,20 @@
 		fit {
 			images {
 				uboot {
-					description = "U-Boot for AM625 Board";
+					description = "U-Boot for AM6232 Board";
 				};
 
 				fdt-0 {
-					description = "k3-am625-pocketbeagle2";
+					description = "k3-am6232-pocketbeagle2";
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
 					ti-secure {
-						content = <&am625_pb2_dtb>;
+						content = <&am6232_pb2_dtb>;
 						keyfile = "custMpk.pem";
 					};
-					am625_pb2_dtb: blob-ext {
-						filename = AM625_POCKETBEAGLE2_DTB;
+					am6232_pb2_dtb: blob-ext {
+						filename = AM6232_POCKETBEAGLE2_DTB;
 					};
 					hash {
 						algo = "crc32";
@@ -338,7 +338,7 @@
 				default = "conf-0";
 
 				conf-0 {
-					description = "k3-am625-pocketbeagle2";
+					description = "k3-am6232-pocketbeagle2";
 					firmware = "uboot";
 					loadables = "uboot";
 					fdt = "fdt-0";
@@ -402,12 +402,12 @@
 				};
 
 				fdt-0 {
-					description = "k3-am625-pocketbeagle2";
+					description = "k3-am6232-pocketbeagle2";
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
-					spl_am625_pb2_dtb_unsigned: blob {
-						filename = SPL_AM625_POCKETBEAGLE2_DTB;
+					spl_am6232_pb2_dtb_unsigned: blob {
+						filename = SPL_AM6232_POCKETBEAGLE2_DTB;
 					};
 				};
 			};
@@ -416,7 +416,7 @@
 				default = "conf-0";
 
 				conf-0 {
-					description = "k3-am625-pocketbeagle2";
+					description = "k3-am6232-pocketbeagle2";
 					firmware = "atf";
 					loadables = "tee", "tifsstub-hs", "tifsstub-fs",
 						  "tifsstub-gp", "dm", "spl";
@@ -434,16 +434,16 @@
 		fit {
 			images {
 				uboot {
-					description = "U-Boot for AM625 Board";
+					description = "U-Boot for AM6232 Board";
 				};
 
 				fdt-0 {
-					description = "k3-am625-pocketbeagle2";
+					description = "k3-am6232-pocketbeagle2";
 					type = "flat_dt";
 					arch = "arm";
 					compression = "none";
-					am625_pb2_dtb_unsigned: blob {
-						filename = AM625_POCKETBEAGLE2_DTB;
+					am6232_pb2_dtb_unsigned: blob {
+						filename = AM6232_POCKETBEAGLE2_DTB;
 					};
 					hash {
 						algo = "crc32";
@@ -455,7 +455,7 @@
 				default = "conf-0";
 
 				conf-0 {
-					description = "k3-am625-pocketbeagle2";
+					description = "k3-am6232-pocketbeagle2";
 					firmware = "uboot";
 					loadables = "uboot";
 					fdt = "fdt-0";
