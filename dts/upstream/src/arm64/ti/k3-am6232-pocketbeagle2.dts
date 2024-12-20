@@ -19,9 +19,11 @@
 
 	aliases {
 		serial0 = &wkup_uart0;
-		serial2 = &main_uart0;
+		//serial2 = &main_uart0;
+		serial2 = &main_uart6;
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
+		usb0 = &usb0;
 		usb1 = &usb1;
 		i2c0 = &main_i2c0;
 		i2c1 = &wkup_i2c0;
@@ -226,6 +228,13 @@
 		bootph-all;
 	};
 
+	main_uart6_pins_default: main-uart6-default-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x001c, PIN_INPUT, 3) /* (J23) OSPI0_D4.UART6_RXD */
+			AM62X_IOPAD(0x0020, PIN_OUTPUT, 3) /* (J25) OSPI0_D5.UART6_TXD */
+		>;
+	};
+
 	main_mmc0_pins_default: main-mmc0-default-pins {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x220, PIN_INPUT, 0) /* (Y3/V3) MMC0_CMD */
@@ -317,8 +326,8 @@
 	pinctrl-0 = <&main_gpio0_pins_default>;
 	status = "okay";
 	gpio-line-names = "", "", "",	/* 0-2 */
-			  "", "", "",	/* 3-5 */
-			  "", "", "",	/* 6-8 */
+			  "[USR LED 0]", "[USR LED 1]", "[USR LED 2]",	/* 3-5 */
+			  "[USR LED 3]", "", "",	/* 6-8 */
 			  "", "", "",	/* 9-11 */
 			  "", "", "",	/* 12-14 */
 			  "", "", "",	/* 15-17 */
@@ -328,42 +337,42 @@
 			  "", "", "",	/* 27-29 */
 			  "", "", "",	/* 30-32 */
 			  "", "", "",	/* 33-35 */
-			  "", "", "",	/* 36-38 */
-			  "", "", "",	/* 39-41 */
-			  "", "", "",	/* 42-44 */
-			  "", "", "",	/* 45-47 */
-			  "", "P2_20", "P1_20",	/* 48-50 */
+			  "P1_13 [USB_ID]", "", "",	/* 36-38 */
+			  "", "P2_29", "",	/* 39-41 */
+			  "", "P1_28 [I2C2_SCL]", "P1_26 [I2C2_SDA]",	/* 42-44 */
+			  "P2_2", "P2_4", "P2_6",	/* 45-47 */
+			  "P2_8", "P2_20", "P1_20",	/* 48-50 */
 			  "P2_24", "P2_33", "P2_18",	/* 51-53 */
-			  "", "", "",	/* 54-56 */
-			  "", "", "",	/* 57-59 */
-			  "", "", "",	/* 60-62 */
-			  "P2_22", "", "",	/* 63-65 */
+			  "P2_35 [AIN5]", "P1_36", "P1_33",	/* 54-56 */
+			  "P2_32", "P2_30", "P1_31",	/* 57-59 */
+			  "P2_34", "P2_28", "P1_29",	/* 60-62 */
+			  "P2_22", "P2_17", "",	/* 63-65 */
 			  "", "", "",	/* 66-68 */
 			  "", "", "",	/* 69-71 */
 			  "", "", "",	/* 72-74 */
-			  "", "", "",	/* 75-77 */
-			  "", "", "",	/* 78-80 */
+			  "", "", "P1_12",	/* 75-77 */
+			  "P1_6", "", "",	/* 78-80 */
 			  "", "", "",	/* 81-83 */
-			  "", "", "",	/* 84-86 */
-			  "", "", "",	/* 87-89 */
-			  "", "";	/* 90-91 */
+			  "", "P2_3", "P2_1",	/* 84-86 */
+			  "P1_02 [AIN6]", "P1_36", "P1_4",	/* 87-89 */
+			  "P2_31", "P2_10";	/* 90-91 */
 };
 
 &main_gpio1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_gpio1_pins_default>;
 	status = "okay";
-	gpio-line-names = "", "", "P1_34",	/* 0-2 */
-			  "", "", "",	/* 3-5 */
-			  "", "P1_10", "P1_12",	/* 6-8 */
-			  "", "P1_2", "",	/* 9-11 */
+	gpio-line-names = "P2_19", "P1_19 [AIN0]", "P1_34",	/* 0-2 */
+			  "P1_27 [AIN4]", "P1_25 [AIN3]", "P1_23 [AIN2]",	/* 3-5 */
+			  "P1_21 [AIN1]", "P1_10", "P1_12",	/* 6-8 */
+			  "P2_3", "P1_2 [AIN6]", "P2_1",	/* 9-11 */
 			  "P1_4", "P1_6", "P1_8",	/* 12-14 */
-			  "", "", "",	/* 15-17 */
-			  "", "", "",	/* 18-20 */
-			  "", "", "",	/* 21-23 */
-			  "", "", "",	/* 24-26 */
-			  "", "", "",	/* 27-29 */
-			  "", "", "",	/* 30-32 */
+			  "P2_31", "P2_36 [AIN7]", "P2_29",	/* 15-17 */
+			  "P2_27", "P2_25", "P1_32",	/* 18-20 */
+			  "P1_30", "P2_9", "P2_11",	/* 21-23 */
+			  "P2_5", "P2_7", "",	/* 24-26 */
+			  "", "P1_36", "P1_33",	/* 27-29 */
+			  "P1_10", "", "",	/* 30-32 */
 			  "", "", "",	/* 33-35 */
 			  "", "", "",	/* 36-38 */
 			  "", "", "",	/* 39-41 */
@@ -386,6 +395,19 @@
 			  "", "";	/* 90-91 */
 };
 
+&mcu_gpio0 {
+	pinctrl-names = "default";
+	status = "okay";
+	gpio-line-names = "", "", "",   /* 0-2 */
+			  "", "", "P2_5",   /* 3-5 */
+			  "P2_6", "", "",   /* 6-8 */
+			  "", "", "",   /* 9-11 */
+			  "", "P1_26 [I2C2_SDA]", "P1_28 [I2C2_SCL]",   /* 12-14 */
+			  "P2_11", "P2_9", "",   /* 15-17 */
+			  "", "", "",   /* 18-20 */
+			  "", "", "";   /* 21-23 */
+};
+
 &main_uart0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_uart0_pins_default>;
@@ -400,8 +422,15 @@
 	status = "reserved";
 };
 
+&main_uart6 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_uart6_pins_default>;
+	bootph-all;
+	status = "ok";
+};
+
 &mcu_pmx0 {
-	wkup_mcu_pins_default: wkup-mcu-pins-default {
+	wkup_mcu_pins_default: wkup-mcu-default-pins {
 		pinctrl-single,pins = <
 			AM62X_MCU_IOPAD(0x004, PIN_OUTPUT, 7)	/* (C6/A7) WKUP_UART0_CTSn */
 		>;
@@ -425,6 +454,17 @@
 		>;
 		bootph-all;
 	};
+};
+
+&usbss0 {
+	bootph-all;
+	ti,vbus-divider;
+	status = "okay";
+};
+
+&usb0 {
+	bootph-all;
+	dr_mode = "peripheral";
 };
 
 &usbss1 {
