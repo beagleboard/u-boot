@@ -19,8 +19,8 @@
 
 	aliases {
 		serial0 = &wkup_uart0;
-		//serial2 = &main_uart0;
-		serial2 = &main_uart6;
+		serial2 = &main_uart0;
+		//serial2 = &main_uart6;
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
 		usb0 = &usb0;
