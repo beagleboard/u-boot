@@ -126,7 +126,7 @@
 		bootph-all;
 		compatible = "gpio-leds";
 		pinctrl-names = "default";
-		pinctrl-0 = <&led_pins_default &main_mcu_pins_default &wkup_mcu_pins_default>;
+		pinctrl-0 = <&led_pins_default>;
 
 		led-0 {
 			bootph-all;
@@ -155,23 +155,6 @@
 			function = LED_FUNCTION_DISK_ACTIVITY;
 			linux,default-trigger = "mmc1";
 		};
-
-		/* FIXME: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c966c715c77717bd8bdda32a46b33868acb7a4e2 */
-		led-4 {
-			bootph-all;
-			label = "mcu_bsl";
-			gpios = <&mcu_gpio0 1 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "default-off";
-		};
-
-		/* FIXME: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c966c715c77717bd8bdda32a46b33868acb7a4e2 */
-		led-5 {
-			bootph-all;
-			label = "mcu_nrst";
-			gpios = <&main_gpio1 50 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "default-on";
-			default-state = "on";
-		};
 	};
 };
 
@@ -182,13 +165,6 @@
 			AM62X_IOPAD(0x0010, PIN_OUTPUT, 7) /* (G24) OSPI0_D1.GPIO0_4 */
 			AM62X_IOPAD(0x0014, PIN_OUTPUT, 7) /* (F25) OSPI0_D2.GPIO0_5 */
 			AM62X_IOPAD(0x0018, PIN_OUTPUT, 7) /* (F24) OSPI0_D3.GPIO0_6 */
-		>;
-		bootph-all;
-	};
-
-	main_mcu_pins_default: main_mcu-default-pins {
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x0254, PIN_OUTPUT, 7) /* (C20) USB0_DRVVBUS.GPIO1_50 */
 		>;
 		bootph-all;
 	};
@@ -209,7 +185,6 @@
 		bootph-all;
 	};
 
-	/* First pad number is ALW package and second is AMC package */
 	main_uart0_pins_default: main-uart0-default-pins {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x1c8, PIN_INPUT, 0) /* (D14/A13) UART0_RXD */
@@ -317,6 +292,12 @@
 			AM62X_IOPAD(0x0198, PIN_INPUT, 7) /* (A19) MCASP0_AXR2.GPIO1_8 */
 			AM62X_IOPAD(0x01ac, PIN_INPUT, 7) /* (E19) MCASP0_AFSR.GPIO1_13 */
 			AM62X_IOPAD(0x01b0, PIN_INPUT, 7) /* (A20) MCASP0_ACLKR.GPIO1_14 */
+		>;
+	};
+
+	mspm0_nrst_pins_default: mspm0-nrst-default-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x0254, PIN_INPUT, 7) /* (C20) USB0_DRVVBUS.GPIO1_50 */
 		>;
 	};
 };
@@ -430,13 +411,6 @@
 };
 
 &mcu_pmx0 {
-	wkup_mcu_pins_default: wkup-mcu-default-pins {
-		pinctrl-single,pins = <
-			AM62X_MCU_IOPAD(0x004, PIN_OUTPUT, 7)	/* (C6/A7) WKUP_UART0_CTSn */
-		>;
-		bootph-all;
-	};
-
 	wkup_uart0_pins_default: wkup-uart0-default-pins {
 		pinctrl-single,pins = <
 			AM62X_MCU_IOPAD(0x02c, PIN_INPUT, 0)	/* (C6/A7) WKUP_UART0_CTSn */
@@ -453,6 +427,12 @@
 			AM62X_MCU_IOPAD(0x0050, PIN_INPUT_PULLUP, 0)	/* (A9) WKUP_I2C0_SDA */
 		>;
 		bootph-all;
+	};
+
+	mspm0_bsl_pins_default: mspm0-bsl-default-pins {
+		pinctrl-single,pins = <
+			AM62X_MCU_IOPAD(0x0004, PIN_INPUT, 7) /* (B8) MCU_SPI0_CS1.MCU_GPIO0_1 */
+		>;
 	};
 };
 
@@ -619,6 +599,15 @@
 	eeprom: eeprom@50 {
 		compatible = "atmel,24c32";
 		reg = <0x50>;
+	};
+
+	mspm0l1105: mspm0l1105@48 {
+		compatible = "ti,mspm0l1105";
+		reg = <0x48>;
+		bootloader-backdoor-gpios = <&mcu_gpio0 1 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&main_gpio1 50 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&mspm0_bsl_pins_default &mspm0_nrst_pins_default>;
 	};
 };
 
