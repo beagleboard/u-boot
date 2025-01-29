@@ -5,17 +5,17 @@
 #
 
 choice
-	prompt "BeagleBoard.org AM6232 based PocketBeagle2 board"
+	prompt "BeagleBoard.org AM62XX based PocketBeagle 2 board"
 	optional
 
 config TARGET_AM62XX_A53_POCKETBEAGLE2
-	bool "BeagleBoard.org AM6232 PocketBeagle2 running on A53"
+	bool "BeagleBoard.org AM62XX PocketBeagle 2 running on A53"
 	select ARM64
 	select BINMAN
 	select OF_SYSTEM_SETUP
 
 config TARGET_AM62XX_R5_POCKETBEAGLE2
-	bool "BeagleBoard.org AM6232 PocketBeagle2 running on R5"
+	bool "BeagleBoard.org AM62XX PocketBeagle 2 running on R5"
 	select CPU_V7R
 	select SYS_THUMB_BUILD
 	select K3_LOAD_SYSFW
