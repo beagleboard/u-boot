@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Configuration header file for PocketBeagle2
+ * Configuration header file for PocketBeagle 2
  *
- * https://beagleplay.org/
+ * https://www.beagleboard.org/boards/pocketbeagle-2
  *
  * Copyright (C) 2024 Texas Instruments Incorporated - https://www.ti.com/
  */
@@ -11,10 +11,10 @@
 #define __CONFIG_POCKETBEAGLE2_H
 
 /**
- * define POCKETBEAGLE2_TIBOOT3_IMAGE_GUID - firmware GUID for PocketBeagle2
+ * define POCKETBEAGLE2_TIBOOT3_IMAGE_GUID - firmware GUID for PocketBeagle 2
  *                                        tiboot3.bin
- * define POCKETBEAGLE2_SPL_IMAGE_GUID     - firmware GUID for PocketBeagle2 SPL
- * define POCKETBEAGLE2_UBOOT_IMAGE_GUID   - firmware GUID for PocketBeagle2 UBOOT
+ * define POCKETBEAGLE2_SPL_IMAGE_GUID     - firmware GUID for PocketBeagle 2 SPL
+ * define POCKETBEAGLE2_UBOOT_IMAGE_GUID   - firmware GUID for PocketBeagle 2 UBOOT
  *
  * These GUIDs are used in capsules updates to identify the corresponding
  * firmware object.
