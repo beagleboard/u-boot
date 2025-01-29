@@ -143,11 +143,11 @@
 #include "k3-binman-capsule-r5.dtsi"
 
 // Capsule update GUIDs in string form.  See pocketbeagle2.h
-#define AM6232_POCKETBEAGLE2_TIBOOT3_IMAGE_GUID_STR "06c681e6-f50e-4d32-b3cf-fe1ba90e627b"
+#define AM62XX_POCKETBEAGLE2_TIBOOT3_IMAGE_GUID_STR "06c681e6-f50e-4d32-b3cf-fe1ba90e627b"
 
 &capsule_tiboot3 {
 	efi-capsule {
-		image-guid = AM6232_POCKETBEAGLE2_TIBOOT3_IMAGE_GUID_STR;
+		image-guid = AM62XX_POCKETBEAGLE2_TIBOOT3_IMAGE_GUID_STR;
 	};
 };
 
@@ -155,8 +155,8 @@
 
 #ifdef CONFIG_TARGET_AM62XX_A53_POCKETBEAGLE2
 
-#define SPL_AM6232_POCKETBEAGLE2_DTB "spl/dts/ti/k3-am6232-pocketbeagle2.dtb"
-#define AM6232_POCKETBEAGLE2_DTB "u-boot.dtb"
+#define SPL_AM62XX_POCKETBEAGLE2_DTB "spl/dts/ti/k3-am6232-pocketbeagle2.dtb"
+#define AM62XX_POCKETBEAGLE2_DTB "u-boot.dtb"
 
 &binman {
 	ti-dm {
@@ -287,7 +287,7 @@
 						keyfile = "custMpk.pem";
 					};
 					spl_am6232_pb2_dtb: blob-ext {
-						filename = SPL_AM6232_POCKETBEAGLE2_DTB;
+						filename = SPL_AM62XX_POCKETBEAGLE2_DTB;
 					};
 
 				};
@@ -329,7 +329,7 @@
 						keyfile = "custMpk.pem";
 					};
 					am6232_pb2_dtb: blob-ext {
-						filename = AM6232_POCKETBEAGLE2_DTB;
+						filename = AM62XX_POCKETBEAGLE2_DTB;
 					};
 					hash {
 						algo = "crc32";
@@ -410,7 +410,7 @@
 					arch = "arm";
 					compression = "none";
 					spl_am6232_pb2_dtb_unsigned: blob {
-						filename = SPL_AM6232_POCKETBEAGLE2_DTB;
+						filename = SPL_AM62XX_POCKETBEAGLE2_DTB;
 					};
 				};
 			};
@@ -446,7 +446,7 @@
 					arch = "arm";
 					compression = "none";
 					am6232_pb2_dtb_unsigned: blob {
-						filename = AM6232_POCKETBEAGLE2_DTB;
+						filename = AM62XX_POCKETBEAGLE2_DTB;
 					};
 					hash {
 						algo = "crc32";
@@ -471,18 +471,18 @@
 #include "k3-binman-capsule.dtsi"
 
 // Capsule update GUIDs in string form.  See pocketbeagle2.h
-#define AM6232_POCKETBEAGLE2_SPL_IMAGE_GUID_STR "a2e584af-2b2a-4fe0-add9-e0a64f844065"
-#define AM6232_POCKETBEAGLE2_UBOOT_IMAGE_GUID_STR "cd3055fe-0437-438e-b291-f8e24b0e2833"
+#define AM62XX_POCKETBEAGLE2_SPL_IMAGE_GUID_STR "a2e584af-2b2a-4fe0-add9-e0a64f844065"
+#define AM62XX_POCKETBEAGLE2_UBOOT_IMAGE_GUID_STR "cd3055fe-0437-438e-b291-f8e24b0e2833"
 
 &capsule_tispl {
 	efi-capsule {
-		image-guid = AM6232_POCKETBEAGLE2_SPL_IMAGE_GUID_STR;
+		image-guid = AM62XX_POCKETBEAGLE2_SPL_IMAGE_GUID_STR;
 	};
 };
 
 &capsule_uboot {
 	efi-capsule {
-		image-guid = AM6232_POCKETBEAGLE2_UBOOT_IMAGE_GUID_STR;
+		image-guid = AM62XX_POCKETBEAGLE2_UBOOT_IMAGE_GUID_STR;
 	};
 };
 
