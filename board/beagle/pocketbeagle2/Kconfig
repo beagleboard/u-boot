@@ -8,13 +8,13 @@ choice
 	prompt "BeagleBoard.org AM6232 based PocketBeagle2 board"
 	optional
 
-config TARGET_AM6232_A53_POCKETBEAGLE2
+config TARGET_AM62XX_A53_POCKETBEAGLE2
 	bool "BeagleBoard.org AM6232 PocketBeagle2 running on A53"
 	select ARM64
 	select BINMAN
 	select OF_SYSTEM_SETUP
 
-config TARGET_AM6232_R5_POCKETBEAGLE2
+config TARGET_AM62XX_R5_POCKETBEAGLE2
 	bool "BeagleBoard.org AM6232 PocketBeagle2 running on R5"
 	select CPU_V7R
 	select SYS_THUMB_BUILD
@@ -27,7 +27,7 @@ config TARGET_AM6232_R5_POCKETBEAGLE2
 
 endchoice
 
-if TARGET_AM6232_A53_POCKETBEAGLE2
+if TARGET_AM62XX_A53_POCKETBEAGLE2
 
 config SYS_BOARD
        default "pocketbeagle2"
@@ -42,7 +42,7 @@ source "board/ti/common/Kconfig"
 
 endif
 
-if TARGET_AM6232_R5_POCKETBEAGLE2
+if TARGET_AM62XX_R5_POCKETBEAGLE2
 
 config SYS_BOARD
        default "pocketbeagle2"
