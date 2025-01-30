@@ -145,8 +145,8 @@
 		led-2 {
 			bootph-all;
 			gpios = <&main_gpio0 5 GPIO_ACTIVE_HIGH>;
-			function = LED_FUNCTION_CPU;
-			linux,default-trigger = "cpu";
+			function = LED_FUNCTION_ACTIVITY;
+			linux,default-trigger = "activity";
 		};
 
 		led-3 {
