@@ -19,8 +19,13 @@
 
 	aliases {
 		serial0 = &wkup_uart0;
-		serial2 = &main_uart0;
-		serial4 = &main_uart6;
+		serial1 = &main_uart1;
+		serial2 = &main_uart6;
+		serial3 = &main_uart3;
+		serial4 = &main_uart4;
+		serial5 = &main_uart5;
+		serial6 = &main_uart2;
+		serial7 = &main_uart0;
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
 		usb0 = &usb0;
@@ -31,7 +36,7 @@
 	};
 
 	chosen {
-		stdout-path = "serial4:115200n8";
+		stdout-path = &main_uart6;
 	};
 
 	memory@80000000 {
@@ -128,32 +133,35 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&led_pins_default>;
 
-		led-0 {
-			bootph-all;
-			gpios = <&main_gpio0 3 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "heartbeat";
-			function = LED_FUNCTION_HEARTBEAT;
-		};
-
 		led-1 {
 			bootph-all;
-			gpios = <&main_gpio0 4 GPIO_ACTIVE_HIGH>;
-			function = LED_FUNCTION_DISK_ACTIVITY;
-			linux,default-trigger = "mmc0";
+			gpios = <&main_gpio0 6 GPIO_ACTIVE_HIGH>;
+			color = <LED_COLOR_ID_GREEN>;
+			linux,default-trigger = "heartbeat";
+			function = LED_FUNCTION_HEARTBEAT;
+			default-state = "on";
 		};
 
 		led-2 {
 			bootph-all;
 			gpios = <&main_gpio0 5 GPIO_ACTIVE_HIGH>;
-			function = LED_FUNCTION_ACTIVITY;
-			linux,default-trigger = "activity";
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_DISK_ACTIVITY;
+			linux,default-trigger = "mmc1";
 		};
 
 		led-3 {
 			bootph-all;
-			gpios = <&main_gpio0 6 GPIO_ACTIVE_HIGH>;
-			function = LED_FUNCTION_DISK_ACTIVITY;
-			linux,default-trigger = "mmc1";
+			gpios = <&main_gpio0 4 GPIO_ACTIVE_HIGH>;
+			color = <LED_COLOR_ID_GREEN>;
+		};
+
+		led-4 {
+			bootph-all;
+			gpios = <&main_gpio0 3 GPIO_ACTIVE_HIGH>;
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_INDICATOR;
+			default-state = "off";
 		};
 	};
 };
@@ -294,12 +302,6 @@
 			AM62X_IOPAD(0x01b0, PIN_INPUT, 7) /* (A20) MCASP0_ACLKR.GPIO1_14 */
 		>;
 	};
-
-	mspm0_nrst_pins_default: mspm0-nrst-default-pins {
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x0254, PIN_INPUT, 7) /* (C20) USB0_DRVVBUS.GPIO1_50 */
-		>;
-	};
 };
 
 &main_gpio0 {
@@ -407,7 +409,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_uart6_pins_default>;
 	bootph-all;
-	status = "ok";
+	status = "okay";
 };
 
 &mcu_pmx0 {
@@ -427,12 +429,6 @@
 			AM62X_MCU_IOPAD(0x0050, PIN_INPUT_PULLUP, 0)	/* (A9) WKUP_I2C0_SDA */
 		>;
 		bootph-all;
-	};
-
-	mspm0_bsl_pins_default: mspm0-bsl-default-pins {
-		pinctrl-single,pins = <
-			AM62X_MCU_IOPAD(0x0004, PIN_INPUT, 7) /* (B8) MCU_SPI0_CS1.MCU_GPIO0_1 */
-		>;
 	};
 };
 
@@ -599,15 +595,6 @@
 	eeprom: eeprom@50 {
 		compatible = "atmel,24c32";
 		reg = <0x50>;
-	};
-
-	mspm0l1105: mspm0l1105@48 {
-		compatible = "ti,mspm0l1105";
-		reg = <0x48>;
-		bootloader-backdoor-gpios = <&mcu_gpio0 1 GPIO_ACTIVE_HIGH>;
-		reset-gpios = <&main_gpio1 50 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&mspm0_bsl_pins_default &mspm0_nrst_pins_default>;
 	};
 };
 
