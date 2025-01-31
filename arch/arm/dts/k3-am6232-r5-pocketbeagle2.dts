@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
 /*
  * https://www.beagleboard.org/boards/pocketbeagle-2
  *
@@ -17,11 +17,17 @@
 		remoteproc0 = &sysctrler;
 		remoteproc1 = &a53_0;
 		serial0 = &wkup_uart0;
-		serial3 = &main_uart1;
+		serial1 = &main_uart1;
+		serial2 = &main_uart6;
+		serial3 = &main_uart3;
+		serial4 = &main_uart4;
+		serial5 = &main_uart5;
+		serial6 = &main_uart2;
+		serial7 = &main_uart0;
 	};
 
 	chosen {
-		stdout-path = "serial2:115200n8";
+		stdout-path = &main_uart0;
 	};
 
 	a53_0: a53@0 {
