@@ -27,7 +27,8 @@
 	};
 
 	chosen {
-		stdout-path = &main_uart0;
+		//stdout-path = &main_uart0;
+		stdout-path = &main_uart6;
 	};
 
 	a53_0: a53@0 {
