@@ -18,26 +18,31 @@
 	leds {
 		bootph-all;
 		led-0 {
+			label = "led-0";
 			default-state = "on";
 			bootph-all;
 		};
 
 		led-1 {
+			label = "led-1";
 			default-state = "on";
 			bootph-all;
 		};
 
 		led-2 {
+			label = "led-2";
 			default-state = "on";
 			bootph-all;
 		};
 
 		led-3 {
+			label = "led-3";
 			default-state = "on";
 			bootph-all;
 		};
 
 		led-4 {
+			label = "led-4";
 			default-state = "on";
 			bootph-all;
 		};
