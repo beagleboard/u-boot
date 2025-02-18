@@ -12,22 +12,27 @@
 	/* Keep the LEDs on by default to indicate life */
 	leds {
 		led-0 {
+			label = "led-0";
 			default-state = "on";
 		};
 
 		led-1 {
+			label = "led-1";
 			default-state = "on";
 		};
 
 		led-2 {
+			label = "led-2";
 			default-state = "on";
 		};
 
 		led-3 {
+			label = "led-3";
 			default-state = "on";
 		};
 
 		led-4 {
+			label = "led-4";
 			default-state = "on";
 		};
 	};
