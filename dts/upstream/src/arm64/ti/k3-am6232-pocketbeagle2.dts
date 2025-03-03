@@ -309,13 +309,6 @@
 		>;
 	};
 
-	ecap2_pins_default: ecap2-default-pins {
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x01a4, PIN_INPUT, 2) /* (B20) MCASP0_ACLKX.ECAP2_IN_APWM_OUT */
-			AM62X_IOPAD(0x0160, PIN_DISABLE, 7) /* (AD24) MDIO0_MDC.GPIO0_86 */
-		>;
-	};
-
 	main_spi0_pins_default: main-spi0-default-pins {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x01bc, PIN_INPUT, 0) /* (A14) SPI0_CLK */
@@ -560,6 +553,12 @@
 		compatible = "atmel,24c32";
 		reg = <0x50>;
 	};
+};
+
+&main_i2c1 {
+	clock-frequency = <400000>;
+	bootph-all;
+	status = "okay";
 };
 
 &main_i2c2 {
