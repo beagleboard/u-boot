@@ -123,5 +123,7 @@ CONFIG_LZO=y
 CONFIG_EFI_SET_TIME=y
 CONFIG_SYS_MEM_TOP_HIDE=0x4000000
 
+CONFIG_BOOTDELAY=0
+
 #include <configs/k3_efi_capsule.config>
 #include <configs/am62x_a53_usbdfu.config>
