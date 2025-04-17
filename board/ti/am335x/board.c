@@ -750,7 +750,7 @@ const struct dpll_params *get_dpll_ddr_params(void)
 
 	if (board_is_evm_sk())
 		return &dpll_ddr3_303MHz[ind];
-	else if (board_is_pb() || board_is_bone_lt() || board_is_icev2() || board_is_beaglelogic())
+	else if (board_is_pb() || board_is_bone_lt() || board_is_icev2() || board_is_beaglelogic() || board_is_blank_bone_lt())
 		return &dpll_ddr3_400MHz[ind];
 	else if (board_is_evm_15_or_later())
 		return &dpll_ddr3_303MHz[ind];
@@ -781,7 +781,7 @@ const struct dpll_params *get_dpll_mpu_params(void)
 	if (bone_not_connected_to_ac_power())
 		freq = MPUPLL_M_600;
 
-	if (board_is_pb() || board_is_bone_lt() || board_is_beaglelogic())
+	if (board_is_pb() || board_is_bone_lt() || board_is_beaglelogic() || board_is_blank_bone_lt())
 		freq = MPUPLL_M_1000;
 
 	switch (freq) {

@@ -431,6 +431,10 @@ void enable_board_pin_mux(void)
 		configure_module_pin_mux(spi0_pin_mux);
 	} else {
 		/* Unknown board. We might still be able to boot. */
-		puts("Bad EEPROM or unknown board, cannot configure pinmux.");
+		//puts("Bad EEPROM or unknown board, cannot configure pinmux.");
+		puts("Unknown board: assuming BeagleBone Black.");
+		configure_module_pin_mux(mii1_pin_mux);
+		configure_module_pin_mux(mmc0_pin_mux);
+		configure_module_pin_mux(mmc1_pin_mux);
 	}
 }

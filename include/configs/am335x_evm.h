@@ -152,6 +152,10 @@
 		"bootz ${loadaddr} ${rdaddr} ${fdtaddr}\0" \
 	"findfdt="\
 		"echo board_name=[$board_name] ...; " \
+		"if test $board_name = A335BLNK; then " \
+			"echo EEPROM IS BLANK!!! ...; " \
+			"echo Assuming am335x-bonegreen compatible ...; " \
+			"setenv fdtfile am335x-bonegreen.dtb; fi; " \
 		"if test $board_name = A335BLGC; then " \
 			"setenv fdtfile am335x-beaglelogic.dtb; fi; " \
 		"if test $board_name = A335BONE; then " \
