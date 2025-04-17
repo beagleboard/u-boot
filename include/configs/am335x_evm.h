@@ -182,6 +182,8 @@
 				"setenv fdtfile am335x-osd3358-sm-red.dtb; " \
 			"elif test $board_rev = OS01; then " \
 				"setenv fdtfile am335x-osd3358-sm-red-v4.dtb; " \
+			"elif test $board_rev = 00D0; then " \
+				"setenv fdtfile am335x-boneblack-revd.dtb; " \
 			"else " \
 				"setenv fdtfile am335x-boneblack.dtb; " \
 			"fi; " \
