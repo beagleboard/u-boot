@@ -218,6 +218,10 @@ void board_init_f(ulong dummy)
 	if (!ret)
 		pinctrl_select_state(dev, "default");
 
+	ret = uclass_find_device_by_seq(UCLASS_SERIAL, 6, &dev);
+	if (!ret)
+		pinctrl_select_state(dev, "default");
+
 	preloader_console_init();
 
 	do_board_detect();
