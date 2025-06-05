@@ -2,8 +2,8 @@
 /*
  * https://www.beagleboard.org/boards/pocketbeagle-2
  *
- * Copyright (C) 2022-2023 Texas Instruments Incorporated - https://www.ti.com/
- * Copyright (C) 2022-2023 Robert Nelson, BeagleBoard.org Foundation
+ * Copyright (C) 2024-2025 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2024-2025 Robert Nelson, BeagleBoard.org Foundation
  */
 
 #include "k3-binman.dtsi"
@@ -90,6 +90,10 @@
 	bootph-all;
 };
 
+&cpsw3g {
+	status = "disabled";
+};
+
 &cpsw_port1 {
 	status = "disabled";
 };
@@ -98,7 +102,7 @@
 	status = "disabled";
 };
 
-#ifdef CONFIG_TARGET_AM62X_R5_POCKETBEAGLE2
+#if IS_ENABLED(CONFIG_TARGET_AM62X_R5_POCKETBEAGLE2)
 
 &binman {
 	tiboot3-am62x-hs-evm.bin {
@@ -203,7 +207,7 @@
 };
 #endif /* CONFIG_TARGET_AM62X_R5_POCKETBEAGLE2 */
 
-#ifdef CONFIG_TARGET_AM62X_A53_POCKETBEAGLE2
+#if IS_ENABLED(CONFIG_TARGET_AM62X_A53_POCKETBEAGLE2)
 
 #define SPL_AM62X_POCKETBEAGLE2_DTB "spl/dts/ti/k3-am6232-pocketbeagle2.dtb"
 #define AM62X_POCKETBEAGLE2_DTB "u-boot.dtb"
@@ -233,12 +237,12 @@
 					compression = "none";
 
 					ti-secure {
-						content = <&spl_am6232_pb2_dtb>;
+						content = <&spl_pocketbeagle2_dtb>;
 						keyfile = "custMpk.pem";
 					};
 
-					spl_am6232_pb2_dtb: blob-ext {
-						filename = SPL_AM62X_POCKETBEAGLE2_DTB;
+					spl_pocketbeagle2_dtb: blob-ext {
+						filename = "spl/dts/ti/k3-am6232-pocketbeagle2.dtb";
 					};
 
 				};
@@ -266,7 +270,7 @@
 		fit {
 			images {
 				uboot {
-					description = "U-Boot for AM6232 Board";
+					description = "U-Boot for PocketBeagle 2";
 				};
 
 				fdt-0 {
@@ -276,12 +280,12 @@
 					compression = "none";
 
 					ti-secure {
-						content = <&am6232_pb2_dtb>;
+						content = <&pocketbeagle2_dtb>;
 						keyfile = "custMpk.pem";
 					};
 
-					am6232_pb2_dtb: blob-ext {
-						filename = AM62X_POCKETBEAGLE2_DTB;
+					pocketbeagle2_dtb_dtb: blob-ext {
+						filename = "u-boot.dtb";
 					};
 
 					hash {
