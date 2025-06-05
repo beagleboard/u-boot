@@ -209,14 +209,6 @@
 #define AM62X_POCKETBEAGLE2_DTB "u-boot.dtb"
 
 &binman {
-	ti-dm {
-		filename = "ti-dm.bin";
-		blob-ext {
-			filename = "ti-dm/am62xx/ipc_echo_testb_mcu1_0_release_strip.xer5f";
-			optional;
-		};
-	};
-
 	tifsstub-hs {
 		filename = "tifsstub.bin_hs";
 		ti-secure-rom {
@@ -252,7 +244,6 @@
 			type = "blob-ext";
 			optional;
 		};
-
 	};
 
 	ti-spl {
@@ -294,7 +285,8 @@
 					};
 
 					dm: ti-dm {
-						filename = "ti-dm.bin";
+						filename = "ti-dm/am62xx/ipc_echo_testb_mcu1_0_release_strip.xer5f";
+						optional;
 					};
 				};
 
@@ -377,5 +369,4 @@
 		};
 	};
 };
-
 #endif /* CONFIG_TARGET_AM62X_A53_POCKETBEAGLE2 */
