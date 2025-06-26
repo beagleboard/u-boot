@@ -58,6 +58,11 @@ static inline int board_is_bbg1(void)
 	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BBG1", 4);
 }
 
+static inline int board_is_bbge(void)
+{
+	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BBGE", 4);
+}
+
 static inline int board_is_bbgg1(void)
 {
 	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "GG1", 3);

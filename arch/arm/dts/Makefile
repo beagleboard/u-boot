@@ -383,6 +383,7 @@ dtb-$(CONFIG_AM33XX) += \
 	am335x-evm.dtb \
 	am335x-evmsk.dtb \
 	am335x-bonegreen.dtb \
+	am335x-bonegreen-eco.dtb \
 	am335x-icev2.dtb \
 	am335x-pocketbeagle.dtb \
 	am335x-pxm50.dtb \

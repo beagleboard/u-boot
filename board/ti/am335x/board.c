@@ -784,6 +784,9 @@ const struct dpll_params *get_dpll_mpu_params(void)
 	if (board_is_pb() || board_is_bone_lt() || board_is_beaglelogic() || board_is_blank_bone_lt())
 		freq = MPUPLL_M_1000;
 
+	if (board_is_bbge())
+		freq = MPUPLL_M_600;
+
 	switch (freq) {
 	case MPUPLL_M_1000:
 		return &dpll_mpu_opp[ind][5];
@@ -815,7 +818,6 @@ static void scale_vcores_bone(int freq)
 
 	if (power_tps65217_init(0))
 		return;
-
 
 	/*
 	 * On Beaglebone White we need to ensure we have AC power
@@ -1368,21 +1370,22 @@ int board_late_init(void)
 		}
 	}
 
-	if (board_is_bbg1()) {
+	if (board_is_bbg1())
 		name = "BBG1";
-	}
-
+	if (board_is_bbge())
+		name = "BBGE";
 	if (board_is_bben()) {
 		char subtype_id = board_ti_get_config()[1];
+
 		switch (subtype_id) {
-			case 'L':
-				name = "BBELITE";
-				break;
-			case 'I':
-				name = "BBE_EX_WIFI";
-				break;
-			default:
-				name = "BBEN";
+		case 'L':
+			name = "BBELITE";
+			break;
+		case 'I':
+			name = "BBE_EX_WIFI";
+			break;
+		default:
+			name = "BBEN";
 		}
 	}
 
@@ -1519,7 +1522,8 @@ int board_fit_config_name_match(const char *name)
 		return 0;
 	else if (board_is_bone() && !strcmp(name, "am335x-bone"))
 		return 0;
-	else if (board_is_bone_lt() && !strcmp(name, "am335x-boneblack"))
+	else if (board_is_bone_lt() && !board_is_bbg1() && !board_is_bbge() &&
+		 !strcmp(name, "am335x-boneblack"))
 		return 0;
 	else if (board_is_pb() && !strcmp(name, "am335x-pocketbeagle"))
 		return 0;
@@ -1527,12 +1531,24 @@ int board_fit_config_name_match(const char *name)
 		return 0;
 	else if (board_is_bbg1() && !strcmp(name, "am335x-bonegreen"))
 		return 0;
+	else if (board_is_bbge() && !strcmp(name, "am335x-bonegreen-eco"))
+		return 0;
 	else if (board_is_icev2() && !strcmp(name, "am335x-icev2"))
 		return 0;
-	else if (board_is_bben() && !strcmp(name, "am335x-sancloud-bbe"))
-		return 0;
-	else
-		return -1;
+	else if (board_is_bben()) {
+		char subtype_id = board_ti_get_config()[1];
+
+		if (subtype_id == 'L') {
+			if (!strcmp(name, "am335x-sancloud-bbe-lite"))
+				return 0;
+		} else if (subtype_id == 'I') {
+			if (!strcmp(name, "am335x-sancloud-bbe-extended-wifi"))
+				return 0;
+		} else if (!strcmp(name, "am335x-sancloud-bbe")) {
+			return 0;
+		}
+	}
+	return -1;
 }
 #endif
 

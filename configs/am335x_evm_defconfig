@@ -44,7 +44,7 @@ CONFIG_BOOTP_DNS2=y
 CONFIG_CMD_BTRFS=y
 # CONFIG_SPL_EFI_PARTITION is not set
 CONFIG_OF_CONTROL=y
-CONFIG_OF_LIST="am335x-bone am335x-sancloud-bbe am335x-boneblack am335x-bonegreen am335x-pocketbeagle"
+CONFIG_OF_LIST="am335x-bone am335x-sancloud-bbe am335x-boneblack am335x-bonegreen am335x-pocketbeagle am335x-bonegreen-eco"
 CONFIG_ENV_OVERWRITE=y
 # CONFIG_ENV_IS_IN_FAT is not set
 CONFIG_ENV_IS_IN_EXT4=y
