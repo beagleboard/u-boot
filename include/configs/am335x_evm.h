@@ -224,6 +224,7 @@
 				"setenv pxe_label_override Pruss; fi;" \
 		"fi; " \
 		"if test $fdtfile = undefined; then " \
+			"echo WARNING: Defaulting to am335x-bonegreen; " \
 			"setenv board_name A335BNLT; " \
 			"setenv board_rev EMMC; " \
 			"setenv fdtfile am335x-bonegreen.dtb; " \

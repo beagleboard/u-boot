@@ -124,6 +124,7 @@ void do_board_detect(void)
 #define M_OS00	0x02
 #define M_OS01	0x03
 #define M_BBGG	0x04
+#define M_BBGE	0x05
 
 static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 {
@@ -174,12 +175,19 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 			name = "BBBW";
 		}
 		if (!strncmp(board_ti_get_rev(), "BBG", 3)) {
-			/* catches again in board_is_bbg1() */
-			//puts("Model: SeeedStudio BeagleBone Green:\n");
-			virtual_video=NOT_POP;
-			virtual_audio=NOT_POP;
-			name = "BBG1";
-			model=M_BBG1;
+			if (!strncmp(board_ti_get_rev(), "BBGE", 4)) {
+				virtual_video=NOT_POP;
+				virtual_audio=NOT_POP;
+				name = "BBGE";
+				model=M_BBGE;
+			} else {
+				/* catches again in board_is_bbg1() */
+				//puts("Model: SeeedStudio BeagleBone Green:\n");
+				virtual_video=NOT_POP;
+				virtual_audio=NOT_POP;
+				name = "BBG1";
+				model=M_BBG1;
+			}
 		}
 		if (!strncmp(board_ti_get_rev(), "GW1", 3)) {
 			puts("Model: SeeedStudio BeagleBone Green Wireless:\n");
