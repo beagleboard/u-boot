@@ -2,8 +2,8 @@
 /*
  * https://www.beagleboard.org/boards/pocketbeagle-2
  *
- * Copyright (C) 2024 Texas Instruments Incorporated - https://www.ti.com/
- * Copyright (C) 2024 Robert Nelson, BeagleBoard.org Foundation
+ * Copyright (C) 2025 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2025 Robert Nelson, BeagleBoard.org Foundation
  */
 
 /dts-v1/;
@@ -128,40 +128,40 @@
 	};
 
 	leds {
-		bootph-all;
 		compatible = "gpio-leds";
 		pinctrl-names = "default";
 		pinctrl-0 = <&led_pins_default>;
+		bootph-all;
 
 		led-1 {
-			bootph-all;
-			gpios = <&main_gpio0 6 GPIO_ACTIVE_HIGH>;
+			function = LED_FUNCTION_HEARTBEAT;
 			color = <LED_COLOR_ID_GREEN>;
 			linux,default-trigger = "heartbeat";
-			function = LED_FUNCTION_HEARTBEAT;
+			gpios = <&main_gpio0 6 GPIO_ACTIVE_HIGH>;
 			default-state = "on";
+			bootph-all;
 		};
 
 		led-2 {
-			bootph-all;
-			gpios = <&main_gpio0 5 GPIO_ACTIVE_HIGH>;
-			color = <LED_COLOR_ID_GREEN>;
 			function = LED_FUNCTION_DISK_ACTIVITY;
+			color = <LED_COLOR_ID_GREEN>;
 			linux,default-trigger = "mmc1";
+			gpios = <&main_gpio0 5 GPIO_ACTIVE_HIGH>;
+			bootph-all;
 		};
 
 		led-3 {
-			bootph-all;
-			gpios = <&main_gpio0 4 GPIO_ACTIVE_HIGH>;
 			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&main_gpio0 4 GPIO_ACTIVE_HIGH>;
+			bootph-all;
 		};
 
 		led-4 {
-			bootph-all;
-			gpios = <&main_gpio0 3 GPIO_ACTIVE_HIGH>;
-			color = <LED_COLOR_ID_GREEN>;
 			function = LED_FUNCTION_INDICATOR;
+			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&main_gpio0 3 GPIO_ACTIVE_HIGH>;
 			default-state = "off";
+			bootph-all;
 		};
 	};
 };
@@ -185,7 +185,7 @@
 		bootph-all;
 	};
 
-	main_i2c2_pins_default: main_i2c2-default-pins {
+	main_i2c2_pins_default: main-i2c2-default-pins {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x00b0, PIN_INPUT_PULLUP, 1) /* (K22) GPMC0_CSn2.I2C2_SCL */
 			AM62X_IOPAD(0x00b4, PIN_INPUT_PULLUP, 1) /* (K24) GPMC0_CSn3.I2C2_SDA */
@@ -348,6 +348,12 @@
 	status = "okay";
 };
 
+&epwm2 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&epwm2_pins_default>;
+};
+
 &main_uart0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_uart0_pins_default>;
@@ -365,6 +371,41 @@
 &main_uart6 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_uart6_pins_default>;
+	bootph-all;
+	status = "okay";
+};
+
+&main_i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_i2c0_pins_default>;
+	clock-frequency = <400000>;
+	bootph-all;
+	status = "okay";
+
+	ad7291: adc@20 {
+		/* Emulated with MSPM0L1105 */
+		compatible = "adi,ad7291";
+		reg = <0x20>;
+		vref-supply = <&adc_vref>;
+	};
+
+	eeprom: eeprom@50 {
+		/* Emulated with MSPM0L1105 */
+		compatible = "atmel,24c32";
+		reg = <0x50>;
+	};
+};
+
+&main_i2c1 {
+	clock-frequency = <400000>;
+	bootph-all;
+	status = "okay";
+};
+
+&main_i2c2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_i2c2_pins_default>;
+	clock-frequency = <400000>;
 	bootph-all;
 	status = "okay";
 };
@@ -389,6 +430,28 @@
 	};
 };
 
+&sdhci0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_mmc0_pins_default>;
+	disable-wp;
+	bootph-all;
+	status = "okay";
+};
+
+&sdhci1 {
+	/* SD/MMC */
+	vmmc-supply = <&vdd_mmc1>;
+	vqmmc-supply = <&vdd_sd_dv>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_mmc1_pins_default>;
+	disable-wp;
+	cd-gpios = <&main_gpio1 48 GPIO_ACTIVE_LOW>;
+	cd-debounce-delay-ms = <100>;
+	bootph-all;
+	ti,fails-without-test-cd;
+	status = "okay";
+};
+
 &usbss0 {
 	bootph-all;
 	ti,vbus-divider;
@@ -396,8 +459,9 @@
 };
 
 &usb0 {
-	bootph-all;
+	/* This is a Type-C socket, but wired as USB 2.0 */
 	dr_mode = "peripheral";
+	bootph-all;
 };
 
 &usbss1 {
@@ -406,6 +470,10 @@
 };
 
 &usb1 {
+	/*
+	 * Default set here is compatible with original PocketBeagle,
+	 * Expansion boards assumed this was pre-setup as host.
+	 */
 	dr_mode = "host";
 	pinctrl-names = "default";
 	pinctrl-0 = <&usb1_pins_default>;
@@ -512,65 +580,4 @@
 			};
 		};
 	};
-};
-
-&sdhci0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_mmc0_pins_default>;
-	disable-wp;
-	bootph-all;
-	status = "okay";
-};
-
-&sdhci1 {
-	/* SD/MMC */
-	vmmc-supply = <&vdd_mmc1>;
-	vqmmc-supply = <&vdd_sd_dv>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_mmc1_pins_default>;
-	disable-wp;
-	cd-gpios = <&main_gpio1 48 GPIO_ACTIVE_LOW>;
-	cd-debounce-delay-ms = <100>;
-	bootph-all;
-	ti,fails-without-test-cd;
-	status = "okay";
-};
-
-&main_i2c0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_i2c0_pins_default>;
-	clock-frequency = <400000>;
-	bootph-all;
-	status = "okay";
-
-	ad7291: adc@20 {
-		compatible = "adi,ad7291";
-		reg = <0x20>;
-		vref-supply = <&adc_vref>;
-	};
-
-	eeprom: eeprom@50 {
-		compatible = "atmel,24c32";
-		reg = <0x50>;
-	};
-};
-
-&main_i2c1 {
-	clock-frequency = <400000>;
-	bootph-all;
-	status = "okay";
-};
-
-&main_i2c2 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_i2c2_pins_default>;
-	clock-frequency = <400000>;
-	bootph-all;
-	status = "okay";
-};
-
-&epwm2 {
-	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&epwm2_pins_default>;
 };
