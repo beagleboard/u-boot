@@ -90,18 +90,6 @@
 	bootph-all;
 };
 
-&cpsw3g {
-	status = "disabled";
-};
-
-&cpsw_port1 {
-	status = "disabled";
-};
-
-&cpsw_port2 {
-	status = "disabled";
-};
-
 #if IS_ENABLED(CONFIG_TARGET_AM62X_R5_POCKETBEAGLE2)
 
 &binman {
