@@ -18,8 +18,6 @@
 	model = "BeagleBoard.org PocketBeagle2";
 
 	aliases {
-		ethernet0 = &cpsw_port1;
-		ethernet1 = &cpsw_port2;
 		serial0 = &wkup_uart0;
 		serial1 = &main_uart1;
 		serial2 = &main_uart6;
@@ -55,13 +53,11 @@
 
 		secure_tfa_ddr: tfa@9e780000 {
 			reg = <0x00 0x9e780000 0x00 0x80000>;
-			alignment = <0x1000>;
 			no-map;
 		};
 
 		secure_ddr: optee@9e800000 {
 			reg = <0x00 0x9e800000 0x00 0x01800000>;
-			alignment = <0x1000>;
 			no-map;
 		};
 
@@ -151,15 +147,12 @@
 			color = <LED_COLOR_ID_GREEN>;
 			linux,default-trigger = "mmc1";
 			gpios = <&main_gpio0 5 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
 			bootph-all;
 		};
 
 		led-3 {
-			function = LED_FUNCTION_INDICATOR;
 			color = <LED_COLOR_ID_GREEN>;
 			gpios = <&main_gpio0 4 GPIO_ACTIVE_HIGH>;
-			default-state = "off";
 			bootph-all;
 		};
 
