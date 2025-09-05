@@ -326,6 +326,18 @@
 	};
 };
 
+&cpsw3g {
+	status = "disabled";
+};
+
+&cpsw_port1 {
+	status = "disabled";
+};
+
+&cpsw_port2 {
+	status = "disabled";
+};
+
 &main_gpio0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_gpio0_pins_default>;
