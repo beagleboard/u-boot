@@ -1,10 +1,8 @@
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Configuration header file for PocketBeagle 2
  *
- * https://www.beagleboard.org/boards/pocketbeagle-2
- *
- * Copyright (C) 2024 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2025 Texas Instruments Incorporated - https://www.ti.com/
  */
 
 #ifndef __CONFIG_POCKETBEAGLE2_H
