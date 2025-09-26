@@ -5,8 +5,8 @@
  * Fri Sep 26 2025 10:34:06 GMT-0500 (Central Daylight Time)
  * DDR Type: DDR4
  * Frequency = 800MHz (1600MTs)
- * Density: 16Gb
- * Number of Ranks: 2
+ * Density: 32Gb
+ * Number of Ranks: 1
 */
 
 /*
@@ -22,19 +22,14 @@
  * #define DDRSS_PHY_1371_DATA 0x0001F7C2 -> 0x00005201 ( value from older v0.09.06 )
  */
 
-// * Number of Ranks: 1
-//#define DDRSS_PLL_FHS_CNT 6
-
-// * Number of Ranks: 2
-#define DDRSS_PLL_FHS_CNT 10
-
+#define DDRSS_PLL_FHS_CNT 6
 #define DDRSS_PLL_FREQUENCY_1 400000000
 #define DDRSS_PLL_FREQUENCY_2 400000000
 
-// * Number of Ranks: 1
+// * Density: 16Gb
 //#define DDRSS_SDRAM_IDX 15
 
-// * Number of Ranks: 2
+// * Density: 32Gb
 #define DDRSS_SDRAM_IDX 16
 
 #define DDRSS_REGION_IDX 16
@@ -359,37 +354,23 @@
 #define DDRSS_CTL_315_DATA 0x00000100
 #define DDRSS_CTL_316_DATA 0x01010000
 
-// * Number of Ranks: 1
+// * Density: 16Gb
 //#define DDRSS_CTL_317_DATA 0x00000000
 //#define DDRSS_CTL_318_DATA 0x3FFF0000
 
-// * Number of Ranks: 2
-#define DDRSS_CTL_317_DATA 0x00000101
-#define DDRSS_CTL_318_DATA 0x1FFF0000
+// * Density: 32Gb
+#define DDRSS_CTL_317_DATA 0xFFFFFEFF
+#define DDRSS_CTL_318_DATA 0x7FFF0000
 
 #define DDRSS_CTL_319_DATA 0x000FFF00
-
-// * Number of Ranks: 1
-//#define DDRSS_CTL_320_DATA 0xFFFFFFFF
-//#define DDRSS_CTL_321_DATA 0x00FFFF00
-//#define DDRSS_CTL_322_DATA 0x0A000000
-
-// * Number of Ranks: 2
-#define DDRSS_CTL_320_DATA 0x3FFF2000
-#define DDRSS_CTL_321_DATA 0x000FFF00
-#define DDRSS_CTL_322_DATA 0x0A000001
-
+#define DDRSS_CTL_320_DATA 0xFFFFFFFF
+#define DDRSS_CTL_321_DATA 0x00FFFF00
+#define DDRSS_CTL_322_DATA 0x0A000000
 #define DDRSS_CTL_323_DATA 0x0001FFFF
 #define DDRSS_CTL_324_DATA 0x01010101
 #define DDRSS_CTL_325_DATA 0x01010101
 #define DDRSS_CTL_326_DATA 0x00000118
-
-// * Number of Ranks: 1
-//#define DDRSS_CTL_327_DATA 0x00000C01
-
-// * Number of Ranks: 2
-#define DDRSS_CTL_327_DATA 0x00000C03
-
+#define DDRSS_CTL_327_DATA 0x00000C01
 #define DDRSS_CTL_328_DATA 0x00000000
 #define DDRSS_CTL_329_DATA 0x00000000
 #define DDRSS_CTL_330_DATA 0x00000000
@@ -498,13 +479,7 @@
 #define DDRSS_PI_10_DATA 0x00000000
 #define DDRSS_PI_11_DATA 0x00000000
 #define DDRSS_PI_12_DATA 0x00000000
-
-// * Number of Ranks: 1
-//#define DDRSS_PI_13_DATA 0x00010001
-
-// * Number of Ranks: 2
-#define DDRSS_PI_13_DATA 0x00030001
-
+#define DDRSS_PI_13_DATA 0x00010001
 #define DDRSS_PI_14_DATA 0x00000000
 #define DDRSS_PI_15_DATA 0x00010001
 #define DDRSS_PI_16_DATA 0x00000005
@@ -517,13 +492,7 @@
 #define DDRSS_PI_23_DATA 0x00000000
 #define DDRSS_PI_24_DATA 0x280D0001
 #define DDRSS_PI_25_DATA 0x00000000
-
-// * Number of Ranks: 1
-//#define DDRSS_PI_26_DATA 0x00010000
-
-// * Number of Ranks: 2
-#define DDRSS_PI_26_DATA 0x00030000
-
+#define DDRSS_PI_26_DATA 0x00010000
 #define DDRSS_PI_27_DATA 0x00003200
 #define DDRSS_PI_28_DATA 0x00000000
 #define DDRSS_PI_29_DATA 0x00000000
@@ -542,13 +511,7 @@
 #define DDRSS_PI_42_DATA 0x000000AD
 #define DDRSS_PI_43_DATA 0x00000000
 #define DDRSS_PI_44_DATA 0x00000000
-
-// * Number of Ranks: 1
-//#define DDRSS_PI_45_DATA 0x00010100
-
-// * Number of Ranks: 2
-#define DDRSS_PI_45_DATA 0x00030300
-
+#define DDRSS_PI_45_DATA 0x00010100
 #define DDRSS_PI_46_DATA 0x00000014
 #define DDRSS_PI_47_DATA 0x000007D0
 #define DDRSS_PI_48_DATA 0x00000300
@@ -569,13 +532,7 @@
 #define DDRSS_PI_63_DATA 0x00000404
 #define DDRSS_PI_64_DATA 0x00000001
 #define DDRSS_PI_65_DATA 0x0001010E
-
-// * Number of Ranks: 1
-//#define DDRSS_PI_66_DATA 0x02040100
-
-// * Number of Ranks: 2
-#define DDRSS_PI_66_DATA 0x02040300
-
+#define DDRSS_PI_66_DATA 0x02040100
 #define DDRSS_PI_67_DATA 0x00010000
 #define DDRSS_PI_68_DATA 0x00000034
 #define DDRSS_PI_69_DATA 0x00000000
@@ -587,11 +544,11 @@
 #define DDRSS_PI_75_DATA 0x00000005
 #define DDRSS_PI_76_DATA 0x01000000
 
-// * Number of Ranks: 1
+// * Density: 16Gb
 //#define DDRSS_PI_77_DATA 0x04000100
 
-// * Number of Ranks: 2
-#define DDRSS_PI_77_DATA 0x04010100
+// * Density: 32Gb
+#define DDRSS_PI_77_DATA 0x03FF0100
 
 #define DDRSS_PI_78_DATA 0x00020000
 #define DDRSS_PI_79_DATA 0x00010002
@@ -2154,13 +2111,7 @@
 #define DDRSS_PHY_1291_DATA 0x00000000
 #define DDRSS_PHY_1292_DATA 0x00000000
 #define DDRSS_PHY_1293_DATA 0x01002000
-
-// * Number of Ranks: 1
-//#define DDRSS_PHY_1294_DATA 0x00004001
-
-// * Number of Ranks: 2
-#define DDRSS_PHY_1294_DATA 0x00004003
-
+#define DDRSS_PHY_1294_DATA 0x00004001
 #define DDRSS_PHY_1295_DATA 0x00020028
 #define DDRSS_PHY_1296_DATA 0x00010100
 #define DDRSS_PHY_1297_DATA 0x00000001
