@@ -1,17 +1,33 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * This file was generated with the
- * AM62x SysConfig DDR Subsystem Register Configuration Tool v0.09.06
- * Thu Feb 09 2023 11:57:18 GMT-0600 (Central Standard Time)
+ * AM623/AM625 SysConfig DDR Configuration Tool for AM64x, AM625, AM623, AM62Ax, AM62Px, AM62Dx, AM62Lx v0.10.32
+ * Fri Sep 26 2025 10:34:06 GMT-0500 (Central Daylight Time)
  * DDR Type: DDR4
  * Frequency = 800MHz (1600MTs)
  * Density: 16Gb
  * Number of Ranks: 1
 */
 
+/*
+ * Modifcations:
+ *
+ * DRAM Timing A)
+ * Disabled -> CA Parity Latency 4 Clocks
+ *
+ * DRAM Timing B)
+ * tDLLk (tCK) : 597 ->  1024
+ *
+ * #define DDRSS_PHY_1312_DATA 0x00005201 -> 0x00004201 ( value from older v0.09.06 )
+ * #define DDRSS_PHY_1371_DATA 0x0001F7C2 -> 0x00005201 ( value from older v0.09.06 )
+ */
+
 #define DDRSS_PLL_FHS_CNT 6
 #define DDRSS_PLL_FREQUENCY_1 400000000
 #define DDRSS_PLL_FREQUENCY_2 400000000
+#define DDRSS_SDRAM_IDX 15
+#define DDRSS_REGION_IDX 16
+#define DDRSS_TOOL_VERSION "0.10.32"
 
 
 #define DDRSS_CTL_0_DATA 0x00000A00
@@ -2094,7 +2110,13 @@
 #define DDRSS_PHY_1309_DATA 0x03030303
 #define DDRSS_PHY_1310_DATA 0x03030303
 #define DDRSS_PHY_1311_DATA 0x00040000
+
+//v0.09.06
 #define DDRSS_PHY_1312_DATA 0x00004201
+
+//v0.10.32
+//#define DDRSS_PHY_1312_DATA 0x00005201
+
 #define DDRSS_PHY_1313_DATA 0x00000000
 #define DDRSS_PHY_1314_DATA 0x00000000
 #define DDRSS_PHY_1315_DATA 0x00000000
@@ -2153,7 +2175,12 @@
 #define DDRSS_PHY_1368_DATA 0x00000002
 #define DDRSS_PHY_1369_DATA 0x00000100
 #define DDRSS_PHY_1370_DATA 0x00000000
+
+//v0.09.06
 #define DDRSS_PHY_1371_DATA 0x00000FC3
+//v0.10.32
+//#define DDRSS_PHY_1371_DATA 0x0001F7C2
+
 #define DDRSS_PHY_1372_DATA 0x00020002
 #define DDRSS_PHY_1373_DATA 0x00000000
 #define DDRSS_PHY_1374_DATA 0x00001142
@@ -2188,3 +2215,4 @@
 #define DDRSS_PHY_1403_DATA 0x300D3F11
 #define DDRSS_PHY_1404_DATA 0x01990000
 #define DDRSS_PHY_1405_DATA 0x20040004
+
