@@ -150,7 +150,7 @@ static inline int k3_get_a53_max_frequency(void)
 	case 'S':
 		return 1000000000;
 	case 'T':
-		return 1250000000;
+		return 1400000000;
 	case 'G':
 	default:
 		return 300000000;
