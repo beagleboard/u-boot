@@ -102,6 +102,10 @@
 	status = "disabled";
 };
 
+&main_uart6_pins_default {
+	bootph-all;
+};
+
 #if IS_ENABLED(CONFIG_TARGET_AM62X_R5_POCKETBEAGLE2)
 
 &binman {
