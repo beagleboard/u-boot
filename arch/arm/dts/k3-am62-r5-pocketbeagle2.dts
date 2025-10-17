@@ -26,12 +26,6 @@
 		serial7 = &main_uart0;
 	};
 
-	chosen {
-		stdout-path = &main_uart0;
-		/* main_uart6 is not working for r5 u-boot yet */
-		/* stdout-path = &main_uart6; */
-	};
-
 	a53_0: a53@0 {
 		compatible = "ti,am654-rproc";
 		reg = <0x00 0x00a90000 0x00 0x10>;
