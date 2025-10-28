@@ -115,6 +115,8 @@ void do_board_detect(void)
 #define BBB_TDA998X_NAUDIO	0x2
 #define BBB_ADV7511_AUDIO	0x3
 #define BBB_ADV7511_NAUDIO	0x4
+#define BBB_IT66122_AUDIO	0x5
+#define BBB_IT66122_NAUDIO	0x6
 
 #define BBBW_WL1835	0x1
 #define BBGW_WL1835	0x2
@@ -158,6 +160,12 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 		virtual_audio=BBB_TDA998X_AUDIO;
 		virtual_wireless=NOT_POP;
 		name = "A335BNLT";
+
+		if (!strncmp(board_ti_get_rev(), "00D0", 4)) {
+			puts("Model: BeagleBoard.org BeagleBone Black Rev D:\n");
+			virtual_video=BBB_IT66122_AUDIO;
+			virtual_audio=BBB_IT66122_AUDIO;
+		}
 
 		if (!strncmp(board_ti_get_rev(), "BLA", 3)) {
 			puts("Model: BeagleBoard.org BeagleBone Blue:\n");
@@ -530,6 +538,19 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 		case BBB_ADV7511_NAUDIO:
 			env_set("uboot_video", "BB-NHDMI-ADV7511-00A0.dtbo");
 			env_set("uboot_video_naudio", "BB-NHDMI-ADV7511-00A0.dtbo");
+			break;
+		case BBB_IT66122_AUDIO:
+			if (virtual_audio == PINS_TAKEN) {
+				env_set("uboot_video", "BB-NHDMI-IT66122-00A0.dtbo");
+				env_set("uboot_video_naudio", "BB-NHDMI-IT66122-00A0.dtbo");
+			} else {
+				env_set("uboot_video", "BB-HDMI-IT66122-00A0.dtbo");
+				env_set("uboot_video_naudio", "BB-NHDMI-IT66122-00A0.dtbo");
+			}
+			break;
+		case BBB_IT66122_NAUDIO:
+			env_set("uboot_video", "BB-NHDMI-IT66122-00A0.dtbo");
+			env_set("uboot_video_naudio", "BB-NHDMI-IT66122-00A0.dtbo");
 			break;
 	}
 
