@@ -108,6 +108,7 @@ void do_board_detect(void)
 #define BBE_BASE_DTB	0x5
 #define BBEL_BASE_DTB	0x6
 #define BBE_EX_WIFI_BASE_DTB	0x7
+#define BBGE_BASE_DTB	0x8
 
 #define BBB_EMMC	0x1
 
@@ -184,6 +185,8 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 		}
 		if (!strncmp(board_ti_get_rev(), "BBG", 3)) {
 			if (!strncmp(board_ti_get_rev(), "BBGE", 4)) {
+				puts("Model: SeeedStudio BeagleBone Green Eco:\n");
+				base_dtb=BBGE_BASE_DTB;
 				virtual_video=NOT_POP;
 				virtual_audio=NOT_POP;
 				name = "BBGE";
@@ -505,6 +508,10 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 			break;
 		case BBBL_BASE_DTB:
 			env_set("uboot_base_dtb_univ", "am335x-boneblue.dtb");
+			break;
+		case BBGE_BASE_DTB:
+			env_set("uboot_base_dtb_univ", "am335x-bonegreen-eco-uboot-univ.dtb");
+			env_set("uboot_base_dtb", "am335x-bonegreen-eco-uboot.dtb");
 			break;
 	}
 
