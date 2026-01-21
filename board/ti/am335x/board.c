@@ -222,6 +222,11 @@ static int probe_cape_eeprom(struct am335x_cape_eeprom_id *cape_header)
 		if (!strncmp(board_ti_get_rev(), "EIA", 3)) {
 			puts("Model: BeagleBone Black Industrial:\n");
 		}
+		if (!strncmp(board_ti_get_rev(), "EID0", 4)) {
+			puts("Model: BeagleBone Black Industrial Rev D:\n");
+			virtual_video=BBB_IT66122_AUDIO;
+			virtual_audio=BBB_IT66122_AUDIO;
+		}
 		if (!strncmp(board_ti_get_rev(), "SE", 2)) {
 			char subtype_id = board_ti_get_config()[1];
 			switch (subtype_id) {
