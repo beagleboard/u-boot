@@ -27,9 +27,7 @@
 	};
 
 	chosen {
-		stdout-path = &main_uart0;
-		/* main_uart6 is not working for r5 u-boot yet */
-		/* stdout-path = &main_uart6; */
+		stdout-path = &main_uart6;
 	};
 
 	a53_0: a53@0 {
