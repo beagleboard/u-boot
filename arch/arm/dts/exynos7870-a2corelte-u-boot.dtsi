@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2026 Kaustabh Chakraborty <kauschluss@disroot.org>
+ */
+
+/ {
+	chosen {
+		#address-cells = <2>;
+		#size-cells = <1>;
+		ranges;
+
+		framebuffer@67000000 {
+			compatible = "simple-framebuffer";
+			reg = <0x0 0x67000000 (540 * 960 * 4)>;
+			width = <540>;
+			height = <960>;
+			stride = <(540 * 4)>;
+			format = "a8r8g8b8";
+		};
+	};
+};
