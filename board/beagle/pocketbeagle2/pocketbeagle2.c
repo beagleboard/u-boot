@@ -18,6 +18,9 @@
 
 #include "../../ti/common/board_detect.h"
 
+#include "pocketbeagle2-ddr-data.h"
+#include "../../phytec/common/k3/k3_ddrss_patch.h"
+
 enum {
 	EEPROM_RAM_SIZE_512MB = 0,
 	EEPROM_RAM_SIZE_1GB = 1
@@ -82,6 +85,14 @@ int dram_init(void)
 
 	ram_size = pocketbeagle2_get_am62_ddr_size_default();
 
+	switch (ram_size) {
+	case EEPROM_RAM_SIZE_1GB:
+		gd->ram_size = 0x40000000;
+		break;
+	default:
+		gd->ram_size = 0x20000000;
+	}
+
 	return 0;
 }
 
@@ -89,13 +100,86 @@ int dram_init_banksize(void)
 {
 	u8 ram_size;
 
+	memset(gd->bd->bi_dram, 0, sizeof(gd->bd->bi_dram[0]) * CONFIG_NR_DRAM_BANKS);
+
 	if (!IS_ENABLED(CONFIG_CPU_V7R))
 		return fdtdec_setup_memory_banksize();
 
 	ram_size = pocketbeagle2_get_am62_ddr_size_default();
+	switch (ram_size) {
+	case EEPROM_RAM_SIZE_1GB:
+		gd->bd->bi_dram[0].start = CFG_SYS_SDRAM_BASE;
+		gd->bd->bi_dram[0].size = 0x40000000;
+		gd->ram_size = 0x40000000;
+		break;
+	default:
+		/* Continue with default 512MB setup */
+		gd->bd->bi_dram[0].start = CFG_SYS_SDRAM_BASE;
+		gd->bd->bi_dram[0].size = 0x20000000;
+		gd->ram_size = 0x20000000;
+	}
 
 	return 0;
 }
+
+#if defined(CONFIG_K3_DDRSS)
+int update_ddrss_timings(void)
+{
+	int ret;
+	u8 ram_size;
+	struct ddrss *ddr_patch = NULL;
+	void *fdt = (void *)gd->fdt_blob;
+
+	ram_size = pocketbeagle2_get_am62_ddr_size_default();
+	switch (ram_size) {
+	case EEPROM_RAM_SIZE_512MB:
+		ddr_patch = NULL;
+		break;
+	case EEPROM_RAM_SIZE_1GB:
+		ddr_patch = &phycore_ddrss_data[POCKETBEAGLE2_1GB];
+		break;
+	default:
+		break;
+	}
+
+	/* Nothing to patch */
+	if (!ddr_patch)
+		return 0;
+
+	printf("Applying DDRSS timings patch for ram_size %d\n", ram_size);
+
+	ret = fdt_apply_ddrss_timings_patch(fdt, ddr_patch);
+	if (ret < 0) {
+		printf("Failed to apply ddrs timings patch %d\n", ret);
+		return ret;
+	}
+
+	return 0;
+}
+
+int do_board_detect(void)
+{
+	int ret;
+	void *fdt = (void *)gd->fdt_blob;
+	int bank;
+	u64 start[CONFIG_NR_DRAM_BANKS];
+	u64 size[CONFIG_NR_DRAM_BANKS];
+
+	dram_init();
+	dram_init_banksize();
+
+	for (bank = 0; bank < CONFIG_NR_DRAM_BANKS; bank++) {
+		start[bank] = gd->bd->bi_dram[bank].start;
+		size[bank] = gd->bd->bi_dram[bank].size;
+	}
+
+	ret = fdt_fixup_memory_banks(fdt, start, size, CONFIG_NR_DRAM_BANKS);
+	if (ret)
+		return ret;
+
+	return update_ddrss_timings();
+}
+#endif
 
 #if IS_ENABLED(CONFIG_BOARD_LATE_INIT)
 int board_late_init(void)

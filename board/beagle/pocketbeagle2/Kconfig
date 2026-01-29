@@ -25,6 +25,7 @@ config TARGET_AM62X_R5_POCKETBEAGLE2
 	select BINMAN
 	imply SYS_K3_SPL_ATF
 	imply TI_I2C_BOARD_DETECT
+	imply PHYTEC_K3_DDR_PATCH
 
 endchoice
 
@@ -58,5 +59,6 @@ config SPL_LDSCRIPT
 	default "arch/arm/mach-omap2/u-boot-spl.lds"
 
 source "board/ti/common/Kconfig"
+source "board/phytec/common/k3/Kconfig"
 
 endif
