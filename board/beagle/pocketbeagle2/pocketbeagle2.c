@@ -79,8 +79,8 @@ int dram_init(void)
 {
 	u8 ram_size;
 
-	if (!IS_ENABLED(CONFIG_CPU_V7R))
-		return fdtdec_setup_mem_size_base();
+//	if (!IS_ENABLED(CONFIG_CPU_V7R))
+//		return fdtdec_setup_mem_size_base();
 
 	ram_size = pocketbeagle2_get_am62_ddr_size_default();
 
@@ -101,8 +101,8 @@ int dram_init_banksize(void)
 
 	memset(gd->bd->bi_dram, 0, sizeof(gd->bd->bi_dram[0]) * CONFIG_NR_DRAM_BANKS);
 
-	if (!IS_ENABLED(CONFIG_CPU_V7R))
-		return fdtdec_setup_memory_banksize();
+//	if (!IS_ENABLED(CONFIG_CPU_V7R))
+//		return fdtdec_setup_memory_banksize();
 
 	ram_size = pocketbeagle2_get_am62_ddr_size_default();
 	switch (ram_size) {
