@@ -57,8 +57,8 @@ static u8 pocketbeagle2_get_am62_ddr_size_default(void)
 
 	ret = do_eeprom_read();
 	if (!ret) {
-		if (ep->name[0] == 0x50) {
-			printf("EEPROM: [%s]\n", ep->name);
+		if (ep->name[0] != 0x50) {
+			printf("ERROR: EEPROM not POCKETBEAGLE2: [%s]\n", ep->name);
 		}
 		/*
 		 * POCKETBEAGL2A00 (am6232 512MB)
@@ -66,7 +66,7 @@ static u8 pocketbeagle2_get_am62_ddr_size_default(void)
 		 * POCKETBEAGL2A1I (am625 1GB)
 		 */
 		if (!strncmp(&ep->name[11], "2A1I", 4)) {
-			puts("EEPROM: EEPROM_RAM_SIZE_1GB\n");
+			puts("EEPROM: POCKETBEAGLE2_1GB\n");
 			return EEPROM_RAM_SIZE_1GB;
 		}
 	}
@@ -79,11 +79,10 @@ int dram_init(void)
 {
 	u8 ram_size;
 
-//	if (!IS_ENABLED(CONFIG_CPU_V7R))
-//		return fdtdec_setup_mem_size_base();
+	//if (!IS_ENABLED(CONFIG_CPU_V7R))
+	//	return fdtdec_setup_mem_size_base();
 
 	ram_size = pocketbeagle2_get_am62_ddr_size_default();
-
 	switch (ram_size) {
 	case EEPROM_RAM_SIZE_1GB:
 		gd->ram_size = 0x40000000;
@@ -101,8 +100,8 @@ int dram_init_banksize(void)
 
 	memset(gd->bd->bi_dram, 0, sizeof(gd->bd->bi_dram[0]) * CONFIG_NR_DRAM_BANKS);
 
-//	if (!IS_ENABLED(CONFIG_CPU_V7R))
-//		return fdtdec_setup_memory_banksize();
+	//if (!IS_ENABLED(CONFIG_CPU_V7R))
+	//	return fdtdec_setup_memory_banksize();
 
 	ram_size = pocketbeagle2_get_am62_ddr_size_default();
 	switch (ram_size) {
@@ -145,7 +144,7 @@ int update_ddrss_timings(void)
 	if (!ddr_patch)
 		return 0;
 
-	printf("Applying DDRSS timings patch for ram_size %d\n", ram_size);
+	puts("Applying DDRSS timings patch for [POCKETBEAGLE2_1GB]\n");
 
 	ret = fdt_apply_ddrss_timings_patch(fdt, ddr_patch);
 	if (ret < 0) {
@@ -158,7 +157,6 @@ int update_ddrss_timings(void)
 #else
 int update_ddrss_timings(void)
 {
-	puts("update_ddrss_timings (on A53 don't change anything)\n");
 	return 0;
 }
 #endif
