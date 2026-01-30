@@ -155,6 +155,13 @@ int update_ddrss_timings(void)
 
 	return 0;
 }
+#else
+int update_ddrss_timings(void)
+{
+	puts("update_ddrss_timings (on A53 don't change anything)\n");
+	return 0;
+}
+#endif
 
 int do_board_detect(void)
 {
@@ -178,7 +185,6 @@ int do_board_detect(void)
 
 	return update_ddrss_timings();
 }
-#endif
 
 #if IS_ENABLED(CONFIG_BOARD_LATE_INIT)
 int board_late_init(void)
