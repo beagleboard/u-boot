@@ -54,10 +54,8 @@ static u8 pocketbeagle2_get_am62_ddr_size_default(void)
 {
 	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
 
-	if (do_eeprom_read()) {
-		/* EEPROM not populated */
-		puts("EEPROM: PB2 BLANK EEPROM 512MB)\n");
-	} else {
+	ret = do_eeprom_read();
+	if (!ret) {
 		if (ep->name[0] == 0x50) {
 			printf("EEPROM: [%s]\n", ep->name);
 		}
