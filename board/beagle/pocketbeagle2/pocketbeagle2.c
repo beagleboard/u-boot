@@ -52,6 +52,7 @@ int do_eeprom_read(void)
 
 static u8 pocketbeagle2_get_am62_ddr_size_default(void)
 {
+	int ret;
 	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
 
 	ret = do_eeprom_read();
