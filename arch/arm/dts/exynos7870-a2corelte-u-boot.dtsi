@@ -4,6 +4,11 @@
  */
 
 / {
+	/* These properties are required by S-BOOT. */
+	model_info-chip = <7870>;
+	model_info-hw_rev = <0>;
+	model_info-hw_rev_end = <255>;
+
 	chosen {
 		#address-cells = <2>;
 		#size-cells = <1>;
