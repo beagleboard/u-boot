@@ -27,7 +27,6 @@ DECLARE_GLOBAL_DATA_PTR;
 struct exynos_board_info {
 	const char *name;
 	const char *chip;
-	const u64 *const dram_bank_bases;
 
 	char serial[64];
 
@@ -53,10 +52,6 @@ static struct mm_region exynos_mem_map[CONFIG_NR_DRAM_BANKS + 2] = {
 };
 
 struct mm_region *mem_map = exynos_mem_map;
-
-static const u64 exynos7870_common_dram_bank_bases[CONFIG_NR_DRAM_BANKS] = {
-	0x40000000, 0x80000000, 0x100000000,
-};
 
 static const char *exynos_prev_bl_get_bootargs(void)
 {
@@ -157,7 +152,6 @@ static struct exynos_board_info exynos_board_info_match[] = {
 		/* Samsung Galaxy A2 Core */
 		.name = "a2corelte",
 		.chip = "exynos7870",
-		.dram_bank_bases = exynos7870_common_dram_bank_bases,
 		.match = exynos7870_fdt_match,
 		.match_model = "A260",
 		.match_max_rev = U8_MAX,
@@ -165,7 +159,6 @@ static struct exynos_board_info exynos_board_info_match[] = {
 		/* Samsung Galaxy J6 */
 		.name = "j6lte",
 		.chip = "exynos7870",
-		.dram_bank_bases = exynos7870_common_dram_bank_bases,
 		.match = exynos7870_fdt_match,
 		.match_model = "J600",
 		.match_max_rev = U8_MAX,
@@ -173,18 +166,17 @@ static struct exynos_board_info exynos_board_info_match[] = {
 		/* Samsung Galaxy J7 Prime */
 		.name = "on7xelte",
 		.chip = "exynos7870",
-		.dram_bank_bases = exynos7870_common_dram_bank_bases,
 		.match = exynos7870_fdt_match,
 		.match_model = "G610",
 		.match_max_rev = U8_MAX,
 	},
 };
 
-static void exynos_parse_dram_banks(const struct exynos_board_info *board_info,
-				    const void *fdt_base)
+static void exynos_parse_dram_banks(const void *fdt_base)
 {
 	u64 mem_addr, mem_size = 0;
-	u32 na, ns, i, j;
+	u32 na, ns, i;
+	int index = 1;
 	int offset;
 
 	if (fdt_check_header(fdt_base) < 0)
@@ -199,6 +191,9 @@ static void exynos_parse_dram_banks(const struct exynos_board_info *board_info,
 			continue;
 
 		for (i = 0; ; i++) {
+			if (index > CONFIG_NR_DRAM_BANKS)
+				break;
+
 			mem_addr = fdtdec_get_addr_size_fixed(fdt_base, offset,
 							      "reg", i, na, ns,
 							      &mem_size, false);
@@ -208,17 +203,12 @@ static void exynos_parse_dram_banks(const struct exynos_board_info *board_info,
 			if (!mem_size)
 				continue;
 
-			for (j = 0; j < CONFIG_NR_DRAM_BANKS; j++) {
-				if (board_info->dram_bank_bases[j] != mem_addr)
-					continue;
-
-				mem_map[j + 1].phys = mem_addr;
-				mem_map[j + 1].virt = mem_addr;
-				mem_map[j + 1].size = mem_size;
-				mem_map[j + 1].attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL) |
-						       PTE_BLOCK_INNER_SHARE;
-				break;
-			}
+			mem_map[index].phys = mem_addr;
+			mem_map[index].virt = mem_addr;
+			mem_map[index].size = mem_size;
+			mem_map[index].attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL) |
+					       PTE_BLOCK_INNER_SHARE;
+			index++;
 		}
 	}
 }
@@ -334,7 +324,7 @@ int board_early_init_f(void)
 		return -ENODATA;
 	board_info = (const struct exynos_board_info *)gd->board_type;
 
-	exynos_parse_dram_banks(board_info, gd->fdt_blob);
+	exynos_parse_dram_banks(gd->fdt_blob);
 	/*
 	 * Some devices have multiple variants based on the amount of
 	 * memory and internal storage. The lowest bank base has been
@@ -342,7 +332,7 @@ int board_early_init_f(void)
 	 * For variants with more memory, the previous bootloader should
 	 * overlay the devicetree with the required extra memory ranges.
 	 */
-	exynos_parse_dram_banks(board_info, (const void *)get_prev_bl_fdt_addr());
+	exynos_parse_dram_banks((const void *)get_prev_bl_fdt_addr());
 
 	return 0;
 }
