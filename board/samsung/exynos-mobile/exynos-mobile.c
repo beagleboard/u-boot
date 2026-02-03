@@ -18,6 +18,7 @@
 #include <lmb.h>
 #include <part.h>
 #include <stdbool.h>
+#include <string.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -213,6 +214,76 @@ static void exynos_parse_dram_banks(const void *fdt_base)
 	}
 }
 
+static void exynos_env_setup(void)
+{
+	const char *bootargs = exynos_prev_bl_get_bootargs();
+	const char *dev_compatible, *soc_compatible;
+	char *ptr;
+	char buf[128];
+	int nr_compatibles;
+	int offset;
+	int ret;
+
+	if (bootargs) {
+		/* Read the cmdline property which stores the serial number. */
+		ret = cmdline_get_arg(bootargs, "androidboot.serialno", &offset);
+		if (ret > 0) {
+			strlcpy(buf, bootargs + offset, ret);
+			env_set("serial#", buf);
+		}
+	}
+
+	nr_compatibles = ofnode_read_string_count(ofnode_root(), "compatible");
+	if (nr_compatibles < 2) {
+		log_warning("%s: expected 2 or more compatible strings\n",
+			    __func__);
+		return;
+	}
+
+	ret = ofnode_read_string_index(ofnode_root(), "compatible",
+				       nr_compatibles - 1, &soc_compatible);
+	if (ret) {
+		log_warning("%s: failed to read SoC compatible\n",
+			    __func__);
+		return;
+	}
+
+	ret = ofnode_read_string_index(ofnode_root(), "compatible", 0,
+				       &dev_compatible);
+	if (ret) {
+		log_warning("%s: failed to read device compatible\n",
+			    __func__);
+		return;
+	}
+
+	/* <manufacturer>,<soc> => platform = <soc> */
+	ptr = strchr(soc_compatible, ',');
+	if (ptr)
+		soc_compatible = ptr + 1;
+	env_set("platform", soc_compatible);
+
+	/* <manufacturer>,<codename> => board = <manufacturer>-<codename> */
+	strlcpy(buf, dev_compatible, sizeof(buf) - 1);
+	ptr = strchr(buf, ',');
+	if (ptr)
+		*ptr = '-';
+	env_set("board", buf);
+
+	/*
+	 * NOTE: Board name usually goes as <manufacturer>-<codename>, but
+	 * upstream device trees for Exynos SoCs are <soc>-<codename>.
+	 * Extraction of <codename> from the board name is required.
+	 */
+	ptr = strchr(dev_compatible, ',');
+	if (ptr)
+		dev_compatible = ptr + 1;
+
+	/* EFI booting requires the path to correct DTB, specify it here. */
+	snprintf(buf, sizeof(buf), "exynos/%s-%s.dtb", soc_compatible,
+		 dev_compatible);
+	env_set("fdtfile", buf);
+}
+
 static int exynos_fastboot_setup(void)
 {
 	struct blk_desc *blk_dev;
@@ -371,23 +442,7 @@ int board_init(void)
 
 int misc_init_r(void)
 {
-	const struct exynos_board_info *board_info;
-	char buf[128];
-
-	if (!gd->board_type)
-		return -ENODATA;
-	board_info = (const struct exynos_board_info *)gd->board_type;
-
-	env_set("platform", board_info->chip);
-	env_set("board", board_info->name);
-
-	if (strlen(board_info->serial))
-		env_set("serial#", board_info->serial);
-
-	/* EFI booting requires the path to correct dtb, specify it here. */
-	snprintf(buf, sizeof(buf), "exynos/%s-%s.dtb", board_info->chip,
-		 board_info->name);
-	env_set("fdtfile", buf);
+	exynos_env_setup();
 
 	return exynos_fastboot_setup();
 }
