@@ -53,7 +53,7 @@ Finally, use ``mkbootimg`` by osm0sis [3]_ to generate the boot image:
 .. prompt:: bash $
 
 	mkbootimg -o u-boot.img \
-		--kernel	.output/u-boot.bin \
+		--kernel	.output/u-boot-nodtb.bin \
 		--dt		stub-dt.img
 
 Offsets are not provided to ``mkbootimg`` as S-BOOT ignores them.
