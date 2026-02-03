@@ -9,3 +9,11 @@
 		u-boot,mmc-env-partition = "u-boot-env";
 	};
 };
+
+&syscfg {
+	bootph-all;
+};
+
+&usart2 {
+	bootph-all;
+};
