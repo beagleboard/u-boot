@@ -231,6 +231,15 @@ static int exynos_fastboot_setup(void)
 	return 0;
 }
 
+int board_fdt_blob_setup(void **fdtp)
+{
+	/* If internal FDT is not available, use the external FDT instead. */
+	if (fdt_check_header(*fdtp))
+		*fdtp = (void *)get_prev_bl_fdt_addr();
+
+	return 0;
+}
+
 int timer_init(void)
 {
 	ofnode timer_node;
