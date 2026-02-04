@@ -40,7 +40,7 @@ struct stm32key {
 	char *desc;
 	u16 start;
 	u8 size;
-	int (*post_process)(struct udevice *dev);
+	int (*post_process)(struct udevice *dev, const struct stm32key *key);
 };
 
 const struct stm32key stm32mp13_list[] = {
@@ -67,7 +67,56 @@ const struct stm32key stm32mp15_list[] = {
 	}
 };
 
-static int post_process_oem_key2(struct udevice *dev);
+static int post_process_oem_key2(struct udevice *dev, const struct stm32key *key);
+static int post_process_edmk_128b(struct udevice *dev, const struct stm32key *key);
+
+const struct stm32key stm32mp21_list[] = {
+	[STM32KEY_PKH] = {
+		.name = "OEM-KEY1",
+		.desc = "Hash of the 8 ECC Public Keys Hashes Table (ECDSA is the authentication algorithm) for FSBLA or M",
+		.start = 152,
+		.size = 8,
+	},
+	{
+		.name = "OEM-KEY2",
+		.desc = "Hash of the 8 ECC Public Keys Hashes Table (ECDSA is the authentication algorithm) for FSBLM",
+		.start = 160,
+		.size = 8,
+		.post_process = post_process_oem_key2,
+	},
+	{
+		.name = "FIP-EDMK",
+		.desc = "Encryption/Decryption Master Key for FIP",
+		.start = 260,
+		.size = 8,
+	},
+	{
+		.name = "EDMK1-128b",
+		.desc = "Encryption/Decryption Master 128b Key for FSBLA or M",
+		.start = 356,
+		.size = 4,
+		.post_process = post_process_edmk_128b,
+	},
+	{
+		.name = "EDMK1-256b",
+		.desc = "Encryption/Decryption Master 256b Key for FSBLA or M",
+		.start = 356,
+		.size = 8,
+	},
+	{
+		.name = "EDMK2-128b",
+		.desc = "Encryption/Decryption Master 128b Key for FSBLM",
+		.start = 348,
+		.size = 4,
+		.post_process = post_process_edmk_128b,
+	},
+	{
+		.name = "EDMK2-256b",
+		.desc = "Encryption/Decryption Master 256b Key for FSBLM",
+		.start = 348,
+		.size = 8,
+	},
+};
 
 const struct stm32key stm32mp2x_list[] = {
 	[STM32KEY_PKH] = {
@@ -171,8 +220,10 @@ static u8 get_key_nb(void)
 	if (IS_ENABLED(CONFIG_STM32MP15X))
 		return ARRAY_SIZE(stm32mp15_list);
 
-	if (IS_ENABLED(CONFIG_STM32MP21X) || IS_ENABLED(CONFIG_STM32MP23X) ||
-	    IS_ENABLED(CONFIG_STM32MP25X))
+	if (IS_ENABLED(CONFIG_STM32MP21X))
+		return ARRAY_SIZE(stm32mp21_list);
+
+	if (IS_ENABLED(CONFIG_STM32MP23X) || IS_ENABLED(CONFIG_STM32MP25X))
 		return ARRAY_SIZE(stm32mp2x_list);
 }
 
@@ -184,8 +235,10 @@ static const struct stm32key *get_key(u8 index)
 	if (IS_ENABLED(CONFIG_STM32MP15X))
 		return &stm32mp15_list[index];
 
-	if (IS_ENABLED(CONFIG_STM32MP21X) || IS_ENABLED(CONFIG_STM32MP23X) ||
-	    IS_ENABLED(CONFIG_STM32MP25X))
+	if (IS_ENABLED(CONFIG_STM32MP21X))
+		return &stm32mp21_list[index];
+
+	if (IS_ENABLED(CONFIG_STM32MP23X) || IS_ENABLED(CONFIG_STM32MP25X))
 		return &stm32mp2x_list[index];
 }
 
@@ -237,7 +290,8 @@ static void read_key_value(const struct stm32key *key, unsigned long addr)
 	}
 }
 
-static int read_key_otp(struct udevice *dev, const struct stm32key *key, bool print, bool *locked)
+static int read_key_otp(struct udevice *dev, const struct stm32key *key,
+			bool print, bool *locked)
 {
 	int i, word, ret;
 	int nb_invalid = 0, nb_zero = 0, nb_lock = 0, nb_lock_err = 0;
@@ -351,7 +405,7 @@ static int write_close_status(struct udevice *dev)
 	return 0;
 }
 
-static int post_process_oem_key2(struct udevice *dev)
+static int post_process_oem_key2(struct udevice *dev, const struct stm32key *key)
 {
 	int ret;
 	u32 val;
@@ -367,6 +421,31 @@ static int post_process_oem_key2(struct udevice *dev)
 	if (ret != 4) {
 		log_err("Error %d failed to write OEM_KEY2_ENABLE\n", ret);
 		return -EIO;
+	}
+
+	return 0;
+}
+
+static int post_process_edmk_128b(struct udevice *dev, const struct stm32key *key)
+{
+	int ret, word, start_otp;
+	u32 val;
+
+	start_otp = key->start + key->size;
+
+	/* On MP21, when using a 128bit key, program 0xffffffff and lock the unused OTPs. */
+	for (word = start_otp; word < (start_otp + 4); word++) {
+		val = GENMASK(31, 0);
+		ret = misc_write(dev, STM32_BSEC_OTP(word), &val, 4);
+		if (ret != 4)
+			log_warning("Fuse %s OTP padding %i failed, continue\n", key->name, word);
+
+		val = BSEC_LOCK_PERM;
+		ret = misc_write(dev, STM32_BSEC_LOCK(word), &val, 4);
+		if (ret != 4) {
+			log_err("Failed to lock unused OTP : %d\n", word);
+			return ret;
+		}
 	}
 
 	return 0;
@@ -550,7 +629,7 @@ static int do_stm32key_fuse(struct cmd_tbl *cmdtp, int flag, int argc, char *con
 		return CMD_RET_FAILURE;
 
 	if (key->post_process) {
-		if (key->post_process(dev)) {
+		if (key->post_process(dev, key)) {
 			printf("Error: %s for post process\n", key->name);
 			return CMD_RET_FAILURE;
 		}
