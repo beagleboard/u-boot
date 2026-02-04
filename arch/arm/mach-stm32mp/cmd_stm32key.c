@@ -41,6 +41,7 @@ struct stm32key {
 	u16 start;
 	u8 size;
 	int (*post_process)(struct udevice *dev, const struct stm32key *key);
+	u32 (*key_format)(u32 value);
 };
 
 const struct stm32key stm32mp13_list[] = {
@@ -69,6 +70,8 @@ const struct stm32key stm32mp15_list[] = {
 
 static int post_process_oem_key2(struct udevice *dev, const struct stm32key *key);
 static int post_process_edmk_128b(struct udevice *dev, const struct stm32key *key);
+static u32 format1(u32 value);
+static u32 format2(u32 value);
 
 const struct stm32key stm32mp21_list[] = {
 	[STM32KEY_PKH] = {
@@ -268,6 +271,24 @@ static const struct otp_close *get_otp_close_state(u8 index)
 		return &stm32mp2x_close_state_otp[index];
 }
 
+/*
+ * Define format wrappers based on reference manual formats
+ * ex for key from NIST vector AES_ECB_256b_test0:
+ * key (bytes)     : f9 e8 38 9f ... ef 94 4b e0
+ * format 1 (le32) : 0xf9e8389f  ... 0xef944be0
+ * format 2 (le32) : 0x9f38e8f9  ... 0xe04b94ef
+ */
+
+static u32 format1(u32 value)
+{
+	return __be32_to_cpu(value);
+}
+
+static u32 __maybe_unused format2(u32 value)
+{
+	return __le32_to_cpu(value);
+}
+
 static int get_misc_dev(struct udevice **dev)
 {
 	int ret;
@@ -282,10 +303,15 @@ static int get_misc_dev(struct udevice **dev)
 static void read_key_value(const struct stm32key *key, unsigned long addr)
 {
 	int i;
+	u32 (*format)(u32) = format1;
+
+	/* Use key_format function pointer if defined */
+	if (key->key_format)
+		format = key->key_format;
 
 	for (i = 0; i < key->size; i++) {
 		printf("%s OTP %i: [%08x] %08x\n", key->name, key->start + i,
-		       (u32)addr, __be32_to_cpu(*(u32 *)addr));
+		       (u32)addr, format(*(u32 *)addr));
 		addr += 4;
 	}
 }
@@ -456,9 +482,14 @@ static int fuse_key_value(struct udevice *dev, const struct stm32key *key, unsig
 {
 	u32 word, val;
 	int i, ret;
+	u32 (*format)(u32) = format1;
+
+	/* Use key_format function pointer if defined */
+	if (key->key_format)
+		format = key->key_format;
 
 	for (i = 0, word = key->start; i < key->size; i++, word++, addr += 4) {
-		val = __be32_to_cpu(*(u32 *)addr);
+		val = format(*(u32 *)addr);
 		if (print)
 			printf("Fuse %s OTP %i : %08x\n", key->name, word, val);
 
