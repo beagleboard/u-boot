@@ -94,6 +94,13 @@ const struct stm32key stm32mp21_list[] = {
 		.size = 8,
 	},
 	{
+		.name = "RPROC-FW-ENC-KEY",
+		.desc = "Encryption/Decryption Key for remote processor firmware",
+		.start = 332,
+		.size = 8,
+		.key_format = format2,
+	},
+	{
 		.name = "EDMK1-128b",
 		.desc = "Encryption/Decryption Master 128b Key for FSBLA or M",
 		.start = 356,
@@ -140,6 +147,13 @@ const struct stm32key stm32mp2x_list[] = {
 		.desc = "Encryption/Decryption Master Key for FIP",
 		.start = 260,
 		.size = 8,
+	},
+	{
+		.name = "RPROC-FW-ENC-KEY",
+		.desc = "Encryption/Decryption Key for remote processor firmware",
+		.start = 336,
+		.size = 8,
+		.key_format = format2,
 	},
 	{
 		.name = "EDMK1",
@@ -284,7 +298,7 @@ static u32 format1(u32 value)
 	return __be32_to_cpu(value);
 }
 
-static u32 __maybe_unused format2(u32 value)
+static u32 format2(u32 value)
 {
 	return __le32_to_cpu(value);
 }
