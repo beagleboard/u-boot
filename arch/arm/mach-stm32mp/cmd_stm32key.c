@@ -88,6 +88,13 @@ const struct stm32key stm32mp21_list[] = {
 		.post_process = post_process_oem_key2,
 	},
 	{
+		.name = "RPROC-FW-PKH",
+		.desc = "Hash of the Public Key for remote processor firmware",
+		.start = 180,
+		.size = 8,
+		.key_format = format2,
+	},
+	{
 		.name = "FIP-EDMK",
 		.desc = "Encryption/Decryption Master Key for FIP",
 		.start = 260,
@@ -141,6 +148,13 @@ const struct stm32key stm32mp2x_list[] = {
 		.start = 152,
 		.size = 8,
 		.post_process = post_process_oem_key2,
+	},
+	{
+		.name = "RPROC-FW-PKH",
+		.desc = "Hash of the Public Key for remote processor firmware",
+		.start = 176,
+		.size = 8,
+		.key_format = format2,
 	},
 	{
 		.name = "FIP-EDMK",
