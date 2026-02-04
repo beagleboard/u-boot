@@ -95,6 +95,13 @@ const struct stm32key stm32mp21_list[] = {
 		.key_format = format2,
 	},
 	{
+		.name = "ADAC-ROTPKH",
+		.desc = "Authenticated Debug Access Control Root Of Trust Public Key Hash",
+		.start = 238,
+		.size = 8,
+		.key_format = format2,
+	},
+	{
 		.name = "FIP-EDMK",
 		.desc = "Encryption/Decryption Master Key for FIP",
 		.start = 260,
