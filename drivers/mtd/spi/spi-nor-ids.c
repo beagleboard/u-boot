@@ -77,6 +77,17 @@ const struct flash_info spi_nor_ids[] = {
 	{ INFO("at25sl321",	0x1f4216, 0, 64 * 1024,  64, SECT_4K) },
 	{ INFO("at26df081a",	0x1f4501, 0, 64 * 1024,  16, SECT_4K) },
 #endif
+#ifdef CONFIG_SPI_FLASH_DOSILICON
+	/* Dosilicon Co., Ltd */
+	{ INFO("ds25m4cb", 0xe5401a, 0, 64 * 1024, 1024,
+		    SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES) },
+	{ INFO("ds25m4dn", 0xe5401b, 0, 64 * 1024, 2048,
+		    SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES) },
+	{ INFO("ds25q4cb", 0xe5301a, 0, 64 * 1024, 1024,
+		    SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES) },
+	{ INFO("ds25q4dn", 0xe5301b, 0, 64 * 1024, 2048,
+		    SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES) },
+#endif
 #ifdef CONFIG_SPI_FLASH_EON		/* EON */
 	/* EON -- en25xxx */
 	{ INFO("en25q80b",   0x1c3014, 0, 64 * 1024,   16, SECT_4K) },

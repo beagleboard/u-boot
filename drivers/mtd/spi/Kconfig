@@ -157,6 +157,11 @@ config SPI_FLASH_ATMEL
 	help
 	  Add support for various Atmel SPI flash chips (AT45xxx and AT25xxx)
 
+config SPI_FLASH_DOSILICON
+	bool "Dosilicon SPI flash support"
+	help
+	  Add support for various Dosilicon SPI flash chips (DS25xxx)
+
 config SPI_FLASH_EON
 	bool "EON SPI flash support"
 	help
