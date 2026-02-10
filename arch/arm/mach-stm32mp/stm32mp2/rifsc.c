@@ -141,26 +141,9 @@ static int rifsc_check_access(void *base, u32 id)
 	cid_reg_value = readl(base + RIFSC_RISC_PER0_CIDCFGR(id));
 	sem_reg_value = readl(base + RIFSC_RISC_PER0_SEMCR(id));
 
-	/*
-	 * First check conditions for semaphore mode, which doesn't take into
-	 * account static CID.
-	 */
-	if (cid_reg_value & CIDCFGR_SEMEN)
+	/* Skip cid check if CID filtering isn't enabled */
+	if (!(cid_reg_value & CIDCFGR_CFEN))
 		goto skip_cid_check;
-
-	/*
-	 * Skip cid check if CID filtering isn't enabled or filtering is enabled on CID0, which
-	 * corresponds to whatever CID.
-	 */
-	if (!(cid_reg_value & CIDCFGR_CFEN) ||
-	    FIELD_GET(RIFSC_RISC_SCID_MASK, cid_reg_value) == RIF_CID0)
-		goto skip_cid_check;
-
-	/* Coherency check with the CID configuration */
-	if (FIELD_GET(RIFSC_RISC_SCID_MASK, cid_reg_value) != RIF_CID1) {
-		log_debug("Invalid CID configuration for peripheral %d\n", id);
-		return -EACCES;
-	}
 
 	/* Check semaphore accesses */
 	if (cid_reg_value & CIDCFGR_SEMEN) {
@@ -173,6 +156,9 @@ static int rifsc_check_access(void *base, u32 id)
 			log_debug("Semaphore unavailable for peripheral %d\n", id);
 			return -EACCES;
 		}
+	} else if (FIELD_GET(RIFSC_RISC_SCID_MASK, cid_reg_value) != RIF_CID1) {
+		log_debug("Invalid CID configuration for peripheral %d\n", id);
+		return -EACCES;
 	}
 
 skip_cid_check:
