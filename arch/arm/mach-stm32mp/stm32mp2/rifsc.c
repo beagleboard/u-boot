@@ -141,6 +141,12 @@ static int rifsc_check_access(void *base, u32 id)
 	cid_reg_value = readl(base + RIFSC_RISC_PER0_CIDCFGR(id));
 	sem_reg_value = readl(base + RIFSC_RISC_PER0_SEMCR(id));
 
+	/* Check security configuration */
+	if (sec_reg_value & BIT(reg_offset)) {
+		log_debug("Invalid security configuration for peripheral %d\n", id);
+		return -EACCES;
+	}
+
 	/* Skip cid check if CID filtering isn't enabled */
 	if (!(cid_reg_value & CIDCFGR_CFEN))
 		goto skip_cid_check;
@@ -162,12 +168,6 @@ static int rifsc_check_access(void *base, u32 id)
 	}
 
 skip_cid_check:
-	/* Check security configuration */
-	if (sec_reg_value & BIT(reg_offset)) {
-		log_debug("Invalid security configuration for peripheral %d\n", id);
-		return -EACCES;
-	}
-
 	return 0;
 }
 
