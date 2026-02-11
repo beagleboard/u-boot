@@ -92,6 +92,11 @@ static int do_stboard(struct cmd_tbl *cmdtp, int flag, int argc,
 					  DM_DRIVER_GET(stm32mp_bsec),
 					  &dev);
 
+	if (ret) {
+		puts("Can't get BSEC device\n");
+		return CMD_RET_FAILURE;
+	}
+
 	ret = misc_read(dev, STM32_BSEC_OTP(BSEC_OTP_BOARD),
 			&otp, sizeof(otp));
 
