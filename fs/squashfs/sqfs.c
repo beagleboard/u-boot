@@ -178,6 +178,11 @@ static int sqfs_frag_lookup(u32 inode_fragment_index,
 		goto out;
 	}
 
+	if (SQFS_METADATA_SIZE(header) > SQFS_METADATA_BLOCK_SIZE) {
+		ret = -EINVAL;
+		goto out;
+	}
+
 	entries = malloc(SQFS_METADATA_BLOCK_SIZE);
 	if (!entries) {
 		ret = -ENOMEM;
