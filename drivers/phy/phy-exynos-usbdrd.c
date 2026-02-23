@@ -66,6 +66,10 @@
 #define KHZ					1000
 #define MHZ					(KHZ * KHZ)
 
+enum exynos_usbdrd_phy_variant {
+	EXYNOS850_USBDRD_PHY,
+};
+
 /**
  * struct exynos_usbdrd_phy - driver data for Exynos USB PHY
  * @reg_phy: USB PHY controller register memory base
@@ -73,6 +77,7 @@
  * @core_clk: core clock for phy (ref clock)
  * @reg_pmu: regmap for PMU block
  * @extrefclk: frequency select settings when using 'separate reference clocks'
+ * @variant: ID to uniquely distinguish USB PHY variant
  */
 struct exynos_usbdrd_phy {
 	void __iomem *reg_phy;
@@ -80,6 +85,7 @@ struct exynos_usbdrd_phy {
 	struct clk *core_clk;
 	struct regmap *reg_pmu;
 	u32 extrefclk;
+	enum exynos_usbdrd_phy_variant variant;
 };
 
 static void exynos_usbdrd_phy_isol(struct regmap *reg_pmu, bool isolate)
@@ -254,7 +260,13 @@ static int exynos_usbdrd_phy_init(struct phy *phy)
 	if (ret)
 		return ret;
 
-	exynos850_usbdrd_utmi_init(phy);
+	switch (phy_drd->variant) {
+	case EXYNOS850_USBDRD_PHY:
+		exynos850_usbdrd_utmi_init(phy);
+		break;
+	default:
+		dev_err(phy->dev, "Failed to recognize phy variant\n");
+	}
 
 	clk_disable_unprepare(phy_drd->clk);
 
@@ -270,7 +282,13 @@ static int exynos_usbdrd_phy_exit(struct phy *phy)
 	if (ret)
 		return ret;
 
-	exynos850_usbdrd_utmi_exit(phy);
+	switch (phy_drd->variant) {
+	case EXYNOS850_USBDRD_PHY:
+		exynos850_usbdrd_utmi_exit(phy);
+		break;
+	default:
+		dev_err(phy->dev, "Failed to recognize phy variant\n");
+	}
 
 	clk_disable_unprepare(phy_drd->clk);
 
@@ -359,6 +377,8 @@ static int exynos_usbdrd_phy_probe(struct udevice *dev)
 		return err;
 	}
 
+	phy_drd->variant = dev_get_driver_data(dev);
+
 	return 0;
 }
 
@@ -372,6 +392,7 @@ static const struct phy_ops exynos_usbdrd_phy_ops = {
 static const struct udevice_id exynos_usbdrd_phy_of_match[] = {
 	{
 		.compatible = "samsung,exynos850-usbdrd-phy",
+		.data = EXYNOS850_USBDRD_PHY,
 	},
 	{ }
 };
