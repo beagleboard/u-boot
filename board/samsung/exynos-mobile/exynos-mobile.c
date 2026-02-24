@@ -184,6 +184,45 @@ static void exynos_env_setup(void)
 	env_set("fdtfile", buf);
 }
 
+static int exynos_blk_env_setup(void)
+{
+	const char *blk_ifname;
+	int blk_dev = 0;
+	struct blk_desc *blk_desc;
+	struct disk_partition info = {0};
+	unsigned long largest_part_start = 0, largest_part_size = 0;
+	int i;
+
+	blk_ifname = "mmc";
+	blk_desc = blk_get_dev(blk_ifname, blk_dev);
+	if (!blk_desc) {
+		log_err("%s: required mmc device not available\n", __func__);
+		return -ENODEV;
+	}
+
+	for (i = 1; i < CONFIG_EFI_PARTITION_ENTRIES_NUMBERS; i++) {
+		if (part_get_info(blk_desc, i, &info))
+			continue;
+
+		if (info.start > largest_part_size) {
+			largest_part_start = info.start;
+			largest_part_size = info.size;
+		}
+	}
+
+	if (largest_part_size) {
+		env_set("blkmap_blk_ifname", blk_ifname);
+		env_set_ulong("blkmap_blk_dev", blk_dev);
+		env_set_ulong("blkmap_blk_nr", largest_part_start);
+		env_set_hex("blkmap_size_r", largest_part_size);
+	} else {
+		log_warning("%s: no qualified partition for blkmap, skipping\n",
+			    __func__);
+	}
+
+	return 0;
+}
+
 static int exynos_fastboot_setup(void)
 {
 	struct blk_desc *blk_dev;
@@ -297,7 +336,13 @@ int board_init(void)
 
 int misc_init_r(void)
 {
+	int ret;
+
 	exynos_env_setup();
+
+	ret = exynos_blk_env_setup();
+	if (ret)
+		return ret;
 
 	return exynos_fastboot_setup();
 }
