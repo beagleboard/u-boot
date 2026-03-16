@@ -1809,7 +1809,7 @@ config SPL_IMAGE_PRE_LOAD
 config IMAGE_PRE_LOAD_SIG
 	bool "Image pre-load signature support"
 	depends on IMAGE_PRE_LOAD
-	select FIT_SIGNATURE
+	depends on FIT_SIGNATURE
 	select RSA
 	select RSA_VERIFY_WITH_PKEY
 	help
@@ -1826,7 +1826,7 @@ config IMAGE_PRE_LOAD_SIG
 config SPL_IMAGE_PRE_LOAD_SIG
 	bool "Image pre-load signature support within SPL"
 	depends on SPL_IMAGE_PRE_LOAD && IMAGE_PRE_LOAD_SIG
-	select SPL_FIT_SIGNATURE
+	depends on SPL_FIT_SIGNATURE
 	select SPL_RSA
 	select SPL_RSA_VERIFY_WITH_PKEY
 	help
