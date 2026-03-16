@@ -191,6 +191,18 @@
 			status = "disabled";
 		};
 
+		mmc1: mmc@11240000 {
+			compatible = "mediatek,mt8189-mmc";
+			reg = <0 0x11240000 0 0x1000>,
+			      <0 0x11d80000 0 0x1000>;
+			clocks = <&topckgen_clk CLK_TOP_MSDC30_1_SEL>,
+				 <&pericfg_ao_clk CLK_PERAO_MSDC1_H>,
+				 <&pericfg_ao_clk CLK_PERAO_MSDC1>;
+			clock-names = "source", "hclk", "source_cg";
+			interrupts = <GIC_SPI 388 IRQ_TYPE_LEVEL_HIGH 0>;
+			status = "disabled";
+		};
+
 		clock-controller@1000c000 {
 			compatible = "mediatek,mt8189-apmixedsys", "syscon";
 			reg = <0 0x1000c000 0 0x1000>;
