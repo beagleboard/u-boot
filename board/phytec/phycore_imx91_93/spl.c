@@ -19,7 +19,7 @@
 #include <power/pca9450.h>
 #include <spl.h>
 
-#include "../common/imx93_som_detection.h"
+#include "../common/imx91_93_som_detection.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -50,32 +50,38 @@ void spl_board_init(void)
 void spl_dram_init(void)
 {
 	int ret;
-	enum phytec_imx93_ddr_eeprom_code ddr_opt = PHYTEC_IMX93_DDR_INVALID;
+	enum phytec_imx91_93_ddr_eeprom_code ddr_opt = PHYTEC_IMX91_93_DDR_INVALID;
 
 	ret = phytec_eeprom_data_setup(NULL, CONFIG_PHYTEC_EEPROM_BUS, EEPROM_ADDR);
-	if (ret && !IS_ENABLED(CONFIG_PHYCORE_IMX93_RAM_TYPE_FIX))
+	if (ret && !IS_ENABLED(CONFIG_PHYCORE_IMX91_93_RAM_TYPE_FIX))
 		goto out;
 
-	ret = phytec_imx93_detect(NULL);
+	ret = phytec_imx91_93_detect(NULL);
 	if (!ret)
 		phytec_print_som_info(NULL);
 
-	if (IS_ENABLED(CONFIG_PHYCORE_IMX93_RAM_TYPE_FIX)) {
-		if (IS_ENABLED(CONFIG_PHYCORE_IMX93_RAM_TYPE_LPDDR4X_1GB))
-			ddr_opt = PHYTEC_IMX93_LPDDR4X_1GB;
-		else if (IS_ENABLED(CONFIG_PHYCORE_IMX93_RAM_TYPE_LPDDR4X_2GB))
-			ddr_opt = PHYTEC_IMX93_LPDDR4X_2GB;
+	if (IS_ENABLED(CONFIG_PHYCORE_IMX91_93_RAM_TYPE_FIX)) {
+		if (IS_ENABLED(CONFIG_PHYCORE_IMX91_93_RAM_TYPE_LPDDR4_1GB))
+			ddr_opt = PHYTEC_IMX91_93_LPDDR4_1GB;
+		else if (IS_ENABLED(CONFIG_PHYCORE_IMX91_93_RAM_TYPE_LPDDR4X_1GB))
+			ddr_opt = PHYTEC_IMX91_93_LPDDR4X_1GB;
+		else if (IS_ENABLED(CONFIG_PHYCORE_IMX91_93_RAM_TYPE_LPDDR4X_2GB))
+			ddr_opt = PHYTEC_IMX91_93_LPDDR4X_2GB;
 	} else {
-		ddr_opt = phytec_imx93_get_opt(NULL, PHYTEC_IMX93_OPT_DDR);
+		ddr_opt = phytec_imx91_93_get_opt(NULL, PHYTEC_IMX91_93_OPT_DDR);
 	}
 
 	switch (ddr_opt) {
-	case PHYTEC_IMX93_LPDDR4X_1GB:
-		if (is_voltage_mode(VOLT_LOW_DRIVE))
+	case PHYTEC_IMX91_93_LPDDR4_1GB:
+		/* Timings statically set for i.MX91 LPDDR4 1GB. */
+		break;
+	case PHYTEC_IMX91_93_LPDDR4X_1GB:
+		if (IS_ENABLED(CONFIG_IMX93) && is_voltage_mode(VOLT_LOW_DRIVE))
 			set_dram_timings_1gb_lpddr4x_900mhz();
 		break;
-	case PHYTEC_IMX93_LPDDR4X_2GB:
-		set_dram_timings_2gb_lpddr4x();
+	case PHYTEC_IMX91_93_LPDDR4X_2GB:
+		if (IS_ENABLED(CONFIG_IMX93))
+			set_dram_timings_2gb_lpddr4x();
 		break;
 	default:
 		goto out;
@@ -84,7 +90,7 @@ void spl_dram_init(void)
 	return;
 out:
 	puts("Could not detect correct RAM type and size. Fall back to default.\n");
-	if (is_voltage_mode(VOLT_LOW_DRIVE))
+	if (IS_ENABLED(CONFIG_IMX93) && is_voltage_mode(VOLT_LOW_DRIVE))
 		set_dram_timings_1gb_lpddr4x_900mhz();
 	ddr_init(&dram_timing);
 }
@@ -185,10 +191,12 @@ void board_init_f(ulong dummy)
 	/* DDR initialization */
 	spl_dram_init();
 
-	/* Put M33 into CPUWAIT for following kick */
-	ret = m33_prepare();
-	if (!ret)
-		printf("M33 prepare ok\n");
+	if (IS_ENABLED(CONFIG_IMX93)) {
+		/* Put M33 into CPUWAIT for following kick */
+		ret = m33_prepare();
+		if (!ret)
+			printf("M33 prepare ok\n");
+	}
 
 	board_init_r(NULL, 0);
 }

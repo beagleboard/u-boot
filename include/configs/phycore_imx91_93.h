@@ -6,8 +6,8 @@
  * Copyright (C) 2024 Mathieu Othacehe <m.othacehe@gmail.com>
  */
 
-#ifndef __PHYCORE_IMX93_H
-#define __PHYCORE_IMX93_H
+#ifndef __PHYCORE_IMX91_93_H
+#define __PHYCORE_IMX91_93_H
 
 #include <linux/sizes.h>
 #include <asm/arch/imx-regs.h>
@@ -25,4 +25,4 @@
 /* Using ULP WDOG for reset */
 #define WDOG_BASE_ADDR          WDG3_BASE_ADDR
 
-#endif /* __PHYCORE_IMX93_H */
+#endif /* __PHYCORE_IMX91_93_H */
