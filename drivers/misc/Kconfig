@@ -86,6 +86,7 @@ config GATEWORKS_SC
 config QCOM_GENI
 	bool "Qualcomm Generic Interface (GENI) driver"
 	depends on MISC
+	select EFI_PARTITION
 	select PARTITION_TYPE_GUID
 	help
 	  Enable support for Qualcomm GENI and it's peripherals. GENI is responseible
