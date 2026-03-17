@@ -354,7 +354,7 @@ config SPL_PINCTRL_STMFX
 
 config PINCTRL_TH1520
 	bool "T-Head TH1520 pinctrl driver"
-	depends on DM && PINCTRL_FULL
+	depends on DM && PINCTRL_GENERIC
 	select PINCONF
 	help
 	  Support pin multiplexing and configuration control blocks on the
