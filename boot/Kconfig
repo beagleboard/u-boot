@@ -991,6 +991,7 @@ if SPL
 
 config SPL_UPL
 	bool "Write a UPL handoff in SPL"
+	depends on SPL_LIBGENERIC_SUPPORT
 	imply SPL_UPL_OUT
 	help
 	  This tells SPL to write a UPL handoff and pass it to the next phase
@@ -1008,6 +1009,7 @@ config SPL_UPL_WRITE
 
 config SPL_UPL_OUT
 	bool "upl - Support writing a Universal Payload handoff in SPL"
+	depends on SPL_UPL
 	select SPL_UPL_WRITE
 	help
 	  Provides support for encoding a UPL-format payload and passing it to
