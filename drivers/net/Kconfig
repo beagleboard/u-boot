@@ -979,7 +979,9 @@ source "drivers/net/mtk_eth/Kconfig"
 
 config HIFEMAC_ETH
 	bool "HiSilicon Fast Ethernet Controller"
+	depends on DM && OF_CONTROL
 	select CLK
+	select DM_CLK
 	select DM_RESET
 	select PHYLIB
 	help
@@ -996,6 +998,7 @@ config HIFEMAC_MDIO
 
 config HIGMACV300_ETH
 	bool "HiSilicon Gigabit Ethernet Controller"
+	depends on DM && OF_CONTROL
 	select DM_RESET
 	select PHYLIB
 	help
