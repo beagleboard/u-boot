@@ -6,23 +6,15 @@
  * Copyright (c) 2025, Igor Belwon <igor.belwon@mentallysanemainliners.org>
  */
 
-#include "dm/ofnode.h"
-#include "dm/read.h"
-#include <clk.h>
-#include <dm.h>
-#include <generic-phy.h>
-#include <malloc.h>
-#include <mapmem.h>
-#include <regmap.h>
-#include <syscon.h>
 #include <asm/io.h>
+#include <clk.h>
+#include <dm/device.h>
 #include <dm/device_compat.h>
-#include <dm/devres.h>
-#include <linux/bitfield.h>
+#include <dm/read.h>
+#include <generic-phy.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
-
-#include <dt-bindings/phy/phy.h>
+#include <mapmem.h>
 
 /* mphy register and offsets */
 #define MP_GLB_DIG_8C               0x008C
