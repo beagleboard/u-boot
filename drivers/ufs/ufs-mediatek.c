@@ -182,18 +182,14 @@ static int ufs_mtk_bind_mphy(struct ufs_hba *hba)
 	struct ufs_mtk_host *host = dev_get_priv(hba->dev);
 	int err = 0;
 
-	err = generic_phy_get_by_index(hba->dev, 0, host->mphy);
+	err = generic_phy_get_by_index(hba->dev, 0, &host->mphy);
 
-	if (IS_ERR(host->mphy)) {
-		err = PTR_ERR(host->mphy);
-		if (err != -ENODEV) {
-			dev_info(hba->dev, "%s: Could NOT get a valid PHY %d\n", __func__,
-				 err);
-		}
+	if (err) {
+		if (err == -ENOENT)
+			return 0; /* no PHY, nothing to do */
+		dev_err(hba->dev, "Failed to get PHY: %d.\n", err);
+		return err;
 	}
-
-	if (err)
-		host->mphy = NULL;
 
 	return err;
 }
@@ -323,7 +319,7 @@ static int ufs_mtk_init(struct ufs_hba *hba)
 
 	// TODO: Clocking
 
-	err = generic_phy_power_on(priv->mphy);
+	err = generic_phy_power_on(&priv->mphy);
 	if (err) {
 		dev_err(hba->dev, "%s: phy init failed, err = %d\n",
 			__func__, err);
