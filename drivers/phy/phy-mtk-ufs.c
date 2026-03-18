@@ -40,8 +40,7 @@ struct mtk_ufs_phy {
 	struct udevice *dev;
 	void __iomem *mmio;
 
-	struct clk *unipro_clk;
-	struct clk *mp_clk;
+	struct clk_bulk clk_bulk;
 };
 
 static void ufs_mtk_phy_set_active(struct mtk_ufs_phy *phy)
@@ -78,16 +77,9 @@ static int mtk_phy_power_on(struct phy *phy)
 	struct mtk_ufs_phy *ufs_phy = dev_get_priv(phy->dev);
 	int ret;
 
-	ret = clk_enable(ufs_phy->mp_clk);
-	if (ret < 0) {
-		dev_err(phy->dev, "failed to enable mp_clk\n");
-		return ret;
-	}
-
-	ret = clk_enable(ufs_phy->unipro_clk);
-	if (ret < 0) {
-		dev_err(phy->dev, "failed to enable unipro_clk %d\n", ret);
-		clk_disable(ufs_phy->unipro_clk);
+	ret = clk_enable_bulk(&ufs_phy->clk_bulk);
+	if (ret) {
+		dev_err(phy->dev, "failed to enable clocks (ret=%d)\n", ret);
 		return ret;
 	}
 
@@ -148,21 +140,11 @@ static int mtk_ufs_phy_probe(struct udevice *dev)
 	phy->dev = dev;
 	phy->mmio = map_sysmem(addr, 0);
 
-	phy->mp_clk = devm_clk_get(dev, "mp");
-	if (IS_ERR(phy->mp_clk)) {
-		ret = PTR_ERR(phy->mp_clk);
-		dev_err(dev, "Failed to get mp clock (ret=%d)\n", ret);
-		return ret;
-	}
+	ret = clk_get_bulk(dev, &phy->clk_bulk);
+	if (ret)
+		dev_err(dev, "Failed to get clocks (ret=%d)\n", ret);
 
-	phy->unipro_clk = devm_clk_get(dev, "unipro");
-	if (IS_ERR(phy->unipro_clk)) {
-		ret = PTR_ERR(phy->unipro_clk);
-		dev_err(dev, "Failed to get unipro clock (ret=%d)\n", ret);
-		return ret;
-	}
-
-	return 0;
+	return ret;
 }
 
 static const struct udevice_id mtk_ufs_phy_id_table[] = {
