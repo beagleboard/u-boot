@@ -139,10 +139,6 @@ static int mtk_ufs_phy_probe(struct udevice *dev)
 	fdt_addr_t addr;
 	int ret;
 
-	phy = devm_kzalloc(dev, sizeof(*phy), GFP_KERNEL);
-	if (!phy)
-		return -ENOMEM;
-
 	addr = dev_read_addr(dev);
 	if (addr == FDT_ADDR_T_NONE)
 		return -ENOMEM;
