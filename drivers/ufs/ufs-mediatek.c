@@ -395,6 +395,8 @@ static int ufs_mtk_probe(struct udevice *dev)
 
 static const struct udevice_id ufs_mtk_ids[] = {
 	{ .compatible = "mediatek,mt6878-ufshci" },
+	{ .compatible = "mediatek,mt8195-ufshci" },
+
 	{},
 };
 
