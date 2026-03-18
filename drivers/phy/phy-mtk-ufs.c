@@ -17,26 +17,24 @@
 #include <mapmem.h>
 
 /* mphy register and offsets */
-#define MP_GLB_DIG_8C               0x008C
-#define FRC_PLL_ISO_EN              BIT(8)
-#define PLL_ISO_EN                  BIT(9)
-#define FRC_FRC_PWR_ON              BIT(10)
-#define PLL_PWR_ON                  BIT(11)
+#define MP_GLB_DIG_8C		0x008C
+#define FRC_PLL_ISO_EN		BIT(8)
+#define PLL_ISO_EN		BIT(9)
+#define FRC_FRC_PWR_ON		BIT(10)
+#define PLL_PWR_ON		BIT(11)
 
-#define MP_LN_DIG_RX_9C             0xA09C
-#define FSM_DIFZ_FRC                BIT(18)
+#define MP_LN_DIG_RX_9C		0xA09C
+#define FSM_DIFZ_FRC		BIT(18)
 
-#define MP_LN_DIG_RX_AC             0xA0AC
-#define FRC_RX_SQ_EN                BIT(0)
-#define RX_SQ_EN                    BIT(1)
+#define MP_LN_DIG_RX_AC		0xA0AC
+#define FRC_RX_SQ_EN		BIT(0)
+#define RX_SQ_EN		BIT(1)
 
-#define MP_LN_RX_44                 0xB044
-#define FRC_CDR_PWR_ON              BIT(17)
-#define CDR_PWR_ON                  BIT(18)
-#define FRC_CDR_ISO_EN              BIT(19)
-#define CDR_ISO_EN                  BIT(20)
-
-#define UFSPHY_CLKS_CNT    2
+#define MP_LN_RX_44		0xB044
+#define FRC_CDR_PWR_ON		BIT(17)
+#define CDR_PWR_ON		BIT(18)
+#define FRC_CDR_ISO_EN		BIT(19)
+#define CDR_ISO_EN		BIT(20)
 
 struct mtk_ufs_phy {
 	struct udevice *dev;
