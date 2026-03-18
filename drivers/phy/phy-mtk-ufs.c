@@ -88,34 +88,44 @@ static int mtk_phy_power_on(struct phy *phy)
 	return 0;
 }
 
+static void ufs_mtk_phy_set_inactive(struct mtk_ufs_phy *phy)
+{
+	/* Set PHY to Deep Hibernate mode */
+	setbits_le32(phy->mmio + MP_LN_DIG_RX_9C, FSM_DIFZ_FRC);
+
+	/* force DA_MP_RX0_SQ_EN */
+	setbits_le32(phy->mmio + MP_LN_DIG_RX_AC, FRC_RX_SQ_EN);
+	clrbits_le32(phy->mmio + MP_LN_DIG_RX_AC, RX_SQ_EN);
+
+	/* force DA_MP_CDR_ISO_EN */
+	setbits_le32(phy->mmio + MP_LN_RX_44, FRC_CDR_ISO_EN);
+	setbits_le32(phy->mmio + MP_LN_RX_44, CDR_ISO_EN);
+
+	/* force DA_MP_CDR_PWR_ON */
+	setbits_le32(phy->mmio + MP_LN_RX_44, FRC_CDR_PWR_ON);
+	clrbits_le32(phy->mmio + MP_LN_RX_44, CDR_PWR_ON);
+
+	/* force DA_MP_PLL_ISO_EN */
+	setbits_le32(phy->mmio + MP_GLB_DIG_8C, FRC_PLL_ISO_EN);
+	setbits_le32(phy->mmio + MP_GLB_DIG_8C, PLL_ISO_EN);
+
+	/* force DA_MP_PLL_PWR_ON */
+	setbits_le32(phy->mmio + MP_GLB_DIG_8C, FRC_FRC_PWR_ON);
+	clrbits_le32(phy->mmio + MP_GLB_DIG_8C, PLL_PWR_ON);
+}
+
 static int mtk_phy_power_off(struct phy *phy)
 {
 	struct mtk_ufs_phy *ufs_phy = dev_get_priv(phy->dev);
+	int ret;
 
-	/* Set PHY to Deep Hibernate mode */
-	setbits_le32(ufs_phy->mmio + MP_LN_DIG_RX_9C, FSM_DIFZ_FRC);
+	ufs_mtk_phy_set_inactive(ufs_phy);
 
-	/* force DA_MP_RX0_SQ_EN */
-	setbits_le32(ufs_phy->mmio + MP_LN_DIG_RX_AC, FRC_RX_SQ_EN);
-	clrbits_le32(ufs_phy->mmio + MP_LN_DIG_RX_AC, RX_SQ_EN);
+	ret = clk_disable_bulk(&ufs_phy->clk_bulk);
+	if (ret)
+		dev_err(phy->dev, "failed to disable clocks (ret=%d)\n", ret);
 
-	/* force DA_MP_CDR_ISO_EN */
-	setbits_le32(ufs_phy->mmio + MP_LN_RX_44, FRC_CDR_ISO_EN);
-	setbits_le32(ufs_phy->mmio + MP_LN_RX_44, CDR_ISO_EN);
-
-	/* force DA_MP_CDR_PWR_ON */
-	setbits_le32(ufs_phy->mmio + MP_LN_RX_44, FRC_CDR_PWR_ON);
-	clrbits_le32(ufs_phy->mmio + MP_LN_RX_44, CDR_PWR_ON);
-
-	/* force DA_MP_PLL_ISO_EN */
-	setbits_le32(ufs_phy->mmio + MP_GLB_DIG_8C, FRC_PLL_ISO_EN);
-	setbits_le32(ufs_phy->mmio + MP_GLB_DIG_8C, PLL_ISO_EN);
-
-	/* force DA_MP_PLL_PWR_ON */
-	setbits_le32(ufs_phy->mmio + MP_GLB_DIG_8C, FRC_FRC_PWR_ON);
-	clrbits_le32(ufs_phy->mmio + MP_GLB_DIG_8C, PLL_PWR_ON);
-
-	return 0;
+	return ret;
 }
 
 static const struct phy_ops mtk_ufs_phy_ops = {
