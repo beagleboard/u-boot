@@ -317,19 +317,35 @@ static int ufs_mtk_init(struct ufs_hba *hba)
 
 	ufs_mtk_init_reset(hba);
 
-	// TODO: Clocking
+	err = clk_get_bulk(hba->dev, &priv->clks);
+	if (err) {
+		dev_err(hba->dev, "failed to initialize clocks, err:%d\n", err);
+		return err;
+	}
+
+	err = clk_enable_bulk(&priv->clks);
+	if (err) {
+		dev_err(hba->dev, "failed to enable clocks, err:%d\n", err);
+		goto err_clk_enable;
+	}
 
 	err = generic_phy_power_on(&priv->mphy);
 	if (err) {
 		dev_err(hba->dev, "%s: phy init failed, err = %d\n",
 			__func__, err);
-		return err;
+		goto err_phy_power_on;
 	}
 
 	ufs_mtk_setup_ref_clk(hba, true);
 	ufs_mtk_get_hw_ip_version(hba);
 
 	return 0;
+
+err_phy_power_on:
+	clk_disable_bulk(&priv->clks);
+err_clk_enable:
+	clk_release_bulk(&priv->clks);
+	return err;
 }
 
 static int ufs_mtk_device_reset(struct ufs_hba *hba)
