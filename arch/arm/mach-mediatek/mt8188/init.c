@@ -18,10 +18,6 @@ int dram_init(void)
 {
 	int ret;
 
-	ret = fdtdec_setup_memory_banksize();
-	if (ret)
-		return ret;
-
 	ret = fdtdec_setup_mem_size_base();
 	if (ret)
 		return ret;
