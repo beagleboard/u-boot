@@ -9,6 +9,7 @@
 #include <asm/global_data.h>
 #include <asm/system.h>
 #include <dm/uclass.h>
+#include <linux/kernel.h>
 #include <linux/sizes.h>
 #include <wdt.h>
 
@@ -16,23 +17,16 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int dram_init(void)
 {
-	int ret;
+	return fdtdec_setup_mem_size_base();
+}
 
-	ret = fdtdec_setup_mem_size_base();
-	if (ret)
-		return ret;
-
+phys_size_t get_effective_memsize(void)
+{
 	/*
-	 * Limit gd->ram_top not exceeding SZ_4G.  Some periphals like mmc
-	 * requires DMA buffer allocated below SZ_4G.
-	 *
-	 * Note: SZ_1M is for adjusting gd->relocaddr, the reserved memory for
-	 * u-boot itself.
+	 * Limit gd->ram_top not exceeding SZ_4G. Because some peripherals like
+	 * MMC requires DMA buffer allocated below SZ_4G.
 	 */
-	if (gd->ram_base + gd->ram_size >= SZ_4G)
-		gd->mon_len = (gd->ram_base + gd->ram_size + SZ_1M) - SZ_4G;
-
-	return 0;
+	return min(SZ_4G - gd->ram_base, gd->ram_size);
 }
 
 void reset_cpu(void)
