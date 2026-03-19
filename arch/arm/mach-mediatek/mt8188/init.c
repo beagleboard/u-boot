@@ -22,7 +22,9 @@ int dram_init(void)
 	if (ret)
 		return ret;
 
-	fdtdec_setup_mem_size_base();
+	ret = fdtdec_setup_mem_size_base();
+	if (ret)
+		return ret;
 
 	/*
 	 * Limit gd->ram_top not exceeding SZ_4G.  Some periphals like mmc
