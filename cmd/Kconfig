@@ -2229,6 +2229,7 @@ config CMD_MDIO
 
 config CMD_NFS
 	bool "nfs"
+	select PROT_UDP_LWIP if NET_LWIP
 	help
 	  Boot image via network using NFS protocol.
 
