@@ -2040,7 +2040,7 @@ menu "Configuration editor"
 
 config CEDIT
 	bool "Configuration editor"
-	depends on EXPO
+	depends on EXPO && DM_RTC
 	help
 	  Provides a way to deal with board configuration and present it to
 	  the user for adjustment.
