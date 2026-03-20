@@ -90,9 +90,10 @@ config DSA_SANDBOX
 	  Ethernet device used as DSA master, to test DSA class code, including
 	  exported DSA API and datapath processing of Ethernet traffic.
 
-menuconfig NETDEVICES
-	bool "Network device support"
-	depends on NET || NET_LWIP
+menu "Network device support"
+
+config NETDEVICES
+	bool
 	select DM_ETH
 	help
 	  You must select Y to enable any network device support
@@ -1106,3 +1107,5 @@ source "drivers/net/pfe_eth/Kconfig"
 source "drivers/net/fsl-mc/Kconfig"
 
 endif # NETDEVICES
+
+endmenu
