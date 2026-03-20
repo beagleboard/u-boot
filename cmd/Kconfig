@@ -223,6 +223,7 @@ config CMD_LICENSE
 
 config CMD_PMC
 	bool "pmc"
+	depends on ACPI_PMC
 	help
 	  Provides access to the Intel Power-Management Controller (PMC) so
 	  that its state can be examined. This does not currently support
