@@ -563,6 +563,7 @@ config BOOTMETH_ANDROID
 	select CMD_BCB
 	imply CMD_FASTBOOT
 	imply FASTBOOT if !NET_LWIP
+	select EFI_PARTITION
 	select PARTITION_TYPE_GUID
 	select PARTITION_UUIDS
 	help
