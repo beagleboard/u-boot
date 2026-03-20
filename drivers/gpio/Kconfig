@@ -383,6 +383,7 @@ config OMAP_GPIO
 
 config CMD_PCA953X
 	bool "Enable the pca953x command"
+	depends on PCA953X
 	help
 	  Deprecated: This should be converted to driver model.
 
