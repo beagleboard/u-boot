@@ -73,6 +73,7 @@ config RTC_DS1307
 
 config RTC_DS1337
 	bool "Enable DS1337 driver"
+	depends on DM_RTC
 	help
 	  Support for Dallas Semiconductor (now Maxim) DS1337/8/9 compatible
 	  Real Time Clock devices.
