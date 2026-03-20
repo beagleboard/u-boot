@@ -298,6 +298,7 @@ config CMD_BOOTD
 
 config CMD_BOOTM
 	bool "bootm"
+	depends on LMB
 	default y
 	select LIB_BOOTM
 	help
@@ -376,6 +377,7 @@ config BOOTM_ELF
 
 config CMD_BOOTZ
 	bool "bootz"
+	depends on LMB
 	select LIB_BOOTZ
 	select LIB_BOOTM
 	help
@@ -384,6 +386,7 @@ config CMD_BOOTZ
 config CMD_BOOTI
 	bool "booti"
 	depends on ARM64 || RISCV || SANDBOX
+	depends on LMB
 	default y
 	select LIB_BOOTI
 	select LIB_BOOTM
