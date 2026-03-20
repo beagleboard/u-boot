@@ -257,7 +257,7 @@ config VPL_CROS_EC_LPC
 
 config CROS_EC_SANDBOX
 	bool "Enable Chrome OS EC sandbox driver"
-	depends on CROS_EC && SANDBOX
+	depends on CROS_EC && SANDBOX && HASH
 	help
 	  Enable a sandbox emulation of the Chrome OS EC. This supports
 	  keyboard (use the -l flag to enable the LCD), verified boot context,
