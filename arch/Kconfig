@@ -297,6 +297,7 @@ config SH
 
 config X86
 	bool "x86 architecture"
+	select AHCI
 	select HAVE_SETJMP
 	select SUPPORT_SPL
 	select SUPPORT_TPL

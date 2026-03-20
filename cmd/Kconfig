@@ -1724,7 +1724,8 @@ config CMD_REMOTEPROC
 
 config CMD_SATA
 	bool "sata - Access SATA subsystem"
-	select SATA
+	depends on SATA && AHCI
+	default y
 	help
 	  SATA (Serial Advanced Technology Attachment) is a serial bus
 	  standard for connecting to hard drives and other storage devices.
