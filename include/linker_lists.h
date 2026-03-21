@@ -284,7 +284,8 @@
  */
 #define ll_entry_get(_type, _name, _list)				\
 	({								\
-		extern _type _u_boot_list_2_##_list##_2_##_name;	\
+		extern _type _u_boot_list_2_##_list##_2_##_name		\
+			__aligned(4);					\
 		_type *_ll_result =					\
 			&_u_boot_list_2_##_list##_2_##_name;		\
 		_ll_result;						\
