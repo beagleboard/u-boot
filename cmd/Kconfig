@@ -2314,7 +2314,7 @@ config WGET_BUILTIN_CACERT_PATH
 config CMD_PXE
 	bool "pxe"
 	select PXE_UTILS
-	imply CMD_TFTPBOOT
+	select CMD_TFTPBOOT
 	help
 	  Boot image via network using PXE protocol
 
