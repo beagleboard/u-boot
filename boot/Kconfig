@@ -434,8 +434,8 @@ config BOOT_DEFAULTS_CMDS
 	select CMD_DHCP if CMD_NET && !NO_NET
 	select CMD_PING if CMD_NET && !NO_NET
 	select CMD_PXE if CMD_NET && !NO_NET
-	select CMD_BOOTI if ARM64
-	select CMD_BOOTZ if ARM && !ARM64
+	select CMD_BOOTI if ARM64 && LMB
+	select CMD_BOOTZ if ARM && !ARM64 && LMB
 	imply CMD_MII if CMD_NET && !NO_NET
 
 config BOOT_DEFAULTS
