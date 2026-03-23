@@ -983,6 +983,8 @@ config HIFEMAC_ETH
 	depends on DM && OF_CONTROL
 	select CLK
 	select DM_CLK
+	select DM_ETH_PHY
+	select DM_MDIO
 	select DM_RESET
 	select PHYLIB
 	help
