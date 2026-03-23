@@ -38,17 +38,4 @@
 #define TQMA6_SPI_UBOOT_START		0x400
 #define TQMA6_SPI_UBOOT_SIZE		0xc0000
 
-/*
- * All the defines above are for the TQMa6 SoM
- *
- * Now include the baseboard specific configuration
- */
-#ifdef CONFIG_MBA6
-#include "tqma6_mba6.h"
-#elif CONFIG_WRU4
-#include "tqma6_wru4.h"
-#else
-#error "No baseboard for the TQMa6 defined!"
-#endif
-
 #endif /* __TQMA6_CONFIG_H */

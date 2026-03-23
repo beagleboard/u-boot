@@ -7,7 +7,8 @@ config SYS_VENDOR
 	default "tq"
 
 config SYS_CONFIG_NAME
-	default "tqma6"
+	default "tqma6_mba6" if MBA6
+	default "tqma6_wru4" if WRU4
 
 choice
 	prompt "TQMa6 SoC variant"

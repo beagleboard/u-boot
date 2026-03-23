@@ -11,6 +11,8 @@
 #ifndef __CONFIG_TQMA6_MBA6_H
 #define __CONFIG_TQMA6_MBA6_H
 
+#include "tqma6.h"
+
 #define CFG_MXC_UART_BASE		UART2_BASE
 
 #endif /* __CONFIG_TQMA6_MBA6_H */
