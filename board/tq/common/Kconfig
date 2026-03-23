@@ -8,3 +8,6 @@
 config TQ_COMMON_BB
 	bool
 	default y
+
+config TQ_COMMON_SDMMC
+	bool
