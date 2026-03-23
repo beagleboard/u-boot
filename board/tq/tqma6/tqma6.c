@@ -26,7 +26,7 @@
 #include <power/pfuze100_pmic.h>
 #include <power/pmic.h>
 
-#include "tqma6_bb.h"
+#include "../common/tq_bb.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -41,7 +41,7 @@ static const uint16_t tqma6_emmc_dsr = 0x0100;
 
 int board_early_init_f(void)
 {
-	return tqma6_bb_board_early_init_f();
+	return tq_bb_board_early_init_f();
 }
 
 int board_init(void)
@@ -49,7 +49,7 @@ int board_init(void)
 	/* address of boot parameters */
 	gd->bd->bi_boot_params = PHYS_SDRAM + 0x100;
 
-	tqma6_bb_board_init();
+	tq_bb_board_init();
 
 	return 0;
 }
@@ -96,11 +96,12 @@ int board_late_init(void)
 {
 	env_set("board_name", tqma6_get_boardname());
 
-	tqma6_bb_board_late_init();
+	tq_bb_board_late_init();
 
 	printf("Board: %s on a %s\n", tqma6_get_boardname(),
-	       tqma6_bb_get_boardname());
-	return 0;
+	       tq_bb_get_boardname());
+
+	return tq_bb_checkboard();
 }
 
 /*
@@ -113,14 +114,14 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 	char modelstr[MODELSTRLEN];
 
 	snprintf(modelstr, MODELSTRLEN, "TQ %s on %s", tqma6_get_boardname(),
-		 tqma6_bb_get_boardname());
+		 tq_bb_get_boardname());
 	do_fixup_by_path_string(blob, "/", "model", modelstr);
 	fdt_fixup_memory(blob, (u64)PHYS_SDRAM, (u64)gd->ram_size);
 	/* bring in eMMC dsr settings */
 	do_fixup_by_path_u32(blob,
 			     "/soc/aips-bus@02100000/usdhc@02198000",
 			     "dsr", tqma6_emmc_dsr, 2);
-	tqma6_bb_ft_board_setup(blob, bd);
+	tq_bb_ft_board_setup(blob, bd);
 
 	return 0;
 }
