@@ -137,3 +137,9 @@ const char *tq_bb_get_boardname(void)
 {
 	return "MBa6x";
 }
+
+int tq_bb_board_late_init(void)
+{
+	board_late_mmc_env_init();
+	return 0;
+}
