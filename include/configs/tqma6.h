@@ -20,11 +20,6 @@
 
 #define TQMA6_SPI_FLASH_SECTOR_SIZE	SZ_64K
 
-#if !defined(CONFIG_DM_PMIC)
-#define CFG_POWER_PFUZE100_I2C_ADDR	0x08
-#define TQMA6_PFUZE100_I2C_BUS		2
-#endif
-
 /* MMC Configs */
 #define CFG_SYS_FSL_ESDHC_ADDR	0
 
