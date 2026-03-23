@@ -108,8 +108,6 @@ U_BOOT_ENV_LOCATION(scsi) = {
 	.location	= ENVL_SCSI,
 	ENV_NAME("SCSI")
 	.load		= env_scsi_load,
-#if defined(CONFIG_CMD_SAVEENV) && !defined(CONFIG_XPL_BUILD)
-	.save		= env_save_ptr(env_scsi_save),
+	.save		= ENV_SAVE_PTR(env_scsi_save),
 	.erase		= ENV_ERASE_PTR(env_scsi_erase),
-#endif
 };
