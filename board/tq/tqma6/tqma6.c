@@ -26,6 +26,7 @@
 #include <power/pfuze100_pmic.h>
 #include <power/pmic.h>
 
+#include "tqma6_emmc.h"
 #include "../common/tq_bb.h"
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -37,8 +38,6 @@ int dram_init(void)
 	return 0;
 }
 
-static const uint16_t tqma6_emmc_dsr = 0x0100;
-
 int board_early_init_f(void)
 {
 	return tq_bb_board_early_init_f();
@@ -46,8 +45,12 @@ int board_early_init_f(void)
 
 int board_init(void)
 {
+	struct mmc *mmc = find_mmc_device(0);
+
 	/* address of boot parameters */
 	gd->bd->bi_boot_params = PHYS_SDRAM + 0x100;
+
+	tqma6_mmc_detect_card_type(mmc);
 
 	tq_bb_board_init();
 
@@ -111,17 +114,24 @@ int board_late_init(void)
 #define MODELSTRLEN 32u
 int ft_board_setup(void *blob, struct bd_info *bd)
 {
+	struct mmc *mmc = find_mmc_device(0);
 	char modelstr[MODELSTRLEN];
 
 	snprintf(modelstr, MODELSTRLEN, "TQ %s on %s", tqma6_get_boardname(),
 		 tq_bb_get_boardname());
 	do_fixup_by_path_string(blob, "/", "model", modelstr);
 	fdt_fixup_memory(blob, (u64)PHYS_SDRAM, (u64)gd->ram_size);
-	/* bring in eMMC dsr settings */
-	do_fixup_by_path_u32(blob,
-			     "/soc/aips-bus@02100000/usdhc@02198000",
-			     "dsr", tqma6_emmc_dsr, 2);
-	tq_bb_ft_board_setup(blob, bd);
+
+	/* bring in eMMC dsr settings if needed */
+	if (mmc && (!mmc_init(mmc))) {
+		if (tqma6_emmc_need_dsr(mmc) > 0) {
+			tqma6_ft_fixup_emmc_dsr(blob,
+						"/soc/bus@2100000/mmc@2198000",
+						TQMA6_EMMC_DSR);
+		}
+	} else {
+		puts("eMMC: not present?\n");
+	}
 
 	return 0;
 }
