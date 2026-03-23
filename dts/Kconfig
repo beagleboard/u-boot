@@ -88,7 +88,7 @@ config OF_LIVE
 
 config OF_UPSTREAM
 	bool "Enable use of devicetree imported from Linux kernel release"
-	depends on !COMPILE_TEST
+	depends on !COMPILE_TEST && !SANDBOX
 	help
 	  Traditionally, U-Boot platforms used to have their custom devicetree
 	  files or copy devicetree files from Linux kernel which are hard to
