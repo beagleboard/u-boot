@@ -847,6 +847,7 @@ config SPL_ENV_IS_IN_MMC
 	bool "SPL Environment in an MMC device"
 	depends on !SPL_ENV_IS_NOWHERE
 	depends on !SPL_OS_BOOT_SECURE
+	depends on SPL_MMC
 	depends on ENV_IS_IN_MMC
 	default y
 	help

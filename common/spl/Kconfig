@@ -729,7 +729,7 @@ config SPL_ENV_SUPPORT
 config SPL_SAVEENV
 	bool "Support save environment"
 	depends on SPL_ENV_SUPPORT
-	select SPL_MMC_WRITE if ENV_IS_IN_MMC
+	select SPL_MMC_WRITE if SPL_ENV_IS_IN_MMC
 	help
 	  Enable save environment support in SPL after setenv. By default
 	  the saveenv option is not provided in SPL, but some boards need
