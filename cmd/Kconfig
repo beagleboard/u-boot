@@ -1395,7 +1395,7 @@ config CMD_I3C
 	  and perform read and write on the connected i3c devices.
 
 config CMD_W1
-	depends on W1
+	depends on W1 && W1_EEPROM
 	default y if W1
 	bool "w1 - Support for Dallas 1-Wire protocol"
 	help
