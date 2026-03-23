@@ -59,7 +59,7 @@ config SPL_OF_CONTROL
 config TPL_OF_CONTROL
 	bool "Enable run-time configuration via Device Tree in TPL"
 	depends on TPL && OF_CONTROL
-	select TPL_OF_LIBFDT if !TPL_OF_PLATDATA
+	select TPL_OF_LIBFDT if !TPL_OF_PLATDATA && TPL_LIBGENERIC_SUPPORT
 	select TPL_OF_REAL if !TPL_OF_PLATDATA
 	help
 	  Some boards use device tree in U-Boot but only have 4KB of SRAM
