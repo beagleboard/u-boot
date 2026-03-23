@@ -1206,7 +1206,7 @@ static const struct udevice_id xgmac_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(eth_xgmac) = {
+U_BOOT_DRIVER(dwc_eth_xgmac) = {
 	.name = "eth_xgmac",
 	.id = UCLASS_ETH,
 	.of_match = of_match_ptr(xgmac_ids),
