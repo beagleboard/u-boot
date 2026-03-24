@@ -640,7 +640,7 @@ L:	linux@analog.com
 S:	Supported
 T:	git https://github.com/analogdevicesinc/u-boot
 F:	arch/arm/dts/sc5*
-F:	arch/arm/include/asm/arch-adi/
+F:	arch/arm/include/asm/arch-sc5xx/
 F:	arch/arm/mach-sc5xx/
 F:	board/adi/
 F:	configs/sc5*
