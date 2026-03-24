@@ -275,7 +275,7 @@ int espi_xfer(struct fsl_spi_slave *fsl,  uint cs, unsigned int bitlen,
 			}
 		}
 		if (data_in) {
-			memcpy(data_in, buffer + 2 * cmd_len, tran_len);
+			memcpy(data_in, buffer + rx_offset, tran_len);
 			if (*buffer == 0x0b) {
 				data_in += tran_len;
 				data_len -= tran_len;
