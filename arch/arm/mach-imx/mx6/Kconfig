@@ -419,7 +419,6 @@ config TARGET_MX6SXSABRESD
 config TARGET_MX6SXSABREAUTO
 	bool "mx6sxsabreauto"
 	depends on MX6SX
-	select BOARD_EARLY_INIT_F
 	select BOARD_LATE_INIT
 	select DM
 	select DM_THERMAL
