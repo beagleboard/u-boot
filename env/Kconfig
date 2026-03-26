@@ -293,6 +293,23 @@ config ENV_IS_IN_SCSI
 	  Define this if you have an SCSI device which you want to use for the
 	  environment.
 
+	  - CONFIG_ENV_SIZE:
+
+	  The size of the partition where the environment is stored in bytes. Must
+	  be a multiple of the partition block size.
+
+	  - CONFIG_ENV_SCSI_HW_PARTITION:
+
+	  Specifies which SCSI partition the environment is stored in. If not
+	  set, defaults to partition 0, the user area. Common values might be
+	  1 (first SCSI boot partition), 2 (second SCSI boot partition). Ignored
+	  if CONFIG_ENV_SCSI_PART_UUID is set to non-empty string.
+
+	  - CONFIG_ENV_SCSI_PART_UUID:
+
+	  UUID of the SCSI partition where the environment is stored.
+
+
 config ENV_RANGE
 	hex "Length of the region in which the environment can be written"
 	depends on ENV_IS_IN_NAND
