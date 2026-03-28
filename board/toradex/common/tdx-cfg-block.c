@@ -506,7 +506,7 @@ static int get_cfgblock_interactive(void)
 			       toradex_modules[i].name);
 	}
 
-	sprintf(message, "Enter the module ID: ");
+	snprintf(message, sizeof(message), "Enter the module ID: ");
 	len = cli_readline(message);
 
 	prodid = dectoul(console_buffer, NULL);
@@ -519,7 +519,8 @@ static int get_cfgblock_interactive(void)
 
 	len = 0;
 	while (len < 4) {
-		sprintf(message, "Enter the module version (e.g. V1.1B or V1.1#26): V");
+		snprintf(message, sizeof(message),
+			 "Enter the module version (e.g. V1.1B or V1.1#26): V");
 		len = cli_readline(message);
 	}
 
@@ -533,7 +534,7 @@ static int get_cfgblock_interactive(void)
 	}
 
 	while (len < 8) {
-		sprintf(message, "Enter module serial number: ");
+		snprintf(message, sizeof(message), "Enter module serial number: ");
 		len = cli_readline(message);
 	}
 
@@ -742,12 +743,13 @@ static int get_cfgblock_carrier_interactive(void)
 		       toradex_carrier_boards[i].name,
 		       toradex_carrier_boards[i].pid4);
 
-	sprintf(message, "Choose your carrier board (provide ID): ");
+	snprintf(message, sizeof(message), "Choose your carrier board (provide ID): ");
 	len = cli_readline(message);
 	tdx_car_hw_tag.prodid = dectoul(console_buffer, NULL);
 
 	do {
-		sprintf(message, "Enter carrier board version (e.g. V1.1B or V1.1#26): V");
+		snprintf(message, sizeof(message),
+			 "Enter carrier board version (e.g. V1.1B or V1.1#26): V");
 		len = cli_readline(message);
 	} while (len < 4);
 
@@ -761,7 +763,7 @@ static int get_cfgblock_carrier_interactive(void)
 	}
 
 	while (len < 8) {
-		sprintf(message, "Enter carrier board serial number: ");
+		snprintf(message, sizeof(message), "Enter carrier board serial number: ");
 		len = cli_readline(message);
 	}
 
@@ -797,7 +799,8 @@ static int do_cfgblock_carrier_create(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (valid_cfgblock_carrier && !force_overwrite) {
 		char message[CONFIG_SYS_CBSIZE];
 
-		sprintf(message, "A valid Toradex Carrier config block is present, still recreate? [y/N] ");
+		snprintf(message, sizeof(message),
+			 "A valid Toradex Carrier config block is present, still recreate? [y/N] ");
 
 		if (!cli_readline(message))
 			goto out;
@@ -905,8 +908,8 @@ static int do_cfgblock_create(struct cmd_tbl *cmdtp, int flag, int argc,
 		if (!force_overwrite) {
 			char message[CONFIG_SYS_CBSIZE];
 
-			sprintf(message,
-				"A valid Toradex config block is present, still recreate? [y/N] ");
+			snprintf(message, sizeof(message),
+				 "A valid Toradex config block is present, still recreate? [y/N] ");
 
 			if (!cli_readline(message))
 				goto out;
