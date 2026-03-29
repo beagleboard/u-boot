@@ -304,7 +304,7 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 	void (*kernel_entry)(int zero, int arch, uint params);
 	unsigned long r2;
 	kernel_entry = (void (*)(int, int, uint))images->ep;
-#ifdef CONFIG_CPU_V7M
+#ifdef CONFIG_CPU_V7M_V8M
 	ulong addr = (ulong)kernel_entry | 1;
 	kernel_entry = (void *)addr;
 #endif

@@ -10,7 +10,7 @@
 #include <config.h>
 #include <elf.h>
 #include <linux/linkage.h>
-#ifdef CONFIG_CPU_V7M
+#ifdef CONFIG_CPU_V7M_V8M
 #include <asm/armv7m.h>
 #endif
 
@@ -26,7 +26,7 @@
 
 WEAK(relocate_vectors)
 
-#ifdef CONFIG_CPU_V7M
+#ifdef CONFIG_CPU_V7M_V8M
 	/*
 	 * On ARMv7-M we only have to write the new vector address
 	 * to VTOR register.
