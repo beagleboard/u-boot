@@ -41,6 +41,10 @@ static int hush_test_if_base(struct unit_test_state *uts)
 	sprintf(if_formatted, if_format, "test 'abc'");
 	ut_assertok(run_command(if_formatted, 0));
 
+	/* Special case: 'test -n' interpreted as 'test -n ""'. */
+	sprintf(if_formatted, if_format, "test '-n'");
+	ut_asserteq(1, run_command(if_formatted, 0));
+
 	return 0;
 }
 HUSH_TEST(hush_test_if_base, 0);
@@ -384,6 +388,10 @@ static int hush_test_lbracket_alias(struct unit_test_state *uts)
 	sprintf(if_formatted, if_format, "[ 'abc'");
 	ut_asserteq(1, run_command(if_formatted, 0));
 	ut_assert_nextline(missing_rbracket_error);
+
+	/* Special case: '[ -n ]' interpreted as '[ -n "" ]'. */
+	sprintf(if_formatted, if_format, "[ -n ]");
+	ut_asserteq(1, run_command(if_formatted, 0));
 
 	return 0;
 }

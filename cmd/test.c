@@ -75,12 +75,25 @@ static int do_test(struct cmd_tbl *cmdtp, int flag, int argc,
 	 * Per POSIX, 'test' with 0 arguments should return 1, while
 	 * 'test <arg>' should be equivalent to 'test -n <arg>',
 	 * i.e. true if and only if <arg> is not empty.
+	 *
+	 * However, due to previous versions of U-Boot unconditionally
+	 * returning false when 'test' was given less than two
+	 * arguments, there are existing scripts that do
+	 *
+	 *   test -n $somevar
+	 *
+	 * (i.e. without properly quoting $somevar) and expecting that
+	 * to return false when $somevar expands to nothing. It is
+	 * quite unlikely that anyone would use the single-argument
+	 * form to test a string for being empty and a possible
+	 * non-empty value for that string to be exactly "-n". So we
+	 * interpret 'test -n' as if it was 'test -n ""'.
 	 */
 	if (argc < 2)
 		return 1;
 
 	if (argc == 2)
-		return !strcmp(argv[1], "");
+		return !strcmp(argv[1], "") || !strcmp(argv[1], "-n");
 
 #ifdef DEBUG
 	{
