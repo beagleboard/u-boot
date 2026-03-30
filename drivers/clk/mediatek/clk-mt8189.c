@@ -1641,6 +1641,46 @@ static const struct mtk_gate mminfra_config_clks[] = {
 	GATE_MMINFRA_CONFIG1(CLK_MMINFRA_GCE_26M, CLK_TOP_MMINFRA_SEL, 17),
 };
 
+static const struct mtk_gate_regs ufscfg_ao_reg_cg_regs = {
+	.set_ofs = 0x8,
+	.clr_ofs = 0xc,
+	.sta_ofs = 0x4,
+};
+
+#define GATE_UFSCFG_AO_REG_EXT(_id, _parent, _shift) \
+	GATE_FLAGS(_id, _parent, &ufscfg_ao_reg_cg_regs, _shift, \
+		   CLK_GATE_SETCLR | CLK_PARENT_EXT)
+
+#define GATE_UFSCFG_AO_REG_TOP(_id, _parent, _shift) \
+	GATE_FLAGS(_id, _parent, &ufscfg_ao_reg_cg_regs, _shift, \
+		   CLK_GATE_SETCLR | CLK_PARENT_TOPCKGEN)
+
+static const struct mtk_gate ufs_config_ao_clks[] = {
+	GATE_UFSCFG_AO_REG_EXT(CLK_UFSCFG_AO_REG_UNIPRO_TX_SYM, CLK_PAD_CLK26M, 1),
+	GATE_UFSCFG_AO_REG_EXT(CLK_UFSCFG_AO_REG_UNIPRO_RX_SYM0, CLK_PAD_CLK26M, 2),
+	GATE_UFSCFG_AO_REG_EXT(CLK_UFSCFG_AO_REG_UNIPRO_RX_SYM1, CLK_PAD_CLK26M, 3),
+	GATE_UFSCFG_AO_REG_TOP(CLK_UFSCFG_AO_REG_UNIPRO_SYS, CLK_TOP_U_SEL, 4),
+	GATE_UFSCFG_AO_REG_EXT(CLK_UFSCFG_AO_REG_U_SAP_CFG, CLK_PAD_CLK26M, 5),
+	GATE_UFSCFG_AO_REG_TOP(CLK_UFSCFG_AO_REG_U_PHY_TOP_AHB_S_BUS, CLK_TOP_AXI_U_SEL, 6),
+};
+
+static const struct mtk_gate_regs ufscfg_pdn_reg_cg_regs = {
+	.set_ofs = 0x8,
+	.clr_ofs = 0xc,
+	.sta_ofs = 0x4,
+};
+
+#define GATE_UFSCFG_PDN_REG(_id, _parent, _shift) \
+	GATE_FLAGS(_id, _parent, &ufscfg_pdn_reg_cg_regs, _shift, \
+		   CLK_GATE_SETCLR | CLK_PARENT_TOPCKGEN)
+
+static const struct mtk_gate ufs_config_pdn_clks[] = {
+	GATE_UFSCFG_PDN_REG(CLK_UFSCFG_REG_UFSHCI_UFS, CLK_TOP_U_SEL, 0),
+	GATE_UFSCFG_PDN_REG(CLK_UFSCFG_REG_UFSHCI_AES, CLK_TOP_AES_UFSFDE_SEL, 1),
+	GATE_UFSCFG_PDN_REG(CLK_UFSCFG_REG_UFSHCI_U_AHB, CLK_TOP_AXI_U_SEL, 3),
+	GATE_UFSCFG_PDN_REG(CLK_UFSCFG_REG_UFSHCI_U_AXI, CLK_TOP_MEM_SUB_U_SEL, 5),
+};
+
 static const struct mtk_parent vlp_26m_oscd10_parents[] = {
 	EXT_PARENT(CLK_PAD_CLK26M),
 	TOP_PARENT(CLK_TOP_OSC_D10),
@@ -1955,6 +1995,8 @@ GATE_CLK_DATA(perao_clks);
 GATE_CLK_DATA(imp_clks);
 GATE_CLK_DATA(mm_clks);
 GATE_CLK_DATA(mminfra_config_clks);
+GATE_CLK_DATA(ufs_config_ao_clks);
+GATE_CLK_DATA(ufs_config_pdn_clks);
 GATE_CLK_DATA(vlpcfg_ao_clks);
 
 static const struct udevice_id of_match_mt8189_clk_gate[] = {
@@ -1962,6 +2004,8 @@ static const struct udevice_id of_match_mt8189_clk_gate[] = {
 	{ .compatible = "mediatek,mt8189-iic-wrap", .data = (ulong)&imp_clks_data },
 	{ .compatible = "mediatek,mt8189-dispsys", .data = (ulong)&mm_clks_data },
 	{ .compatible = "mediatek,mt8189-mm-infra", .data = (ulong)&mminfra_config_clks_data },
+	{ .compatible = "mediatek,mt8189-ufscfg-ao", .data = (ulong)&ufs_config_ao_clks_data },
+	{ .compatible = "mediatek,mt8189-ufscfg-pdn", .data = (ulong)&ufs_config_pdn_clks_data },
 	{ .compatible = "mediatek,mt8189-vlpcfg-ao", .data = (ulong)&vlpcfg_ao_clks_data },
 	{ }
 };
