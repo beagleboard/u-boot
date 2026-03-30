@@ -204,6 +204,7 @@ struct mtk_io_type_desc {
 			bool pullup, u32 val);
 	int (*drive_set)(struct udevice *dev, u32 pin, u32 arg);
 	int (*input_enable)(struct udevice *dev, u32 pin, u32 arg);
+	int (*get_pinconf)(struct udevice *dev, u32 pin, char *buf, size_t size);
 #endif
 };
 
@@ -263,6 +264,9 @@ int mtk_pinconf_bias_set_v1(struct udevice *dev, u32 pin, bool disable,
 int mtk_pinconf_input_enable_v1(struct udevice *dev, u32 pin, u32 arg);
 int mtk_pinconf_drive_set_v0(struct udevice *dev, u32 pin, u32 arg);
 int mtk_pinconf_drive_set_v1(struct udevice *dev, u32 pin, u32 arg);
+int mtk_pinconf_get_pu_pd(struct udevice *dev, u32 pin, char *buf, size_t size);
+int mtk_pinconf_get_pupd_r1_r0(struct udevice *dev, u32 pin, char *buf, size_t size);
+int mtk_pinconf_get_pu_pd_rsel(struct udevice *dev, u32 pin, char *buf, size_t size);
 
 #endif
 
