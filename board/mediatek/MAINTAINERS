@@ -3,6 +3,7 @@ M:	Macpaul Lin <macpaul.lin@mediatek.com>
 S:	Maintained
 F:	arch/arm/dts/mt8371-genio-520-evk-u-boot.dtsi
 F:	arch/arm/dts/mt8371-genio-common-u-boot.dtsi
+F:	arch/arm/dts/mt8371-genio-common-ufs.dtso
 F:	arch/arm/dts/mt8391-genio-720-evk-u-boot.dtsi
 F:	configs/mt8189.config
 F:	configs/mt8371_genio_520_evk_defconfig
