@@ -11,6 +11,8 @@
 #include <linux/kernel.h>
 #include <linux/sizes.h>
 
+#include "../cpu.h"
+
 DECLARE_GLOBAL_DATA_PTR;
 
 int dram_init(void)
@@ -33,9 +35,37 @@ void reset_cpu(ulong addr)
 		psci_system_reset();
 }
 
+static const char *mediatek_get_segment_name_string(void)
+{
+	u32 seg = mediatek_sip_segment_name();
+
+	switch (seg) {
+	case 0x80:
+		return "MT8391AV/AZA";
+	case 0x81:
+		return "MT8371AV/AZA";
+	case 0x82:
+		return "MT8371LV/AZA";
+	case 0x88:
+		return "MT8391IV/AZA";
+	case 0x89:
+		return "MT8371IV/AZA";
+	default:
+		return NULL;
+	}
+}
+
 int print_cpuinfo(void)
 {
-	printf("CPU:   MediaTek MT8189\n");
+	const char *seg_name = mediatek_get_segment_name_string();
+	u32 part = mediatek_sip_part_name();
+
+	if (seg_name)
+		printf("CPU:   MediaTek %s\n", seg_name);
+	else if (part)
+		printf("CPU:   MediaTek part MT%.4x\n", part);
+	else
+		printf("CPU:   MediaTek MT8189\n");
 
 	return 0;
 }
