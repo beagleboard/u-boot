@@ -5,9 +5,12 @@ F:	arch/arm/dts/mt8371-genio-520-evk-u-boot.dtsi
 F:	arch/arm/dts/mt8371-genio-common-u-boot.dtsi
 F:	arch/arm/dts/mt8371-genio-common-ufs.dtso
 F:	arch/arm/dts/mt8391-genio-720-evk-u-boot.dtsi
+F:	configs/mt8189-ufs.config
 F:	configs/mt8189.config
 F:	configs/mt8371_genio_520_evk_defconfig
+F:	configs/mt8371_genio_520_evk_ufs_defconfig
 F:	configs/mt8391_genio_720_evk_defconfig
+F:	configs/mt8391_genio_720_evk_ufs_defconfig
 
 MT8365 EVK
 M:	Julien Masson <jmasson@baylibre.com>
