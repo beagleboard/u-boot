@@ -1273,18 +1273,21 @@ static const struct mtk_io_type_desc mt8189_io_type_desc[] = {
 		.bias_set = mtk_pinconf_bias_set_pu_pd,
 		.drive_set = mtk_pinconf_drive_set_v1,
 		.input_enable = mtk_pinconf_input_enable_v1,
+		.get_pinconf = mtk_pinconf_get_pu_pd,
 	},
 	[IO_TYPE_GRP1] = {
 		.name = "MSDC",
 		.bias_set = mtk_pinconf_bias_set_pupd_r1_r0,
 		.drive_set = mtk_pinconf_drive_set_v1,
 		.input_enable = mtk_pinconf_input_enable_v1,
+		.get_pinconf = mtk_pinconf_get_pupd_r1_r0,
 	},
 	[IO_TYPE_GRP2] = {
 		.name = "I2C",
 		.bias_set = mtk_pinconf_bias_set_pu_pd_rsel,
 		.drive_set = mtk_pinconf_drive_set_v1,
 		.input_enable = mtk_pinconf_input_enable_v1,
+		.get_pinconf = mtk_pinconf_get_pu_pd_rsel,
 	},
 };
 
