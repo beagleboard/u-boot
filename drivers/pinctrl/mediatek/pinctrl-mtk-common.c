@@ -450,6 +450,20 @@ int mtk_pinconf_bias_set_pupd_r1_r0(struct udevice *dev, u32 pin, bool disable,
 	return 0;
 }
 
+int mtk_pinconf_bias_set_pu_pd_rsel(struct udevice *dev, u32 pin, bool disable,
+				    bool pullup, u32 val)
+{
+	int err;
+
+	/* val is expected to be one of MTK_PULL_SET_RSEL_XXX */
+
+	err = mtk_pinconf_bias_set_pu_pd(dev, pin, disable, pullup, val);
+	if (err)
+		return err;
+
+	return mtk_hw_set_value(dev, pin, PINCTRL_PIN_REG_RSEL, val & 0x7);
+}
+
 int mtk_pinconf_bias_set(struct udevice *dev, u32 pin, u32 arg, u32 val)
 {
 	int err;

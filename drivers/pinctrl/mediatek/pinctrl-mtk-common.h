@@ -67,6 +67,7 @@ enum {
 	PINCTRL_PIN_REG_PUPD,
 	PINCTRL_PIN_REG_R0,
 	PINCTRL_PIN_REG_R1,
+	PINCTRL_PIN_REG_RSEL,
 	PINCTRL_PIN_REG_MAX,
 };
 
@@ -252,6 +253,8 @@ int mtk_pinconf_bias_set_pu_pd(struct udevice *dev, u32 pin, bool disable,
 int mtk_pinconf_bias_set_pullen_pullsel(struct udevice *dev, u32 pin,
 					bool disable, bool pullup, u32 val);
 int mtk_pinconf_bias_set_pupd_r1_r0(struct udevice *dev, u32 pin, bool disable,
+				    bool pullup, u32 val);
+int mtk_pinconf_bias_set_pu_pd_rsel(struct udevice *dev, u32 pin, bool disable,
 				    bool pullup, u32 val);
 int mtk_pinconf_bias_set_v0(struct udevice *dev, u32 pin, bool disable,
 			    bool pullup, u32 val);
