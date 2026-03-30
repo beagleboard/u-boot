@@ -397,8 +397,7 @@ static const struct udevice_id ufs_mtk_ids[] = {
 	{ .compatible = "mediatek,mt6878-ufshci" },
 	{ .compatible = "mediatek,mt8183-ufshci" },
 	{ .compatible = "mediatek,mt8195-ufshci" },
-
-	{},
+	{ }
 };
 
 U_BOOT_DRIVER(mediatek_ufshci) = {
