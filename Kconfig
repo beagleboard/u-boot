@@ -804,14 +804,14 @@ config NO_NET
 
 config NET
 	bool "Legacy U-Boot networking stack"
-	imply NETDEVICES
+	select NETDEVICES
 	help
 	  Include networking support with U-Boot's internal implementation of
 	  the TCP/IP protocol stack.
 
 config NET_LWIP
 	bool "Use lwIP for networking stack"
-	imply NETDEVICES
+	select NETDEVICES
 	help
 	  Include networking support based on the lwIP (lightweight IP)
 	  TCP/IP stack (https://nongnu.org/lwip). This is a replacement for

@@ -2195,6 +2195,7 @@ endif  # if NET
 config CMD_DHCP
 	bool "dhcp"
 	select PROT_DHCP_LWIP if NET_LWIP
+	select CMD_BOOTP if NET
 	help
 	  Boot image via network using DHCP/TFTP protocol
 
@@ -2229,6 +2230,7 @@ config CMD_MDIO
 
 config CMD_NFS
 	bool "nfs"
+	select PROT_UDP_LWIP if NET_LWIP
 	help
 	  Boot image via network using NFS protocol.
 
@@ -2313,7 +2315,7 @@ config WGET_BUILTIN_CACERT_PATH
 config CMD_PXE
 	bool "pxe"
 	select PXE_UTILS
-	imply CMD_TFTPBOOT
+	select CMD_TFTPBOOT
 	help
 	  Boot image via network using PXE protocol
 

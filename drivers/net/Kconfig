@@ -90,9 +90,10 @@ config DSA_SANDBOX
 	  Ethernet device used as DSA master, to test DSA class code, including
 	  exported DSA API and datapath processing of Ethernet traffic.
 
-menuconfig NETDEVICES
-	bool "Network device support"
-	depends on NET || NET_LWIP
+menu "Network device support"
+
+config NETDEVICES
+	bool
 	select DM_ETH
 	help
 	  You must select Y to enable any network device support
@@ -979,7 +980,11 @@ source "drivers/net/mtk_eth/Kconfig"
 
 config HIFEMAC_ETH
 	bool "HiSilicon Fast Ethernet Controller"
+	depends on DM && OF_CONTROL
 	select CLK
+	select DM_CLK
+	select DM_ETH_PHY
+	select DM_MDIO
 	select DM_RESET
 	select PHYLIB
 	help
@@ -996,6 +1001,7 @@ config HIFEMAC_MDIO
 
 config HIGMACV300_ETH
 	bool "HiSilicon Gigabit Ethernet Controller"
+	depends on DM && OF_CONTROL
 	select DM_RESET
 	select PHYLIB
 	help
@@ -1103,3 +1109,5 @@ source "drivers/net/pfe_eth/Kconfig"
 source "drivers/net/fsl-mc/Kconfig"
 
 endif # NETDEVICES
+
+endmenu
