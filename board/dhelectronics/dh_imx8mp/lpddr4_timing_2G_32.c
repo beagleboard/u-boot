@@ -1910,3 +1910,141 @@ void dh_imx8mp_dhcom_dram_patch_16g_x32_to_32g_x32_2r(void)
 			ddr_fsp0_2d_cfg[i].val = 0x3;
 	}
 };
+
+/* Convert 2 GiB DRAM settings to 4 GiB 1-rank DRAM settings. */
+void dh_imx8mp_dhcom_dram_patch_16g_x32_to_32g_x32_1r(void)
+{
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(ddr_ddrc_cfg); i++) {
+		if (ddr_ddrc_cfg[i].reg == 0x3d400064)
+			ddr_ddrc_cfg[i].val = 0x6d0156;
+		if (ddr_ddrc_cfg[i].reg == 0x3d400138)
+			ddr_ddrc_cfg[i].val = 0x15d;
+#if IS_ENABLED(CONFIG_IMX8M_DRAM_INLINE_ECC)
+		if (ddr_ddrc_cfg[i].reg == 0x3d400200)
+			ddr_ddrc_cfg[i].val = 0x1f;
+		if (ddr_ddrc_cfg[i].reg == 0x3d40020c)
+			ddr_ddrc_cfg[i].val = 0x14141400;
+#else
+		if (ddr_ddrc_cfg[i].reg == 0x3d400200)
+			ddr_ddrc_cfg[i].val = 0x17;
+#endif
+		if (ddr_ddrc_cfg[i].reg == 0x3d40021c)
+			ddr_ddrc_cfg[i].val = 0xf04;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402024)
+			ddr_ddrc_cfg[i].val = 0x61a800;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402064)
+			ddr_ddrc_cfg[i].val = 0x18004c;
+		if (ddr_ddrc_cfg[i].reg == 0x3d4020dc)
+			ddr_ddrc_cfg[i].val = 0x940009;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402100)
+			ddr_ddrc_cfg[i].val = 0xc080609;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402104)
+			ddr_ddrc_cfg[i].val = 0x3040d;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402108)
+			ddr_ddrc_cfg[i].val = 0x3060a0c;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402110)
+			ddr_ddrc_cfg[i].val = 0x4040204;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402114)
+			ddr_ddrc_cfg[i].val = 0x2030303;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402138)
+			ddr_ddrc_cfg[i].val = 0x4e;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402144)
+			ddr_ddrc_cfg[i].val = 0x280014;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402180)
+			ddr_ddrc_cfg[i].val = 0xc80006;
+		if (ddr_ddrc_cfg[i].reg == 0x3d402190)
+			ddr_ddrc_cfg[i].val = 0x3878202;
+		if (ddr_ddrc_cfg[i].reg == 0x3d4021b4)
+			ddr_ddrc_cfg[i].val = 0x702;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403024)
+			ddr_ddrc_cfg[i].val = 0x493fe1;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403064)
+			ddr_ddrc_cfg[i].val = 0x12003a;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403100)
+			ddr_ddrc_cfg[i].val = 0xa070507;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403104)
+			ddr_ddrc_cfg[i].val = 0x3040a;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403108)
+			ddr_ddrc_cfg[i].val = 0x203070b;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403110)
+			ddr_ddrc_cfg[i].val = 0x3040203;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403114)
+			ddr_ddrc_cfg[i].val = 0x2030303;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403138)
+			ddr_ddrc_cfg[i].val = 0x3b;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403144)
+			ddr_ddrc_cfg[i].val = 0x1f0010;
+		if (ddr_ddrc_cfg[i].reg == 0x3d403180)
+			ddr_ddrc_cfg[i].val = 0x970005;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(ddr_ddrphy_cfg); i++) {
+		if (ddr_ddrphy_cfg[i].reg == 0x12002e)
+			ddr_ddrphy_cfg[i].val = 0x1;
+		if (ddr_ddrphy_cfg[i].reg == 0x22002e)
+			ddr_ddrphy_cfg[i].val = 0x1;
+		if (ddr_ddrphy_cfg[i].reg == 0x120008)
+			ddr_ddrphy_cfg[i].val = 0xc8;
+		if (ddr_ddrphy_cfg[i].reg == 0x220008)
+			ddr_ddrphy_cfg[i].val = 0x96;
+		if (ddr_ddrphy_cfg[i].reg == 0x200f0)
+			ddr_ddrphy_cfg[i].val = 0x500;
+		if (ddr_ddrphy_cfg[i].reg == 0x200f4)
+			ddr_ddrphy_cfg[i].val = 0x5555;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(ddr_fsp1_cfg); i++) {
+		if (ddr_fsp1_cfg[i].reg == 0x54002)
+			ddr_fsp1_cfg[i].val = 0x1;
+		if (ddr_fsp1_cfg[i].reg == 0x54003)
+			ddr_fsp1_cfg[i].val = 0x320;
+		if (ddr_fsp1_cfg[i].reg == 0x54019)
+			ddr_fsp1_cfg[i].val = 0x994;
+		if (ddr_fsp1_cfg[i].reg == 0x5401f)
+			ddr_fsp1_cfg[i].val = 0x994;
+		if (ddr_fsp1_cfg[i].reg == 0x54032)
+			ddr_fsp1_cfg[i].val = 0x9400;
+		if (ddr_fsp1_cfg[i].reg == 0x54033)
+			ddr_fsp1_cfg[i].val = 0xf309;
+		if (ddr_fsp1_cfg[i].reg == 0x54038)
+			ddr_fsp1_cfg[i].val = 0x9400;
+		if (ddr_fsp1_cfg[i].reg == 0x54039)
+			ddr_fsp1_cfg[i].val = 0xf309;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(ddr_fsp2_cfg); i++) {
+		if (ddr_fsp2_cfg[i].reg == 0x54002)
+			ddr_fsp2_cfg[i].val = 0x2;
+		if (ddr_fsp2_cfg[i].reg == 0x54003)
+			ddr_fsp2_cfg[i].val = 0x258;
+		if (ddr_fsp2_cfg[i].reg == 0x54019)
+			ddr_fsp2_cfg[i].val = 0x994;
+		if (ddr_fsp2_cfg[i].reg == 0x5401f)
+			ddr_fsp2_cfg[i].val = 0x994;
+		if (ddr_fsp2_cfg[i].reg == 0x54032)
+			ddr_fsp2_cfg[i].val = 0x9400;
+		if (ddr_fsp2_cfg[i].reg == 0x54033)
+			ddr_fsp2_cfg[i].val = 0xf309;
+		if (ddr_fsp2_cfg[i].reg == 0x54038)
+			ddr_fsp2_cfg[i].val = 0x9400;
+		if (ddr_fsp2_cfg[i].reg == 0x54039)
+			ddr_fsp2_cfg[i].val = 0xf309;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(ddr_phy_pie); i++) {
+		if (ddr_phy_pie[i].reg == 0x12000b)
+			ddr_phy_pie[i].val = 0xe1;
+		if (ddr_phy_pie[i].reg == 0x12000c)
+			ddr_phy_pie[i].val = 0x32;
+		if (ddr_phy_pie[i].reg == 0x12000d)
+			ddr_phy_pie[i].val = 0x1f4;
+		if (ddr_phy_pie[i].reg == 0x22000b)
+			ddr_phy_pie[i].val = 0xa8;
+		if (ddr_phy_pie[i].reg == 0x22000c)
+			ddr_phy_pie[i].val = 0x25;
+		if (ddr_phy_pie[i].reg == 0x22000d)
+			ddr_phy_pie[i].val = 0x177;
+	}
+};

@@ -107,7 +107,7 @@ static int dh_imx8mp_board_power_init(void)
 typedef void (*patch_func_t)(void);
 
 static const patch_func_t dram_patch_fn[8] = {
-	NULL,							/* 512 MiB */
+	dh_imx8mp_dhcom_dram_patch_16g_x32_to_32g_x32_1r,	/* 4096 MiB 1-rank */
 	NULL,							/* 1024 MiB */
 	NULL,							/* 1536 MiB */
 	dh_imx8mp_dhcom_dram_patch_16g_x32_to_16g_x32,		/* 2048 MiB */
@@ -168,7 +168,7 @@ static void dh_imx8mp_dhcom_dram_scrub_32g_x32(void)
 typedef void (*scrub_func_t)(void);
 
 static const scrub_func_t dram_scrub_fn[8] = {
-	NULL,					/* 512 MiB */
+	dh_imx8mp_dhcom_dram_scrub_32g_x32,	/* 4096 MiB 1-rank */
 	NULL,					/* 1024 MiB */
 	NULL,					/* 1536 MiB */
 	dh_imx8mp_dhcom_dram_scrub_16g_x32,	/* 2048 MiB */
