@@ -1857,17 +1857,3 @@ struct dram_timing_info dh_imx8mp_dhcom_dram_timing_32g_x32 = {
 	.ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
 	.fsp_table = { 3600, 400, 100, },
 };
-
-#if IS_ENABLED(CONFIG_IMX8M_DRAM_INLINE_ECC)
-void dh_imx8mp_dhcom_dram_scrub_32g_x32(void)
-{
-	ddrc_inline_ecc_scrub(0x0,0x7ffffff);
-	ddrc_inline_ecc_scrub(0x8000000,0xfffffff);
-	ddrc_inline_ecc_scrub(0x10000000,0x17ffffff);
-	ddrc_inline_ecc_scrub(0x18000000,0x1fffffff);
-	ddrc_inline_ecc_scrub(0x20000000,0x27ffffff);
-	ddrc_inline_ecc_scrub(0x28000000,0x2fffffff);
-	ddrc_inline_ecc_scrub(0x30000000,0x37ffffff);
-	ddrc_inline_ecc_scrub_end(0x0,0x3fffffff);
-}
-#endif

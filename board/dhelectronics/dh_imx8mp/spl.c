@@ -139,6 +139,32 @@ static void spl_dram_init(void)
 }
 
 #if IS_ENABLED(CONFIG_IMX8M_DRAM_INLINE_ECC)
+static void dh_imx8mp_dhcom_dram_scrub_16g_x32(void)
+{
+	ddrc_inline_ecc_scrub(0x0,0x3ffffff);
+	ddrc_inline_ecc_scrub(0x4000000,0x7ffffff);
+	ddrc_inline_ecc_scrub(0x8000000,0xbffffff);
+	ddrc_inline_ecc_scrub(0xc000000,0xfffffff);
+	ddrc_inline_ecc_scrub(0x10000000,0x13ffffff);
+	ddrc_inline_ecc_scrub(0x14000000,0x17ffffff);
+	ddrc_inline_ecc_scrub(0x18000000,0x1bffffff);
+	ddrc_inline_ecc_scrub_end(0x0,0x1fffffff);
+}
+
+static void dh_imx8mp_dhcom_dram_scrub_32g_x32(void)
+{
+	ddrc_inline_ecc_scrub(0x0,0x7ffffff);
+	ddrc_inline_ecc_scrub(0x8000000,0xfffffff);
+	ddrc_inline_ecc_scrub(0x10000000,0x17ffffff);
+	ddrc_inline_ecc_scrub(0x18000000,0x1fffffff);
+	ddrc_inline_ecc_scrub(0x20000000,0x27ffffff);
+	ddrc_inline_ecc_scrub(0x28000000,0x2fffffff);
+	ddrc_inline_ecc_scrub(0x30000000,0x37ffffff);
+	ddrc_inline_ecc_scrub_end(0x0,0x3fffffff);
+}
+
+typedef void (*scrub_func_t)(void);
+
 static const scrub_func_t dram_scrub_fn[8] = {
 	NULL,					/* 512 MiB */
 	NULL,					/* 1024 MiB */
