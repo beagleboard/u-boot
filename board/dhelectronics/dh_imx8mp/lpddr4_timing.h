@@ -11,7 +11,10 @@ static const u16 dh_imx8mp_dhcom_dram_size[] = {
 };
 
 extern struct dram_timing_info dh_imx8mp_dhcom_dram_timing_16g_x32;
-extern struct dram_timing_info dh_imx8mp_dhcom_dram_timing_32g_x32;
+static __maybe_unused struct dram_timing_info *dh_imx8mp_dhcom_dram_timing =
+	&dh_imx8mp_dhcom_dram_timing_16g_x32;
+void dh_imx8mp_dhcom_dram_patch_16g_x32_to_16g_x32(void);
+void dh_imx8mp_dhcom_dram_patch_16g_x32_to_32g_x32_2r(void);
 
 u8 dh_get_memcfg(void);
 

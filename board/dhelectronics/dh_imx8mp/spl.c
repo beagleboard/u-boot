@@ -104,15 +104,17 @@ static int dh_imx8mp_board_power_init(void)
 	return 0;
 }
 
-static struct dram_timing_info *dram_timing_info[8] = {
-	NULL,					/* 512 MiB */
-	NULL,					/* 1024 MiB */
-	NULL,					/* 1536 MiB */
-	&dh_imx8mp_dhcom_dram_timing_16g_x32,	/* 2048 MiB */
-	NULL,					/* 3072 MiB */
-	&dh_imx8mp_dhcom_dram_timing_32g_x32,	/* 4096 MiB */
-	NULL,					/* 6144 MiB */
-	NULL,					/* 8192 MiB */
+typedef void (*patch_func_t)(void);
+
+static const patch_func_t dram_patch_fn[8] = {
+	NULL,							/* 512 MiB */
+	NULL,							/* 1024 MiB */
+	NULL,							/* 1536 MiB */
+	dh_imx8mp_dhcom_dram_patch_16g_x32_to_16g_x32,		/* 2048 MiB */
+	NULL,							/* 3072 MiB */
+	dh_imx8mp_dhcom_dram_patch_16g_x32_to_32g_x32_2r,	/* 4096 MiB 2-rank */
+	NULL,							/* 6144 MiB */
+	NULL,							/* 8192 MiB */
 };
 
 static void spl_dram_init(void)
@@ -122,15 +124,16 @@ static void spl_dram_init(void)
 
 	printf("DDR:   %d MiB [0x%x]\n", dh_imx8mp_dhcom_dram_size[memcfg], memcfg);
 
-	if (!dram_timing_info[memcfg]) {
+	if (!dram_patch_fn[memcfg]) {
 		printf("Unsupported DRAM strapping, trying lowest supported. MEMCFG=0x%x\n",
 		       memcfg);
-		for (i = 0; i < ARRAY_SIZE(dram_timing_info); i++)
-			if (dram_timing_info[i])	/* Configuration found */
+		for (i = 0; i < ARRAY_SIZE(dram_patch_fn); i++)
+			if (dram_patch_fn[i])	/* Configuration found */
 				break;
 	}
 
-	ddr_init(dram_timing_info[memcfg]);
+	dram_patch_fn[memcfg]();
+	ddr_init(dh_imx8mp_dhcom_dram_timing);
 
 	printf("DDR:   Inline ECC %sabled\n",
 	       (readl(DDRC_ECCCFG0(0)) & DDRC_ECCCFG0_ECC_MODE_MASK) ?
@@ -170,7 +173,7 @@ static const scrub_func_t dram_scrub_fn[8] = {
 	NULL,					/* 1536 MiB */
 	dh_imx8mp_dhcom_dram_scrub_16g_x32,	/* 2048 MiB */
 	NULL,					/* 3072 MiB */
-	dh_imx8mp_dhcom_dram_scrub_32g_x32,	/* 4096 MiB */
+	dh_imx8mp_dhcom_dram_scrub_32g_x32,	/* 4096 MiB 2-rank */
 	NULL,					/* 6144 MiB */
 	NULL,					/* 8192 MiB */
 };

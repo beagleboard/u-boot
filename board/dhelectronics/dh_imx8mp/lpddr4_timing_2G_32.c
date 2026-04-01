@@ -1853,3 +1853,60 @@ struct dram_timing_info dh_imx8mp_dhcom_dram_timing_16g_x32 = {
 	.ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
 	.fsp_table = { 3600, 400, 100, },
 };
+
+/*
+ * Convert 2 GiB DRAM settings to 2 GiB DRAM settings.
+ * This does nothing and is only a placeholder to indicate
+ * that the 2 GiB DRAM settings are valid themselves.
+ */
+void dh_imx8mp_dhcom_dram_patch_16g_x32_to_16g_x32(void)
+{
+}
+
+/* Convert 2 GiB DRAM settings to 4 GiB 2-rank DRAM settings. */
+void dh_imx8mp_dhcom_dram_patch_16g_x32_to_32g_x32_2r(void)
+{
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(ddr_ddrc_cfg); i++) {
+		if (ddr_ddrc_cfg[i].reg == 0x3d400000)
+			ddr_ddrc_cfg[i].val = 0xa3080020;
+#if IS_ENABLED(CONFIG_IMX8M_DRAM_INLINE_ECC)
+		if (ddr_ddrc_cfg[i].reg == 0x3d400200)
+			ddr_ddrc_cfg[i].val = 0x14;
+		if (ddr_ddrc_cfg[i].reg == 0x3d40020c)
+			ddr_ddrc_cfg[i].val = 0x14141400;
+#else
+		if (ddr_ddrc_cfg[i].reg == 0x3d400200)
+			ddr_ddrc_cfg[i].val = 0x17;
+#endif
+	}
+
+	for (i = 0; i < ARRAY_SIZE(ddr_fsp0_cfg); i++) {
+		if (ddr_fsp0_cfg[i].reg == 0x54012)
+			ddr_fsp0_cfg[i].val = 0x310;
+		if (ddr_fsp0_cfg[i].reg == 0x5402c)
+			ddr_fsp0_cfg[i].val = 0x3;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(ddr_fsp1_cfg); i++) {
+		if (ddr_fsp1_cfg[i].reg == 0x54012)
+			ddr_fsp1_cfg[i].val = 0x310;
+		if (ddr_fsp1_cfg[i].reg == 0x5402c)
+			ddr_fsp1_cfg[i].val = 0x3;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(ddr_fsp2_cfg); i++) {
+		if (ddr_fsp2_cfg[i].reg == 0x54012)
+			ddr_fsp2_cfg[i].val = 0x310;
+		if (ddr_fsp2_cfg[i].reg == 0x5402c)
+			ddr_fsp2_cfg[i].val = 0x3;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(ddr_fsp0_2d_cfg); i++) {
+		if (ddr_fsp0_2d_cfg[i].reg == 0x54012)
+			ddr_fsp0_2d_cfg[i].val = 0x310;
+		if (ddr_fsp0_2d_cfg[i].reg == 0x5402c)
+			ddr_fsp0_2d_cfg[i].val = 0x3;
+	}
+};
