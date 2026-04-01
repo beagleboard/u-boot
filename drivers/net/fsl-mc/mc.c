@@ -653,7 +653,7 @@ static int load_mc_aiop_img(u64 aiop_fw_addr)
 }
 #endif
 
-static int wait_for_mc(bool booting_mc, u32 *final_reg_gsr)
+static int wait_for_mc(u32 *final_reg_gsr)
 {
 	u32 reg_gsr;
 	u32 mc_fw_boot_status;
@@ -792,7 +792,7 @@ int mc_init(u64 mc_fw_addr, u64 mc_dpc_addr)
 	 * Deassert reset and release MC core 0 to run
 	 */
 	out_le32(&mc_ccsr_regs->reg_gcr1, GCR1_P1_DE_RST | GCR1_M_ALL_DE_RST);
-	error = wait_for_mc(true, &reg_gsr);
+	error = wait_for_mc(&reg_gsr);
 	if (error != 0)
 		goto out;
 
@@ -856,7 +856,7 @@ int mc_apply_dpl(u64 mc_dpl_addr)
 	 */
 	out_le32(&mc_ccsr_regs->reg_gsr, 0x0);
 	printf("fsl-mc: Deploying data path layout ... ");
-	error = wait_for_mc(false, &reg_gsr);
+	error = wait_for_mc(&reg_gsr);
 
 	if (!error)
 		mc_dpl_applied = 0;
