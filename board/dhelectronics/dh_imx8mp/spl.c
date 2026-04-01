@@ -117,11 +117,10 @@ static struct dram_timing_info *dram_timing_info[8] = {
 
 static void spl_dram_init(void)
 {
-	const u16 size[] = { 512, 1024, 1536, 2048, 3072, 4096, 6144, 8192 };
 	u8 memcfg = dh_get_memcfg();
 	int i;
 
-	printf("DDR:   %d MiB [0x%x]\n", size[memcfg], memcfg);
+	printf("DDR:   %d MiB [0x%x]\n", dh_imx8mp_dhcom_dram_size[memcfg], memcfg);
 
 	if (!dram_timing_info[memcfg]) {
 		printf("Unsupported DRAM strapping, trying lowest supported. MEMCFG=0x%x\n",
