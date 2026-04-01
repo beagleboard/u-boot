@@ -2070,12 +2070,12 @@ static int do_fsl_mc(struct cmd_tbl *cmdtp, int flag, int argc,
 U_BOOT_CMD(
 	fsl_mc,  CONFIG_SYS_MAXARGS,  1,   do_fsl_mc,
 	"DPAA2 command to manage Management Complex (MC)",
-	"start mc [FW_addr] [DPC_addr] - Start Management Complex\n"
-	"fsl_mc apply DPL [DPL_addr] - Apply DPL file\n"
-	"fsl_mc lazyapply DPL [DPL_addr] - Apply DPL file on exit\n"
-	"fsl_mc apply spb [spb_addr] - Apply SPB Soft Parser Blob\n"
-	"fsl_mc start aiop [FW_addr] - Start AIOP\n"
-	"fsl_mc dump_log - Dump MC Log\n"
+	"fsl_mc start mc <fw_addr> <DPC_addr> - Start the Management Complex firmware\n"
+	"fsl_mc apply dpl <dpl_addr> - Apply the DPL (Data Path Layout) file\n"
+	"fsl_mc lazyapply dpl <DPL_addr> - Apply the DPL (Data Path Layout) file on exit\n"
+	"fsl_mc apply spb <spb_addr> - Apply the SPB Soft Parser Blob\n"
+	"fsl_mc start aiop <fw_addr> - Start AIOP\n"
+	"fsl_mc dump_log - Dump the MC Log\n"
 );
 
 void mc_env_boot(void)
