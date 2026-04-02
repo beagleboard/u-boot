@@ -11,7 +11,7 @@
 #include <env.h>
 #include <fdt_support.h>
 
-#include "../common/imx93_som_detection.h"
+#include "../common/imx91_93_som_detection.h"
 
 #define EEPROM_ADDR            0x50
 
@@ -55,13 +55,13 @@ int board_late_init(void)
 
 static void emmc_fixup(void *blob, struct phytec_eeprom_data *data)
 {
-	enum phytec_imx93_voltage voltage = phytec_imx93_get_voltage(data);
+	enum phytec_imx91_93_voltage voltage = phytec_imx91_93_get_voltage(data);
 	int offset;
 
-	if (voltage == PHYTEC_IMX93_VOLTAGE_INVALID)
+	if (voltage == PHYTEC_IMX91_93_VOLTAGE_INVALID)
 		goto err;
 
-	if (voltage == PHYTEC_IMX93_VOLTAGE_1V8) {
+	if (voltage == PHYTEC_IMX91_93_VOLTAGE_1V8) {
 		offset = fdt_node_offset_by_compat_reg(blob, "fsl,imx93-usdhc",
 						       0x42850000);
 		if (offset)

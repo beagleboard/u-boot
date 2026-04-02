@@ -1859,10 +1859,14 @@ F:	drivers/tpm/
 F:	include/tpm*
 F:	lib/tpm*
 
-TQ GROUP
-#M:	Martin Krause <martin.krause@tq-systems.de>
-S:	Orphaned (Since 2016-02)
-T:	git git://git.denx.de/u-boot-tq-group.git
+TQ-SYSTEMS
+L:	u-boot@ew.tq-group.com
+S:	Maintained
+W:	https://www.tq-group.com/en/products/tq-embedded/
+F:	board/tq/*
+F:	doc/board/tq/*
+F:	include/configs/tq*.h
+F:	include/env/tq/*
 
 TEE
 M:	Jens Wiklander <jens.wiklander@linaro.org>

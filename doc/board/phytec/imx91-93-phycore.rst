@@ -1,9 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-phyCORE-i.MX 93
-===============
+phyCORE-i.MX 91/93
+==================
 
-U-Boot for the phyCORE-i.MX 93.
+U-Boot for the phyCORE-i.MX 91/93. Both SoC variants, that is i.MX 91 and i.MX 93,
+are supported by same board code, however each variant uses different defconfig
+and ATF/ELE firmware blobs. Please follow the correct steps for the populated SoC.
 
 Quick Start
 -----------
@@ -18,7 +20,17 @@ Get and Build the ARM Trusted firmware
 
 Note: srctree is U-Boot source directory
 Get ATF from: https://github.com/nxp-imx/imx-atf/
-branch: lf_v2.8
+branch: lf_v2.12
+
+For phyCORE-i.MX 91 variant:
+
+.. code-block:: bash
+
+   $ unset LDFLAGS
+   $ make PLAT=imx91 bl31
+   $ cp build/imx91/release/bl31.bin $(srctree)
+
+For phyCORE-i.MX 93 variant:
 
 .. code-block:: bash
 
@@ -41,13 +53,23 @@ Get ahab-container.img
 
 .. code-block:: bash
 
-   $ wget https://www.nxp.com/lgfiles/NMG/MAD/YOCTO/firmware-sentinel-0.11.bin
-   $ chmod +x firmware-sentinel-0.11.bin
-   $ ./firmware-sentinel-0.11.bin
-   $ cp firmware-sentinel-0.11/mx93a1-ahab-container.img $(srctree)
+   $ wget  https://www.nxp.com/lgfiles/NMG/MAD/YOCTO/firmware-ele-imx-1.3.0-17945fc.bin
+   $ chmod +x firmware-ele-imx-1.3.0-17945fc.bin
+   $ ./firmware-ele-imx-1.3.0-17945fc.bin
+   $ cp firmware-ele-imx-1.3.0-17945fc/mx91a0-ahab-container.img $(srctree)
+   $ cp firmware-ele-imx-1.3.0-17945fc/mx93a1-ahab-container.img $(srctree)
 
 Build U-Boot
 ------------
+
+For phyCORE-i.MX 91 variant:
+
+.. code-block:: bash
+
+   $ make imx91-phycore_defconfig
+   $ make
+
+For phyCORE-i.MX 93 variant:
 
 .. code-block:: bash
 
