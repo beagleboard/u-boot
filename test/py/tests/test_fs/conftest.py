@@ -706,7 +706,7 @@ def fs_obj_fat(request, u_boot_config):
 
     try:
         # the volume size depends on the filesystem
-        fs_img = fs_helper.mk_fs(u_boot_config, fs_type, fs_size, f'{fs_size}', None, 1024)
+        fs_img = fs_helper.mk_fs(u_boot_config, fs_type, fs_size, f'{fs_size}')
     except:
         pytest.skip('Setup failed for filesystem: ' + fs_type)
         return
