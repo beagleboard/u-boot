@@ -66,8 +66,9 @@ class FsHelper:
         """Make a new filesystem and copy in the files"""
         self.setup()
         self._do_cleanup = True
+        src_dir = self.srcdir if os.listdir(self.srcdir) else None
         self.fs_img = mk_fs(self.config, self.fs_type, self.size_mb << 20,
-                            self.prefix, self.srcdir, quiet=self.quiet)
+                            self.prefix, src_dir, quiet=self.quiet)
 
     def setup(self):
         """Set up the srcdir ready to receive files"""
