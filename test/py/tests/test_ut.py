@@ -542,8 +542,8 @@ def test_ut_dm_init(ubman):
         utils.run_and_log(
             ubman, f'sfdisk {fn}', stdin=b'type=83')
 
-    fs_helper.mk_fs(ubman.config, 'ext2', 0x200000, '2MB', None)
-    fs_helper.mk_fs(ubman.config, 'fat32', 0x100000, '1MB', None)
+    FsHelper(ubman.config, 'ext2', 2, '2MB').mk_fs()
+    FsHelper(ubman.config, 'fat32', 1, '1MB').mk_fs()
 
     mmc_dev = 6
     fn = os.path.join(ubman.config.source_dir, f'mmc{mmc_dev}.img')
