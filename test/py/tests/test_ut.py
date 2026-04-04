@@ -585,48 +585,34 @@ def setup_efi_image(ubman):
 def setup_rauc_image(ubman):
     """Create a 40MB disk image with an A/B RAUC system on it"""
     mmc_dev = 10
-    fname = os.path.join(ubman.config.source_dir, f'mmc{mmc_dev}.img')
-    mnt = ubman.config.persistent_data_dir
 
-    spec = 'type=c, size=8M, start=1M, bootable\n' \
-           'type=83, size=10M\n' \
-           'type=c, size=8M, bootable\n' \
-           'type=83, size=10M'
-
-    utils.run_and_log(ubman, f'qemu-img create {fname} 40M')
-    utils.run_and_log(ubman, ['sh', '-c', f'printf "{spec}" | sfdisk {fname}'])
+    boot = FsHelper(ubman.config, 'fat32', 8, 'rauc_boot')
+    boot.setup()
 
     # Generate boot script
     script = '# dummy boot script'
-    bootdir = os.path.join(mnt, 'boot')
-    utils.run_and_log(ubman, f'mkdir -p {bootdir}')
-    cmd_fname = os.path.join(bootdir, 'boot.cmd')
-    scr_fname = os.path.join(bootdir, 'boot.scr')
+    cmd_fname = os.path.join(boot.srcdir, 'boot.cmd')
+    scr_fname = os.path.join(boot.srcdir, 'boot.scr')
     with open(cmd_fname, 'w', encoding='ascii') as outf:
         print(script, file=outf)
 
     mkimage = os.path.join(ubman.config.build_dir, 'tools/mkimage')
     utils.run_and_log(
         ubman, f'{mkimage} -C none -A arm -T script -d {cmd_fname} {scr_fname}')
-    utils.run_and_log(ubman, f'rm -f {cmd_fname}')
+    os.remove(cmd_fname)
+    boot.mk_fs()
 
-    # Generate empty rootfs
-    rootdir = os.path.join(mnt, 'root')
-    utils.run_and_log(ubman, f'mkdir -p {rootdir}')
+    root = FsHelper(ubman.config, 'ext4', 10, 'rauc_root')
+    root.mk_fs()
 
-    # Create boot filesystem image with boot script in it and copy to disk image
-    fsfile = f'rauc_boot.fat32.img'
-    fs_helper.mk_fs(ubman.config, 'fat32', 0x800000, fsfile.split('.')[0], bootdir)
-    utils.run_and_log(ubman, f'dd if={mnt}/{fsfile} of=mmc{mmc_dev}.img bs=1M seek=1 conv=notrunc')
-    utils.run_and_log(ubman, f'dd if={mnt}/{fsfile} of=mmc{mmc_dev}.img bs=1M seek=19 conv=notrunc')
-    utils.run_and_log(ubman, f'rm -f {scr_fname}')
-
-    # Create empty root filesystem image and copy to disk image
-    fsfile = f'rauc_root.ext4.img'
-    fs_helper.mk_fs(ubman.config, 'ext4', 0xa00000, fsfile.split('.')[0], rootdir)
-    utils.run_and_log(ubman, f'dd if={mnt}/{fsfile} of=mmc{mmc_dev}.img bs=1M seek=9 conv=notrunc')
-    utils.run_and_log(ubman, f'dd if={mnt}/{fsfile} of=mmc{mmc_dev}.img bs=1M seek=27 conv=notrunc')
-    utils.run_and_log(ubman, f'rm -f {fsfile}')
+    img = DiskHelper(ubman.config, mmc_dev, 'mmc', True)
+    img.add_fs(boot, DiskHelper.VFAT, bootable=True)
+    img.add_fs(root, DiskHelper.EXT4)
+    img.add_fs(boot, DiskHelper.VFAT, bootable=True)
+    img.add_fs(root, DiskHelper.EXT4)
+    img.create()
+    boot.cleanup()
+    root.cleanup()
 
 @pytest.mark.buildconfigspec('cmd_bootflow')
 @pytest.mark.buildconfigspec('sandbox')
