@@ -172,10 +172,10 @@ def setup_bootflow_image(ubman, devnum, basename, vmlinux, initrd, dtbdir,
         dtbdir (str or None): Devicetree filename
         script (str): Script to place in the extlinux.conf file
     """
-    fname, mnt = fs_helper.setup_image(ubman, devnum, 0xc, second_part=True,
-                                       basename=basename)
+    fsh = FsHelper(ubman.config, 'vfat', 18, prefix=basename)
+    fsh.setup()
 
-    ext = os.path.join(mnt, 'extlinux')
+    ext = os.path.join(fsh.srcdir, 'extlinux')
     mkdir_cond(ext)
 
     conf = os.path.join(ext, 'extlinux.conf')
@@ -187,25 +187,30 @@ def setup_bootflow_image(ubman, devnum, basename, vmlinux, initrd, dtbdir,
         fd.write(gzip.compress(b'vmlinux'))
     mkimage = ubman.config.build_dir + '/tools/mkimage'
     utils.run_and_log(
-        ubman, f'{mkimage} -f auto -d {inf} {os.path.join(mnt, vmlinux)}')
+        ubman, f'{mkimage} -f auto -d {inf} {os.path.join(fsh.srcdir, vmlinux)}')
 
-    with open(os.path.join(mnt, initrd), 'w', encoding='ascii') as fd:
+    with open(os.path.join(fsh.srcdir, initrd), 'w', encoding='ascii') as fd:
         print('initrd', file=fd)
 
     if dtbdir:
-        mkdir_cond(os.path.join(mnt, dtbdir))
+        mkdir_cond(os.path.join(fsh.srcdir, dtbdir))
 
-        dtb_file = os.path.join(mnt, f'{dtbdir}/sandbox.dtb')
+        dtb_file = os.path.join(fsh.srcdir, f'{dtbdir}/sandbox.dtb')
         utils.run_and_log(
             ubman, f'dtc -o {dtb_file}', stdin=b'/dts-v1/; / {};')
 
-    fsfile = 'vfat18M.img'
-    utils.run_and_log(ubman, f'fallocate -l 18M {fsfile}')
-    utils.run_and_log(ubman, f'mkfs.vfat {fsfile}')
-    utils.run_and_log(ubman, ['sh', '-c', f'mcopy -i {fsfile} {mnt}/* ::/'])
-    copy_partition(ubman, fsfile, fname)
-    utils.run_and_log(ubman, f'rm -rf {mnt}')
-    utils.run_and_log(ubman, f'rm -f {fsfile}')
+    fsh.mk_fs()
+
+    img = DiskHelper(ubman.config, devnum, basename, True)
+    img.add_fs(fsh, DiskHelper.VFAT, bootable=True)
+
+    ext4 = FsHelper(ubman.config, 'ext4', 1, prefix=basename)
+    ext4.setup()
+    ext4.mk_fs()
+
+    img.add_fs(ext4, DiskHelper.EXT4)
+    img.create()
+    fsh.cleanup()
 
 def setup_fedora_image(ubman, devnum, basename):
     """Create a 20MB Fedora disk image with a single FAT partition
