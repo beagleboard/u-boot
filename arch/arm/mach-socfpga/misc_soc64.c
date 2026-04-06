@@ -17,10 +17,7 @@
 #include <asm/arch/system_manager.h>
 #include <asm/io.h>
 #include <asm/system.h>
-#include <asm/global_data.h>
 #include <mach/clock_manager.h>
-
-DECLARE_GLOBAL_DATA_PTR;
 
 /* Agilex5 Sub Device Jtag ID List */
 #define A3690_JTAG_ID	0x036090DD
@@ -94,7 +91,7 @@ void save_boot_params(unsigned long r0, unsigned long r1, unsigned long r2,
 int print_cpuinfo(void)
 {
 	printf("CPU: Altera FPGA SoCFPGA Platform (ARMv8 64bit Cortex-%s)\n",
-	       IS_ENABLED(CONFIG_TARGET_SOCFPGA_AGILEX5) ? "A55/A76" : "A53");
+	       IS_ENABLED(CONFIG_ARCH_SOCFPGA_AGILEX5) ? "A55/A76" : "A53");
 
 	return 0;
 }

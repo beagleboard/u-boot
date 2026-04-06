@@ -257,14 +257,14 @@ static int dp83867_config(struct phy_device *phydev)
 
 	dp83867 = (struct dp83867_private *)phydev->priv;
 
-	ret = dp83867_of_init(phydev);
+	/* Reset PHY to clear any stale state after warm reboot */
+	ret = phy_reset(phydev);
 	if (ret)
 		return ret;
 
-	/* Restart the PHY.  */
-	val = phy_read(phydev, MDIO_DEVAD_NONE, DP83867_CTRL);
-	phy_write(phydev, MDIO_DEVAD_NONE, DP83867_CTRL,
-		  val | DP83867_SW_RESTART);
+	ret = dp83867_of_init(phydev);
+	if (ret)
+		return ret;
 
 	/* Mode 1 or 2 workaround */
 	if (dp83867->rxctrl_strap_quirk) {

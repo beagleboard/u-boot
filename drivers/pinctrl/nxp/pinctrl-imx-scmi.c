@@ -17,6 +17,7 @@
 
 #define DAISY_OFFSET_IMX95      0x408
 #define DAISY_OFFSET_IMX94      0x608
+#define DAISY_OFFSET_IMX952     0x460
 
 /* SCMI pin control types */
 #define PINCTRL_TYPE_MUX        192
@@ -69,7 +70,7 @@ static int imx_pinconf_scmi_set(struct udevice *dev, u32 mux_ofs, u32 mux, u32 c
 	in.attributes = num_cfgs << PINCTRL_NUM_CFGS_SHIFT;
 
 	msg = SCMI_MSG_IN(SCMI_PROTOCOL_ID_PINCTRL,
-			  SCMI_MSG_PINCTRL_CONFIG_SET, in, out);
+			  SCMI_PINCTRL_SETTINGS_CONFIGURE, in, out);
 
 	ret = devm_scmi_process_msg(dev, &msg);
 	if (ret || out.status) {
@@ -136,6 +137,8 @@ static int imx_scmi_pinctrl_probe(struct udevice *dev)
 		priv->daisy_offset = DAISY_OFFSET_IMX95;
 	else if (IS_ENABLED(CONFIG_IMX94))
 		priv->daisy_offset = DAISY_OFFSET_IMX94;
+	else if (IS_ENABLED(CONFIG_IMX952))
+		priv->daisy_offset = DAISY_OFFSET_IMX952;
 	else
 		return -EINVAL;
 
@@ -144,7 +147,8 @@ static int imx_scmi_pinctrl_probe(struct udevice *dev)
 
 static int imx_scmi_pinctrl_bind(struct udevice *dev)
 {
-	if (IS_ENABLED(CONFIG_IMX95) || IS_ENABLED(CONFIG_IMX94))
+	if (IS_ENABLED(CONFIG_IMX95) || IS_ENABLED(CONFIG_IMX94) ||
+	    IS_ENABLED(CONFIG_IMX952))
 		return 0;
 
 	return -ENODEV;

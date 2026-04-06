@@ -6,13 +6,11 @@
 
 #include <asm/arch/handoff_soc64.h>
 #include <asm/arch/system_manager.h>
-#include <asm/global_data.h>
 #include <asm/io.h>
 #include <linux/bitfield.h>
 
-DECLARE_GLOBAL_DATA_PTR;
+#if IS_ENABLED(CONFIG_ARCH_SOCFPGA_AGILEX5)
 
-#if IS_ENABLED(CONFIG_TARGET_SOCFPGA_AGILEX5)
 /*
  * Setting RESET_PULSE_OVERRIDE bit for successful reset staggering pulse
  * generation and setting PORT_OVERCURRENT bit so that until we turn on the
@@ -39,7 +37,7 @@ void sysmgr_pinmux_init(void)
 	populate_sysmgr_pinmux();
 	populate_sysmgr_fpgaintf_module();
 
-#if IS_ENABLED(CONFIG_TARGET_SOCFPGA_AGILEX5)
+#if IS_ENABLED(CONFIG_ARCH_SOCFPGA_AGILEX5)
 	sysmgr_config_usb3();
 #endif
 }

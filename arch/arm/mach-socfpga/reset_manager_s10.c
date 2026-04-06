@@ -7,7 +7,6 @@
 
 #include <errno.h>
 #include <hang.h>
-#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/secure.h>
 #include <asm/arch/reset_manager.h>
@@ -19,8 +18,6 @@
 #include <linux/iopoll.h>
 #include <linux/intel-smc.h>
 #include <wait_bit.h>
-
-DECLARE_GLOBAL_DATA_PTR;
 
 #define TIMEOUT_300MS     300
 
@@ -79,7 +76,7 @@ static void socfpga_f2s_bridges_reset(int enable, unsigned int mask)
 	u32 flaginstatus_idleack = 0;
 	u32 flaginstatus_respempty = 0;
 
-	if (CONFIG_IS_ENABLED(TARGET_SOCFPGA_STRATIX10)) {
+	if (CONFIG_IS_ENABLED(ARCH_SOCFPGA_STRATIX10)) {
 		/* Support fpga2soc and f2sdram */
 		brg_mask = mask & (RSTMGR_BRGMODRST_FPGA2SOC_MASK |
 				   RSTMGR_BRGMODRST_F2SDRAM0_MASK |

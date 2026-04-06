@@ -6,6 +6,8 @@
 #ifndef _TDX_CFG_BLOCK_H
 #define _TDX_CFG_BLOCK_H
 
+#include <linux/types.h>
+
 #include "tdx-common.h"
 
 struct toradex_hw {
@@ -147,6 +149,7 @@ enum {
 	OSM_IMX93D_2GB_IT,
 	OSM_IMX91S_2GB_IT, /* 220 */
 	VERDIN_AM62D_1G_ET_GPU_NODSI,
+	AQUILA_TDA4O_16GB_IT = 223,
 };
 
 enum {

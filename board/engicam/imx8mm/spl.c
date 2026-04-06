@@ -17,8 +17,6 @@
 #include <asm/arch/ddr.h>
 #include <asm/sections.h>
 
-DECLARE_GLOBAL_DATA_PTR;
-
 int spl_board_boot_device(enum boot_device boot_dev_spl)
 {
 	switch (boot_dev_spl) {
@@ -54,11 +52,6 @@ int board_fit_config_name_match(const char *name)
 }
 #endif
 
-int board_early_init_f(void)
-{
-       return 0;
-}
-
 void board_init_f(ulong dummy)
 {
 	int ret;
@@ -66,8 +59,6 @@ void board_init_f(ulong dummy)
 	arch_cpu_init();
 
 	init_uart_clk(1);
-
-	board_early_init_f();
 
 	timer_init();
 

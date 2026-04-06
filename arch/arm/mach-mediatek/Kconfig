@@ -93,6 +93,15 @@ config TARGET_MT8188
           USB3.0 dual role, SD and MMC cards, UFS, PWM, I2C, I2S, S/PDIF, and
           several LPDDR3 and LPDDR4 options.
 
+config TARGET_MT8195
+	bool "MediaTek MT8195 SoC"
+	select ARM64
+	help
+	  The MediaTek MT8195 is a ARM64-based SoC with a quad-core Cortex-A73 and
+	  a quad-core Cortex-A53. It is including UART, SPI, USB3.0 dual role,
+	  SD and MMC cards, UFS, PWM, I2C, I2S, S/PDIF, and several LPDDR3
+	  and LPDDR4 options.
+
 config TARGET_MT8365
 	bool "MediaTek MT8365 SoC"
 	select ARM64
@@ -130,6 +139,33 @@ config TARGET_MT8518
 
 endchoice
 
+if ARM64
+
+config MTK_MEM_MAP_DDR_BASE_PHY
+	hex "DDR physical base address"
+	default 0x40000000
+	help
+		Target-specific DDR physical base address.
+
+config MTK_MEM_MAP_DDR_SIZE
+	hex "DDR .size in mem_map"
+	default 0x200000000 if TARGET_MT7987 || TARGET_MT7988 || TARGET_MT8188 || TARGET_MT8195
+	default 0xc0000000 if TARGET_MT8365
+	default 0x80000000 if TARGET_MT7981 || TARGET_MT7986 || TARGET_MT8183
+	default 0x40000000 if TARGET_MT7622 || TARGET_MT8512
+	default 0x20000000
+	help
+		Target-specific DDR region size in mem_map.
+
+config MTK_MEM_MAP_MMIO_SIZE
+	hex "MMIO .size in mem_map"
+	default 0x40000000 if TARGET_MT7622 || TARGET_MT7981 || TARGET_MT7986 || TARGET_MT7987 || TARGET_MT7988 || TARGET_MT8512
+	default 0x20000000
+	help
+		Target-specific MMIO region size in mem_map.
+
+endif
+
 config SYS_BOARD
 	string "Board name"
 	default "mt7622" if TARGET_MT7622
@@ -165,7 +201,7 @@ config SYS_CONFIG_NAME
 config MTK_BROM_HEADER_INFO
 	string
 	default "media=nor" if TARGET_MT8518 || TARGET_MT8512 || TARGET_MT7629
-	default "media=emmc" if TARGET_MT8516 || TARGET_MT8365 || TARGET_MT8183 || TARGET_MT8188
+	default "media=emmc" if TARGET_MT8516 || TARGET_MT8365 || TARGET_MT8183 || TARGET_MT8188 || TARGET_MT8195
 	default "lk=1" if TARGET_MT7623
 
 config MTK_TZ_MOVABLE

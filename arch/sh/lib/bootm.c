@@ -13,10 +13,7 @@
 #include <env.h>
 #include <image.h>
 #include <asm/byteorder.h>
-#include <asm/global_data.h>
 #include <asm/zimage.h>
-
-DECLARE_GLOBAL_DATA_PTR;
 
 #ifdef CONFIG_SH_SDRAM_OFFSET
 #define GET_INITRD_START(initrd, linux) (initrd - linux + CONFIG_SH_SDRAM_OFFSET)
@@ -94,6 +91,8 @@ int do_bootm_linux(int flag, struct bootm_info *bmi)
 		set_sh_linux_param((unsigned long)param + INITRD_SIZE,
 			images->rd_end - images->rd_start);
 	}
+
+	bootm_final(0);
 
 	/* Boot kernel */
 	kernel();

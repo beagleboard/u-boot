@@ -130,9 +130,6 @@ source "arch/x86/cpu/tangier/Kconfig"
 
 # architecture-specific options below
 
-config AHCI
-	default y
-
 config RAMBASE
 	hex
 	default 0x100000

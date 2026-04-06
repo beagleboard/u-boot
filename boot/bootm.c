@@ -7,6 +7,7 @@
 #ifndef USE_HOSTCC
 #include <bootm.h>
 #include <bootstage.h>
+#include <dm/root.h>
 #include <cli.h>
 #include <command.h>
 #include <cpu_func.h>
@@ -602,7 +603,7 @@ static int handle_decomp_error(int comp_type, size_t uncomp_size,
 #ifndef USE_HOSTCC
 static int bootm_load_os(struct bootm_headers *images, int boot_progress)
 {
-	struct image_info os = images->os;
+	const struct image_info os = images->os;
 	ulong load = os.load;
 	ulong load_end;
 	ulong blob_start = os.start;
@@ -631,7 +632,7 @@ static int bootm_load_os(struct bootm_headers *images, int boot_progress)
 			return 1;
 
 		load = (ulong)addr;
-		os.load = (ulong)addr;
+		images->os.load = (ulong)addr;
 		images->ep = (ulong)addr;
 		debug("Allocated %lx bytes at %lx for kernel (size %lx) decompression\n",
 		      req_size, load, image_len);
@@ -1192,6 +1193,30 @@ void bootm_init(struct bootm_info *bmi)
  */
 void __weak switch_to_non_secure_mode(void)
 {
+}
+
+void bootm_final(int flag)
+{
+	printf("\nStarting kernel ...%s\n\n",
+	       (flag & BOOTM_STATE_OS_FAKE_GO) ?
+	       " (fake run for tracing)" : "");
+
+	bootstage_mark_name(BOOTSTAGE_ID_BOOTM_HANDOFF, "start_kernel");
+
+	if (IS_ENABLED(CONFIG_BOOTSTAGE_FDT) && IS_ENABLED(CONFIG_CMD_FDT))
+		bootstage_fdt_add_report();
+	bootstage_stash_default();
+	if (IS_ENABLED(CONFIG_BOOTSTAGE_REPORT))
+		bootstage_report();
+
+	board_quiesce_devices();
+
+	/*
+	 * Call remove function of all devices with a removal flag set.
+	 * This may be useful for last-stage operations, like cancelling
+	 * of DMA operation or releasing device internal buffers.
+	 */
+	dm_remove_devices_active();
 }
 
 #else /* USE_HOSTCC */

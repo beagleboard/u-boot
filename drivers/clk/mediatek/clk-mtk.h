@@ -8,20 +8,14 @@
 #define __DRV_CLK_MTK_H
 
 #include <linux/bitops.h>
-#define CLK_XTAL			0
+
 #define MHZ				(1000 * 1000)
 
 /* flags in struct mtk_clk_tree */
 
-/* clk id == 0 doesn't mean it's xtal clk
- * This doesn't apply when CLK_PARENT_MIXED is defined.
- * With CLK_PARENT_MIXED declare CLK_PARENT_XTAL for the
- * relevant parent.
- */
-#define CLK_BYPASS_XTAL			BIT(0)
+#define CLK_PLL_HAVE_RST_BAR		BIT(0)
 
-#define HAVE_RST_BAR			BIT(0)
-#define CLK_DOMAIN_SCPSYS		BIT(0)
+#define CLK_MUX_DOMAIN_SCPSYS		BIT(0)
 #define CLK_MUX_SETCLR_UPD		BIT(1)
 
 #define CLK_GATE_SETCLR			BIT(0)
@@ -33,13 +27,8 @@
 #define CLK_PARENT_APMIXED		BIT(4)
 #define CLK_PARENT_TOPCKGEN		BIT(5)
 #define CLK_PARENT_INFRASYS		BIT(6)
-#define CLK_PARENT_XTAL			BIT(7)
-/*
- * For CLK_PARENT_MIXED to correctly work, is required to
- * define in clk_tree flags the clk type using the alias.
- */
-#define CLK_PARENT_MIXED		BIT(8)
-#define CLK_PARENT_MASK			GENMASK(8, 4)
+#define CLK_PARENT_EXT			BIT(7)
+#define CLK_PARENT_MASK			GENMASK(7, 4)
 
 #define ETHSYS_HIFSYS_RST_CTRL_OFS	0x34
 
@@ -127,12 +116,17 @@ struct mtk_parent {
 		.flags = _flags,			\
 	}
 
+#define APMIXED_PARENT(id)	PARENT(id, CLK_PARENT_APMIXED)
+#define TOP_PARENT(id)		PARENT(id, CLK_PARENT_TOPCKGEN)
+#define INFRA_PARENT(id)	PARENT(id, CLK_PARENT_INFRASYS)
+#define EXT_PARENT(id)		PARENT(id, CLK_PARENT_EXT)
+#define VOID_PARENT		PARENT(-1, 0)
+
 /**
  * struct mtk_composite - aggregate clock of mux, divider and gate clocks
  *
  * @id:			unmapped ID of clocks
- * @parent:		unmapped ID of parent clocks
- * @parent_flags:	table of parent clocks with flags
+ * @parent:		array of parent clocks
  * @mux_reg:		hardware-specific mux register
  * @gate_reg:		hardware-specific gate register
  * @mux_mask:		mask to the mux bit field
@@ -143,10 +137,7 @@ struct mtk_parent {
  */
 struct mtk_composite {
 	const int id;
-	union {
-		const int *parent;
-		const struct mtk_parent *parent_flags;
-	};
+	const struct mtk_parent *parent;
 	u32 mux_reg;
 	u32 mux_set_reg;
 	u32 mux_clr_reg;
@@ -175,19 +166,6 @@ struct mtk_composite {
 
 #define MUX_GATE(_id, _parents, _reg, _shift, _width, _gate)		\
 	MUX_GATE_FLAGS(_id, _parents, _reg, _shift, _width, _gate, 0)
-
-#define MUX_MIXED_FLAGS(_id, _parents, _reg, _shift, _width, _flags) {	\
-		.id = _id,						\
-		.mux_reg = _reg,					\
-		.mux_shift = _shift,					\
-		.mux_mask = BIT(_width) - 1,				\
-		.gate_shift = -1,					\
-		.parent_flags = _parents,				\
-		.num_parents = ARRAY_SIZE(_parents),			\
-		.flags = CLK_PARENT_MIXED | (_flags),			\
-	}
-#define MUX_MIXED(_id, _parents, _reg, _shift, _width)			\
-	MUX_MIXED_FLAGS(_id, _parents, _reg, _shift, _width, 0)
 
 #define MUX_FLAGS(_id, _parents, _reg, _shift, _width, _flags) {	\
 		.id = _id,						\
@@ -243,10 +221,20 @@ struct mtk_gate {
 	u32 flags;
 };
 
+#define GATE_FLAGS(_id, _parent, _regs, _shift, _flags) {	\
+		.id = _id,					\
+		.parent = _parent,				\
+		.regs = _regs,					\
+		.shift = _shift,				\
+		.flags = _flags,				\
+	}
+
 /* struct mtk_clk_tree - clock tree */
 struct mtk_clk_tree {
-	unsigned long xtal_rate;
-	unsigned long xtal2_rate;
+	const struct mtk_parent pll_parent;
+	/* External fixed clocks - excluded from mapping. */
+	const ulong *ext_clk_rates;
+	const int num_ext_clks;
 	/*
 	 * Clock IDs may be remapped with an auxiliary table. Enable this by
 	 * defining .id_offs_map and .id_offs_map_size. This is needed e.g. when

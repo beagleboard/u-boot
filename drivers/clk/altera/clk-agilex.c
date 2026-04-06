@@ -6,7 +6,6 @@
 
 #include <log.h>
 #include <wait_bit.h>
-#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/system.h>
 #include <clk-uclass.h>
@@ -18,8 +17,6 @@
 #include <linux/bitops.h>
 
 #include <asm/arch/clock_manager.h>
-
-DECLARE_GLOBAL_DATA_PTR;
 
 struct socfpga_clk_plat {
 	void __iomem *regs;
@@ -657,6 +654,7 @@ static int bitmask_from_clk_id(struct clk *clk)
 		plat->bitmask = CLKMGR_MAINPLLGRP_EN_L4MAINCLK_MASK;
 		break;
 	case AGILEX_L4_MP_CLK:
+	case AGILEX_NAND_X_CLK:
 		plat->pllgrp = CLKMGR_MAINPLL_EN;
 		plat->bitmask = CLKMGR_MAINPLLGRP_EN_L4MPCLK_MASK;
 		break;
@@ -728,6 +726,8 @@ static int bitmask_from_clk_id(struct clk *clk)
 		plat->pllgrp = CLKMGR_PERPLL_EN;
 		plat->bitmask = CLKMGR_PERPLLGRP_EN_NANDCLK_MASK;
 		break;
+	case AGILEX_L4_SYS_FREE_CLK:
+		return -EOPNOTSUPP;
 	default:
 		return -ENXIO;
 	}
@@ -742,6 +742,9 @@ static int socfpga_clk_enable(struct clk *clk)
 	int ret;
 
 	ret = bitmask_from_clk_id(clk);
+	if (ret == -EOPNOTSUPP)
+		return 0;
+
 	if (ret)
 		return ret;
 
@@ -757,6 +760,9 @@ static int socfpga_clk_disable(struct clk *clk)
 	int ret;
 
 	ret = bitmask_from_clk_id(clk);
+	if (ret == -EOPNOTSUPP)
+		return 0;
+
 	if (ret)
 		return ret;
 

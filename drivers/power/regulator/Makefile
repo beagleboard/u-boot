@@ -47,3 +47,5 @@ obj-$(CONFIG_$(PHASE_)DM_REGULATOR_ANATOP) += anatop_regulator.o
 obj-$(CONFIG_DM_REGULATOR_TPS65219) += tps65219_regulator.o
 obj-$(CONFIG_REGULATOR_RZG2L_USBPHY) += rzg2l-usbphy-regulator.o
 obj-$(CONFIG_$(PHASE_)DM_REGULATOR_CPCAP) += cpcap_regulator.o
+obj-$(CONFIG_DM_REGULATOR_MT6357) += mt6357_regulator.o
+obj-$(CONFIG_DM_REGULATOR_MT6359) += mt6359_regulator.o

@@ -461,6 +461,7 @@ ulong disk_blk_erase(struct udevice *dev, lbaint_t start, lbaint_t blkcnt);
 #ifdef CONFIG_XPL_BUILD
 # define part_print_ptr(x)	NULL
 # if defined(CONFIG_SPL_FS_EXT4) || defined(CONFIG_SPL_FS_FAT) || \
+	defined(CONFIG_SPL_FS_SQUASHFS) || \
 	defined(CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_PARTITION) || \
 	defined(CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_PARTITION_TYPE)
 #  define part_get_info_ptr(x)	x
@@ -703,6 +704,20 @@ int write_mbr_partitions(struct blk_desc *dev,
 		struct disk_partition *p, int count, unsigned int disksig);
 int layout_mbr_partitions(struct disk_partition *p, int count,
 			  lbaint_t total_sectors);
+
+/**
+ * part_get_mbr() - get the MBR partition record of a partition
+ *
+ * This function reads the MBR partition record for a given block
+ * device and partition number.
+ *
+ * @desc:	block device descriptor
+ * @part:	partition number for which to return the partition record
+ * @mbr:	MBR partition record
+ *
+ * Return:	0 on success, otherwise error
+ */
+int part_get_mbr(struct blk_desc *desc, int part, dos_partition_t *mbr);
 
 #endif
 

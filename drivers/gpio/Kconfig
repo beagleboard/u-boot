@@ -1,3 +1,11 @@
+config GPIO_DELAY
+	bool "GPIO delay driver"
+	depends on DM_GPIO
+	help
+	  Enable the GPIO delay driver.
+	  This driver allows wrapping another GPIO controller and inserting
+	  ramp-up/ramp-down delays on output changes, as described in the
+	  Linux gpio-delay binding.
 #
 # GPIO infrastructure and drivers
 #
@@ -375,6 +383,7 @@ config OMAP_GPIO
 
 config CMD_PCA953X
 	bool "Enable the pca953x command"
+	depends on PCA953X
 	help
 	  Deprecated: This should be converted to driver model.
 

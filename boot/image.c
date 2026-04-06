@@ -15,20 +15,13 @@
 #include <malloc.h>
 #include <u-boot/crc.h>
 
-#ifdef CONFIG_SHOW_BOOT_PROGRESS
-#include <status_led.h>
-#endif
-
 #if CONFIG_IS_ENABLED(FIT) || CONFIG_IS_ENABLED(OF_LIBFDT)
 #include <linux/libfdt.h>
 #include <fdt_support.h>
 #endif
 
-#include <asm/global_data.h>
 #include <linux/errno.h>
 #include <asm/io.h>
-
-DECLARE_GLOBAL_DATA_PTR;
 
 /* Set this if we have less than 4 MB of malloc() space */
 #if CONFIG_SYS_MALLOC_LEN < (4096 * 1024)

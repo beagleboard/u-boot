@@ -259,6 +259,7 @@ config ENV_IS_IN_MMC
 config ENV_IS_IN_NAND
 	bool "Environment in a NAND device"
 	depends on !CHAIN_OF_TRUST
+	depends on MTD_RAW_NAND
 	help
 	  Define this if you have a NAND device which you want to use for the
 	  environment.
@@ -975,7 +976,7 @@ config USE_BOOTFILE
 
 config BOOTFILE
 	string "'bootfile' environment variable value"
-	default kernel.itb if SPL_ATF && TARGET_SOCFPGA_SOC64
+	default kernel.itb if SPL_ATF && ARCH_SOCFPGA_SOC64
 	depends on USE_BOOTFILE
 	help
 	  The value to set the "bootfile" variable to.

@@ -47,6 +47,15 @@ config IMX94
 	select SCMI_FIRMWARE
 	select SPL_IMX_CONTAINER_USE_TRAMPOLINE
 
+config IMX952
+	bool
+	select ARMV8_SPL_EXCEPTION_VECTORS
+	select DM_MAILBOX
+	select IMX9
+	select IMX_PQC_SUPPORT
+	select SCMI_FIRMWARE
+	select SPL_IMX_CONTAINER_USE_TRAMPOLINE
+
 config SYS_SOC
 	default "imx9"
 
@@ -120,6 +129,14 @@ config TARGET_KONTRON_MX93
 	  Kontron Electronics BL i.MX93 using SoM module conformant to OSM
 	  standard 1.1 size S.
 
+config TARGET_PHYCORE_IMX91
+	bool "phycore_imx91"
+	select IMX91
+	select IMX9_LPDDR4X
+	imply OF_UPSTREAM
+	select OF_BOARD_FIXUP
+	select OF_BOARD_SETUP
+
 config TARGET_PHYCORE_IMX93
 	bool "phycore_imx93"
 	select IMX93
@@ -152,6 +169,18 @@ config TARGET_IMX943_EVK
 config TARGET_TORADEX_SMARC_IMX95
 	bool "Support Toradex SMARC iMX95"
 	select IMX95
+	imply OF_UPSTREAM
+
+config TARGET_IMX952_EVK
+	bool "imx952_evk"
+	select IMX_SM_CPU
+	select IMX_SM_LMM
+	select IMX952
+	select REGMAP
+	select SYSCON
+	imply BOOTSTD_BOOTCOMMAND
+	imply BOOTSTD_FULL
+	imply OF_UPSTREAM
 
 endchoice
 
@@ -161,10 +190,11 @@ source "board/nxp/imx93_evk/Kconfig"
 source "board/nxp/imx93_frdm/Kconfig"
 source "board/nxp/imx93_qsb/Kconfig"
 source "board/kontron/osm-s-mx93/Kconfig"
-source "board/phytec/phycore_imx93/Kconfig"
+source "board/phytec/phycore_imx91_93/Kconfig"
 source "board/variscite/imx93_var_som/Kconfig"
 source "board/nxp/imx94_evk/Kconfig"
 source "board/nxp/imx95_evk/Kconfig"
 source "board/toradex/smarc-imx95/Kconfig"
+source "board/nxp/imx952_evk/Kconfig"
 
 endif

@@ -15,7 +15,6 @@
 #include <regmap.h>
 #include <reset.h>
 #include <syscon.h>
-#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm-generic/gpio.h>
 #include <dm/device_compat.h>
@@ -39,12 +38,11 @@
 #define STG_SYSCON_RP_NEP_OFFSET               0xe8
 #define STG_SYSCON_K_RP_NEP_MASK               BIT(8)
 
-DECLARE_GLOBAL_DATA_PTR;
-
 struct starfive_pcie {
 	struct pcie_plda plda;
 	struct clk_bulk	clks;
 	struct reset_ctl_bulk	rsts;
+	struct gpio_desc	power_gpio;
 	struct gpio_desc	reset_gpio;
 	struct regmap *regmap;
 	unsigned int stg_pcie_base;
@@ -184,6 +182,10 @@ static int starfive_pcie_parse_dt(struct udevice *dev)
 		dev_err(dev, "reset-gpio is not valid\n");
 		return -EINVAL;
 	}
+
+	gpio_request_by_name(dev, "enable-gpios", 0, &priv->power_gpio,
+			     GPIOD_IS_OUT);
+
 	return 0;
 }
 
@@ -204,6 +206,9 @@ static int starfive_pcie_init_port(struct udevice *dev)
 		dev_err(dev, "Failed to deassert resets (ret=%d)\n", ret);
 		goto err_deassert_clk;
 	}
+
+	if (dm_gpio_is_valid(&priv->power_gpio))
+		dm_gpio_set_value(&priv->power_gpio, 1);
 
 	dm_gpio_set_value(&priv->reset_gpio, 1);
 	/* Disable physical functions except #0 */

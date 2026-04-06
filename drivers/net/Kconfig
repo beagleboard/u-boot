@@ -1,7 +1,3 @@
-source "drivers/net/phy/Kconfig"
-source "drivers/net/pfe_eth/Kconfig"
-source "drivers/net/fsl-mc/Kconfig"
-
 config ETH
 	def_bool y
 
@@ -94,9 +90,10 @@ config DSA_SANDBOX
 	  Ethernet device used as DSA master, to test DSA class code, including
 	  exported DSA API and datapath processing of Ethernet traffic.
 
-menuconfig NETDEVICES
-	bool "Network device support"
-	depends on NET || NET_LWIP
+menu "Network device support"
+
+config NETDEVICES
+	bool
 	select DM_ETH
 	help
 	  You must select Y to enable any network device support
@@ -121,11 +118,15 @@ config AG7XXX
 	  This driver supports the Atheros AG7xxx Ethernet MAC. This MAC is
 	  present in the Atheros AR7xxx, AR9xxx and QCA9xxx MIPS chips.
 
+source "drivers/net/airoha/Kconfig"
+
 config AIROHA_ETH
 	bool "Airoha Ethernet QDMA Driver"
 	depends on ARCH_AIROHA
+	select MISC
 	select PHYLIB
 	select DEVRES
+	select DM_ETH_PHY
 	select DM_RESET
 	select MDIO_MT7531_MMIO
 	help
@@ -194,7 +195,7 @@ config DWC_ETH_XGMAC_SOCFPGA
 	select SYSCON
 	select DWC_ETH_XGMAC
 	depends on ARCH_SOCFPGA
-	default y if TARGET_SOCFPGA_AGILEX5
+	default y if ARCH_SOCFPGA_AGILEX5
 	help
 	  The Synopsys Designware Ethernet XGMAC IP block with specific
 	  configuration used in Intel SoC FPGA chip.
@@ -979,7 +980,11 @@ source "drivers/net/mtk_eth/Kconfig"
 
 config HIFEMAC_ETH
 	bool "HiSilicon Fast Ethernet Controller"
+	depends on DM && OF_CONTROL
+	select CLK
 	select DM_CLK
+	select DM_ETH_PHY
+	select DM_MDIO
 	select DM_RESET
 	select PHYLIB
 	help
@@ -989,13 +994,14 @@ config HIFEMAC_ETH
 config HIFEMAC_MDIO
 	bool "HiSilicon Fast Ethernet Controller MDIO interface"
 	depends on DM_MDIO
-	select DM_CLK
+	select CLK
 	help
 	  This driver supports the internal MDIO interface of HIFEMAC
 	  Ethernet controller.
 
 config HIGMACV300_ETH
 	bool "HiSilicon Gigabit Ethernet Controller"
+	depends on DM && OF_CONTROL
 	select DM_RESET
 	select PHYLIB
 	help
@@ -1098,4 +1104,10 @@ config MDIO_MUX_MESON_GXL
 	  This driver is used for the MDIO mux found on the Amlogic GXL & compatible
 	  SoCs.
 
+source "drivers/net/phy/Kconfig"
+source "drivers/net/pfe_eth/Kconfig"
+source "drivers/net/fsl-mc/Kconfig"
+
 endif # NETDEVICES
+
+endmenu

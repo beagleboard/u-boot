@@ -73,3 +73,21 @@
 	clock-frequency = <25000000>;
 	bootph-pre-ram;
 };
+
+/* WKUP UART0 is used for DM firmware logs */
+&wkup_uart0 {
+	status = "okay";
+};
+
+&main_pktdma {
+	ti,sci = <&dm_tifs>;
+};
+
+&main_bcdma {
+	ti,sci = <&dm_tifs>;
+};
+
+&ospi0 {
+	reg = <0x00 0x0fc40000 0x00 0x100>,
+		<0x00 0x60000000 0x00 0x08000000>;
+};

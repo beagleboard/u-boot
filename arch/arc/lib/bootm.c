@@ -10,9 +10,6 @@
 #include <irq_func.h>
 #include <log.h>
 #include <asm/cache.h>
-#include <asm/global_data.h>
-
-DECLARE_GLOBAL_DATA_PTR;
 
 static int cleanup_before_linux(void)
 {
@@ -53,17 +50,13 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 {
 	ulong kernel_entry;
 	unsigned int r0, r2;
-	int fake = (flag & BOOTM_STATE_OS_FAKE_GO);
-
 	kernel_entry = images->ep;
 
 	debug("## Transferring control to Linux (at address %08lx)...\n",
 	      kernel_entry);
 	bootstage_mark(BOOTSTAGE_ID_RUN_OS);
 
-	printf("\nStarting kernel ...%s\n\n", fake ?
-	       "(fake run for tracing)" : "");
-	bootstage_mark_name(BOOTSTAGE_ID_BOOTM_HANDOFF, "start_kernel");
+	bootm_final(flag);
 
 	if (CONFIG_IS_ENABLED(OF_LIBFDT) && images->ft_len) {
 		r0 = 2;
@@ -75,7 +68,7 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 
 	cleanup_before_linux();
 
-	if (!fake)
+	if (!(flag & BOOTM_STATE_OS_FAKE_GO))
 		board_jump_and_run(kernel_entry, r0, 0, r2);
 }
 

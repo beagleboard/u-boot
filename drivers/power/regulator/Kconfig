@@ -191,6 +191,14 @@ config DM_REGULATOR_FAN53555
 	  or switching the mode is not supported by this driver (at
 	  this time).
 
+config SPL_DM_REGULATOR_FAN53555
+	bool "Enable Driver Model for REGULATOR FAN53555 in SPL"
+	depends on SPL_DM_PMIC_FAN53555
+	help
+	  This configuration setting enables the implementation of the
+	  driver-model regulator uclass features for the FAN53555
+	  regulator in SPL.
+
 config DM_REGULATOR_COMMON
 	bool
 	depends on DM_REGULATOR
@@ -521,3 +529,21 @@ config DM_REGULATOR_CPCAP
 	REGULATOR CPCAP. The driver supports both DC-to-DC Step-Down Switching
 	(SW) Regulators and Low-Dropout Linear (LDO) Regulators	found in CPCAP
 	PMIC and implements get/set api for voltage and state.
+
+config DM_REGULATOR_MT6357
+	bool "Enable driver for MediaTek MT6357 PMIC regulators"
+	depends on DM_REGULATOR && DM_PMIC_MTK_PWRAP
+	help
+	  Say y here to select this option to enable the power regulator of
+	  MediaTek MT6357 PMIC.
+	  This driver supports the control of different power rails of device
+	  through regulator interface.
+
+config DM_REGULATOR_MT6359
+	bool "Enable driver for MediaTek MT6359 PMIC regulators"
+	depends on DM_REGULATOR && DM_PMIC_MTK_PWRAP
+	help
+	  Say y here to select this option to enable the power regulator of
+	  MediaTek MT6359 PMIC.
+	  This driver supports the control of different power rails of device
+	  through regulator interface.

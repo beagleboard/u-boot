@@ -199,11 +199,6 @@ int board_ehci_hcd_init(int port)
 }
 #endif
 
-int board_early_init_f(void)
-{
-	return 0;
-}
-
 #ifdef CONFIG_FSL_QSPI
 int board_qspi_init(void)
 {

@@ -10,9 +10,6 @@
 #include <image.h>
 #include <irq_func.h>
 #include <log.h>
-#include <asm/global_data.h>
-
-DECLARE_GLOBAL_DATA_PTR;
 
 #define NIOS_MAGIC 0x534f494e /* enable command line and initrd passing */
 
@@ -43,6 +40,8 @@ int do_bootm_linux(int flag, struct bootm_info *bmi)
 
 	if ((flag != 0) && (flag != BOOTM_STATE_OS_GO))
 		return 1;
+
+	bootm_final(0);
 
 	/* flushes data and instruction caches before calling the kernel */
 	disable_interrupts();

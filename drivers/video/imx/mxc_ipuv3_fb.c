@@ -21,7 +21,6 @@
 #include "ipu_regs.h"
 #include "mxcfb.h"
 #include <asm/cache.h>
-#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/mach-imx/video.h>
 #include <linux/err.h>
@@ -36,8 +35,7 @@
 #include <dm.h>
 #include <dm/devres.h>
 #include <video.h>
-
-DECLARE_GLOBAL_DATA_PTR;
+#include <dt-bindings/clock/imx6qdl-clock.h>
 
 static int mxcfb_map_video_memory(struct fb_info *fbi);
 static int mxcfb_unmap_video_memory(struct fb_info *fbi);
@@ -601,6 +599,22 @@ static int ipuv3_video_probe(struct udevice *dev)
 	ret = ipu_displays_init();
 	if (ret < 0)
 		return ret;
+
+#if !CONFIG_IS_ENABLED(IPU_CLK_LEGACY)
+	if (of_machine_is_compatible("fsl,imx6qp"))
+		ret = clk_get_by_id(gdisp ? IMX6QDL_CLK_LDB_DI1_PODF :
+					    IMX6QDL_CLK_LDB_DI0_PODF,
+				    &ctx->ldb_clk);
+	else
+		ret = clk_get_by_id(gdisp ? IMX6QDL_CLK_LDB_DI1 :
+					    IMX6QDL_CLK_LDB_DI0,
+				    &ctx->ldb_clk);
+
+	if (ret < 0)
+		return ret;
+
+	debug("ldb_clk = %lu\n", clk_get_rate(ctx->ldb_clk));
+#endif
 
 	ret = mxcfb_probe(dev, gpixfmt, gdisp, gmode);
 	if (ret < 0)

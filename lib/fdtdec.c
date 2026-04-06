@@ -1077,19 +1077,23 @@ int fdtdec_setup_mem_size_base(void)
 
 	gd->ram_size = (phys_size_t)(res.end - res.start + 1);
 	gd->ram_base = (unsigned long)res.start;
-	debug("%s: Initial DRAM size %llx\n", __func__,
-	      (unsigned long long)gd->ram_size);
+	debug("%s: Initial DRAM size %pap\n", __func__, &gd->ram_size);
 
 	return 0;
 }
 
-ofnode get_next_memory_node(ofnode mem)
+static ofnode get_next_memory_node(ofnode mem)
 {
 	do {
 		mem = ofnode_by_prop_value(mem, "device_type", "memory", 7);
 	} while (!ofnode_is_enabled(mem));
 
 	return mem;
+}
+
+ofnode fdtdec_get_next_memory_node(ofnode mem)
+{
+	return get_next_memory_node(mem);
 }
 
 int fdtdec_setup_memory_banksize(void)
@@ -1124,10 +1128,10 @@ int fdtdec_setup_memory_banksize(void)
 		gd->bd->bi_dram[bank].size =
 			(phys_size_t)(res.end - res.start + 1);
 
-		debug("%s: DRAM Bank #%d: start = 0x%llx, size = 0x%llx\n",
+		debug("%s: DRAM Bank #%d: start = %pap, size = %pap\n",
 		      __func__, bank,
-		      (unsigned long long)gd->bd->bi_dram[bank].start,
-		      (unsigned long long)gd->bd->bi_dram[bank].size);
+		      &gd->bd->bi_dram[bank].start,
+		      &gd->bd->bi_dram[bank].size);
 	}
 
 	return 0;
