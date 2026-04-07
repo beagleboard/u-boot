@@ -361,7 +361,7 @@ F:	drivers/rng/msm_rng.c
 F:	drivers/pinctrl/qcom/pinctrl-ipq4019.c
 
 ARM LAYERSCAPE SFP
-M:	Sean Anderson <sean.anderson@seco.com>
+M:	Sean Anderson <sean.anderson@linux.dev>
 S:	Maintained
 F:	drivers/misc/ls2_sfp.c
 
@@ -1700,7 +1700,7 @@ F:	doc/usage/cmd/seama.rst
 F:	test/cmd/seama.c
 
 SEMIHOSTING
-R:	Sean Anderson <sean.anderson@seco.com>
+R:	Sean Anderson <sean.anderson@linux.dev>
 S:	Orphaned
 N:	semihosting
 
