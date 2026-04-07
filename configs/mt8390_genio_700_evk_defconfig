@@ -1,0 +1,4 @@
+#include <configs/mt8188.config>
+
+CONFIG_DEFAULT_DEVICE_TREE="mediatek/mt8390-genio-700-evk"
+CONFIG_IDENT_STRING="mt8390-genio-700-evk"
