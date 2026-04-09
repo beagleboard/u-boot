@@ -33,20 +33,6 @@ static const struct pinconf_param pinctrl_scmi_conf_params[] = {
 	/* The SCMI spec also include "default", "pull-mode" and "input-value */
 };
 
-static bool valid_selector(struct udevice *dev, enum select_type select_type, u32 selector)
-{
-	struct pinctrl_scmi_priv *priv = dev_get_priv(dev);
-
-	if (select_type == SCMI_PIN)
-		return selector < priv->num_pins;
-	if (select_type == SCMI_GROUP)
-		return selector < priv->num_groups;
-	if (select_type == SCMI_FUNCTION)
-		return selector < priv->num_functions;
-
-	return false;
-}
-
 static int pinctrl_scmi_get_pins_count(struct udevice *dev)
 {
 	struct pinctrl_scmi_priv *priv = dev_get_priv(dev);
@@ -98,6 +84,38 @@ static const char *pinctrl_scmi_get_function_name(struct udevice *dev, unsigned 
 	return (const char *)priv->function_info[selector].name;
 }
 
+static int pinctrl_scmi_get_function_id(struct udevice *dev, const char *function)
+{
+	struct pinctrl_scmi_priv *priv = dev_get_priv(dev);
+	int i;
+
+	if (!function)
+		return -EINVAL;
+
+	for (i = 0; i < priv->num_functions; i++) {
+		if (strcmp(priv->function_info[i].name, function) == 0)
+			return i;
+	}
+
+	return -EINVAL;
+}
+
+static int pinctrl_scmi_get_group_id(struct udevice *dev, const char *group)
+{
+	struct pinctrl_scmi_priv *priv = dev_get_priv(dev);
+	int i;
+
+	if (!group)
+		return -EINVAL;
+
+	for (i = 0; i < priv->num_groups; i++) {
+		if (strcmp(priv->group_info[i].name, group) == 0)
+			return i;
+	}
+
+	return -EINVAL;
+}
+
 static int pinctrl_scmi_pinmux_set(struct udevice *dev, u32 pin, u32 function)
 {
 	struct pinctrl_scmi_priv *priv = dev_get_priv(dev);
@@ -120,96 +138,35 @@ static int pinctrl_scmi_pinmux_group_set(struct udevice *dev, u32 group, u32 fun
 
 static int pinctrl_scmi_set_state(struct udevice *dev, struct udevice *config)
 {
-	struct pinctrl_scmi_priv *priv = dev_get_priv(dev);
-	/* batch the setup into 20 lines at a go (there are 5 u32s in a config) */
-	const int batch_count = 20 * 5;
-	u32 prev_type = -1u;
-	u32 prev_selector;
-	u32 *configs;
-	const u32 *prop;
-	int offset, cnt, len;
-	int ret = 0;
+	int function_id, group_id;
+	const char *function;
+	const char **groups;
+	int group_count;
+	int ret;
+	int i;
 
-	prop = dev_read_prop(config, "pinmux", &len);
-	if (!prop)
-		return 0;
-
-	if (len % sizeof(u32) * 5) {
-		dev_err(dev, "invalid pin configuration: len=%d\n", len);
-		return -FDT_ERR_BADSTRUCTURE;
-	}
-
-	configs = kcalloc(batch_count, sizeof(u32), GFP_KERNEL);
-	if (!configs)
-		return -ENOMEM;
-
-	offset = 0;
-	cnt = 0;
-	while (offset + 4 < len / sizeof(u32)) {
-		u32 select_type  = fdt32_to_cpu(prop[offset]);
-		u32 selector     = fdt32_to_cpu(prop[offset + 1]);
-		u32 function     = fdt32_to_cpu(prop[offset + 2]);
-		u32 config_type  = fdt32_to_cpu(prop[offset + 3]);
-		u32 config_value = fdt32_to_cpu(prop[offset + 4]);
-
-		if (select_type > SCMI_GROUP ||
-		    !valid_selector(dev, select_type, selector) ||
-		    (function != SCMI_PINCTRL_FUNCTION_NONE &&
-		     function > priv->num_functions)) {
-			dev_err(dev, "invalid pinctrl data (%u %u %u %u %u)\n",
-				select_type, selector, function, config_type,
-				config_value);
-			ret = -EINVAL;
-			goto free;
-		}
-
-		if (function != SCMI_PINCTRL_FUNCTION_NONE) {
-			if (cnt) {
-				ret = scmi_pinctrl_settings_configure(dev,
-								      prev_type,
-								      prev_selector,
-								      cnt / 2, configs);
-				if (ret)
-					goto free;
-				prev_type = -1u;
-				cnt = 0;
-			}
-			scmi_pinctrl_set_function(dev, select_type, selector, function);
-			offset += 5;
-			continue;
-		}
-
-		if (cnt == batch_count)
-			goto set;
-
-		if (prev_type == -1u)
-			goto store;
-
-		if (select_type == prev_type && selector == prev_selector)
-			goto store;
-set:
-		ret = scmi_pinctrl_settings_configure(dev, prev_type, prev_selector,
-						      cnt / 2, configs);
-		if (ret)
-			goto free;
-		cnt = 0;
-store:
-		prev_type = select_type;
-		prev_selector = selector;
-		configs[cnt++] = config_type;
-		configs[cnt++] = config_value;
-		offset += 5;
-	}
-
-	if (cnt)
-		ret = scmi_pinctrl_settings_configure(dev, prev_type, prev_selector,
-						      cnt / 2, configs);
-free:
-	kfree(configs);
+	ret = dev_read_string_index(config, "function", 0, &function);
 	if (ret)
-		dev_err(dev, "set_state() failed: %d\n", ret);
+		return ret;
 
-	return ret;
+	function_id = pinctrl_scmi_get_function_id(dev, function);
+	if (function_id < 0)
+		return function_id;
+
+	group_count = dev_read_string_list(config, "groups", &groups);
+	if (group_count < 0)
+		return group_count;
+
+	for (i = 0; i < group_count; i++) {
+		group_id = pinctrl_scmi_get_group_id(dev, groups[i]);
+		if (group_id < 0)
+			return group_id;
+		ret = pinctrl_scmi_pinmux_group_set(dev, group_id, function_id);
+		if (ret)
+			return ret;
+	}
+
+	return 0;
 }
 
 static int get_pin_muxing(struct udevice *dev, unsigned int selector,

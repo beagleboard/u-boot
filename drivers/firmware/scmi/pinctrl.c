@@ -259,6 +259,8 @@ static int scmi_pinctrl_settings_configure_helper(struct udevice *dev,
 	in->attr = 0;
 	in->attr |= FIELD_PREP(GENMASK(9, 2), num_configs);
 	in->attr |= FIELD_PREP(GENMASK(1, 0), select_type);
+	if (function_id != SCMI_PINCTRL_FUNCTION_NONE)
+		in->attr |= BIT(10);
 	memcpy(in->configs, configs, num_configs * sizeof(u32) * 2);
 
 	ret = devm_scmi_process_msg(dev, &msg);

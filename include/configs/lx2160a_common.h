@@ -137,7 +137,7 @@
 	"kernelhdr_addr_sd=0x3000\0"            \
 	"kernel_size_sd=0x14000\0"              \
 	"kernelhdr_size_sd=0x20\0"              \
-	"console=ttyAMA0,38400n8\0"		\
+	"console=ttyAMA0,115200\0"		\
 	BOOTENV					\
 	"mcmemsize=0x70000000\0"		\
 	XSPI_MC_INIT_CMD				\
