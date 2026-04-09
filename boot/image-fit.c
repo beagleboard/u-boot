@@ -2282,7 +2282,7 @@ int fit_image_load(struct bootm_headers *images, ulong addr,
 		printf("   Loading %s from 0x%08lx to 0x%08lx\n",
 		       prop_name, data, load);
 	} else {
-		load = data;	/* No load address specified */
+		load = data;	/* load address specified but set to 0 */
 	}
 
 	comp = IH_COMP_NONE;
