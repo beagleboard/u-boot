@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0+
 .. sectionauthor:: Peter Robinson <pbrobinson@gmail.com>
 
-Overview
---------
+Contributing
+============
 
 This document is a high level contributors overview setting overall expectations,
 so people can get started quickly, the rest of the documentation goes into the
