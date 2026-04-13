@@ -20,8 +20,8 @@ cmd_S_ttf=						\
 	echo '.balign 16';				\
 ) > $@
 
-$(obj)/%.S: $(src)/%.ttf
-	$(call cmd,S_ttf)
+$(obj)/%.ttf.S: $(src)/%.ttf FORCE
+	$(call if_changed,S_ttf)
 
 # Splash logos
 # ---------------------------------------------------------------------------
@@ -40,8 +40,8 @@ cmd_S_splash=						\
 	echo '.balign 16';				\
 ) > $@
 
-$(obj)/%.S: $(src)/%.bmp
-	$(call cmd,S_splash)
+$(obj)/%.bmp.S: $(src)/%.bmp FORCE
+	$(call if_changed,S_splash)
 
 # EFI applications
 # A Makefile target *.efi is built as EFI application.
