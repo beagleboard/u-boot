@@ -88,6 +88,7 @@ include $(srctree)/config.mk
 include $(srctree)/arch/$(ARCH)/Makefile
 
 include $(srctree)/scripts/Makefile.lib
+include $(srctree)/scripts/Makefile.lib-u-boot
 
 # Enable garbage collection of un-used sections for SPL
 KBUILD_CFLAGS += -ffunction-sections -fdata-sections
