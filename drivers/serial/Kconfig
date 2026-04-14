@@ -510,6 +510,14 @@ config DEBUG_UART_XTENSA_SEMIHOSTING
 	  start up driver model. The driver will be available until the real
 	  driver model serial is running.
 
+config DEBUG_UART_GOLDFISH
+	bool "Goldfish TTY"
+	help
+	  Select this to enable the debug UART using the Goldfish TTY driver.
+	  This provides basic serial output from the console without needing to
+	  start up driver model. The driver will be available until the real
+	  driver model serial is running.
+
 endchoice
 
 config DEBUG_UART_BASE
