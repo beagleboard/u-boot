@@ -47,7 +47,7 @@ static int dh_imx8_setup_ethaddr(struct eeprom_id_page *eip)
 	if (dh_get_mac_is_enabled("ethernet0"))
 		return 0;
 
-	if (!dh_imx_get_mac_from_fuse(enetaddr))
+	if (!dh_imx_get_mac_from_fuse(enetaddr, 0))
 		goto out;
 
 	if (!dh_get_value_from_eeprom_buffer(DH_MAC0, enetaddr, sizeof(enetaddr), eip))
@@ -72,8 +72,8 @@ static int dh_imx8_setup_eth1addr(struct eeprom_id_page *eip)
 	if (dh_get_mac_is_enabled("ethernet1"))
 		return 0;
 
-	if (!dh_imx_get_mac_from_fuse(enetaddr))
-		goto increment_out;
+	if (!dh_imx_get_mac_from_fuse(enetaddr, 1))
+		goto out;
 
 	if (!dh_get_value_from_eeprom_buffer(DH_MAC1, enetaddr, sizeof(enetaddr), eip))
 		goto out;
