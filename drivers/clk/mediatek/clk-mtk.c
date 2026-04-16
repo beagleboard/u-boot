@@ -204,10 +204,6 @@ static ulong mtk_clk_find_parent_rate(struct clk *clk, int id,
 	return clk_get_rate(&parent);
 }
 
-const struct clk_ops mtk_clk_apmixedsys_ops;
-const struct clk_ops mtk_clk_topckgen_ops;
-const struct clk_ops mtk_clk_infrasys_ops;
-
 static ulong mtk_find_parent_rate(struct mtk_clk_priv *priv, struct clk *clk,
 				  const int parent, u16 flags)
 {
