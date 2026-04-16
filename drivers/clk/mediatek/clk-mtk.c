@@ -217,17 +217,20 @@ static ulong mtk_find_parent_rate(struct mtk_clk_priv *priv, struct clk *clk,
 	case CLK_PARENT_APMIXED:
 		/* APMIXEDSYS can be parent or grandparent. */
 		if (dev_get_driver_ops(clk->dev) == &mtk_clk_apmixedsys_ops ||
-		    dev_get_driver_ops(clk->dev) == &mtk_clk_fixed_pll_ops)
+		    dev_get_driver_ops(clk->dev) == &mtk_clk_fixed_pll_ops) {
 			parent_dev = clk->dev;
-		else if (dev_get_driver_ops(priv->parent) == &mtk_clk_apmixedsys_ops ||
-			 dev_get_driver_ops(priv->parent) == &mtk_clk_fixed_pll_ops)
+		} else if (dev_get_driver_ops(priv->parent) == &mtk_clk_apmixedsys_ops ||
+			   dev_get_driver_ops(priv->parent) == &mtk_clk_fixed_pll_ops) {
 			parent_dev = priv->parent;
-		else if (dev_get_driver_ops(dev_get_parent(priv->parent)) == &mtk_clk_apmixedsys_ops ||
-			 dev_get_driver_ops(dev_get_parent(priv->parent)) == &mtk_clk_fixed_pll_ops)
-			parent_dev = dev_get_parent(priv->parent);
-		else
-			return -EINVAL;
+		} else {
+			struct udevice *grandparent_dev = dev_get_parent(priv->parent);
 
+			if (dev_get_driver_ops(grandparent_dev) == &mtk_clk_apmixedsys_ops ||
+			    dev_get_driver_ops(grandparent_dev) == &mtk_clk_fixed_pll_ops)
+				parent_dev = grandparent_dev;
+			else
+				return -EINVAL;
+		}
 		break;
 	case CLK_PARENT_TOPCKGEN:
 		if (dev_get_driver_ops(clk->dev) == &mtk_clk_topckgen_ops)
