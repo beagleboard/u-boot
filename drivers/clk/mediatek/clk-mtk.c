@@ -216,11 +216,14 @@ static ulong mtk_find_parent_rate(struct mtk_clk_priv *priv, struct clk *clk,
 	switch (flags & CLK_PARENT_MASK) {
 	case CLK_PARENT_APMIXED:
 		/* APMIXEDSYS can be parent or grandparent. */
-		if (dev_get_driver_ops(clk->dev) == &mtk_clk_apmixedsys_ops)
+		if (dev_get_driver_ops(clk->dev) == &mtk_clk_apmixedsys_ops ||
+		    dev_get_driver_ops(clk->dev) == &mtk_clk_fixed_pll_ops)
 			parent_dev = clk->dev;
-		else if (dev_get_driver_ops(priv->parent) == &mtk_clk_apmixedsys_ops)
+		else if (dev_get_driver_ops(priv->parent) == &mtk_clk_apmixedsys_ops ||
+			 dev_get_driver_ops(priv->parent) == &mtk_clk_fixed_pll_ops)
 			parent_dev = priv->parent;
-		else if (dev_get_driver_ops(dev_get_parent(priv->parent)) == &mtk_clk_apmixedsys_ops)
+		else if (dev_get_driver_ops(dev_get_parent(priv->parent)) == &mtk_clk_apmixedsys_ops ||
+			 dev_get_driver_ops(dev_get_parent(priv->parent)) == &mtk_clk_fixed_pll_ops)
 			parent_dev = dev_get_parent(priv->parent);
 		else
 			return -EINVAL;
